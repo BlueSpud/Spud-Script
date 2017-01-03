@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02CA04CB1E1848A00031E58A /* SVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CA04C91E1848A00031E58A /* SVM.cpp */; };
 		02D5AFFA1E14B05E001E2A2A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D5AFF91E14B05E001E2A2A /* main.cpp */; };
+		02D5B0021E14B076001E2A2A /* SLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D5B0001E14B076001E2A2A /* SLexer.cpp */; };
+		02D5B0051E14C841001E2A2A /* SParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D5B0031E14C841001E2A2A /* SParser.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +26,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		029F6DBC1E1C6DCF0071C2BA /* script.ss */ = {isa = PBXFileReference; lastKnownFileType = text; name = script.ss; path = "../../Library/Developer/Xcode/DerivedData/SpudScript-bhfpmdxqklwqhtcrsccjuwskimmu/Build/Products/Debug/script.ss"; sourceTree = "<group>"; };
+		02CA04C81E183EDB0031E58A /* SASTNodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SASTNodes.h; sourceTree = "<group>"; };
+		02CA04C91E1848A00031E58A /* SVM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SVM.cpp; sourceTree = "<group>"; };
+		02CA04CA1E1848A00031E58A /* SVM.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SVM.hpp; sourceTree = "<group>"; };
 		02D5AFF61E14B05E001E2A2A /* SpudScript */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SpudScript; sourceTree = BUILT_PRODUCTS_DIR; };
 		02D5AFF91E14B05E001E2A2A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		02D5B0001E14B076001E2A2A /* SLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SLexer.cpp; sourceTree = "<group>"; };
+		02D5B0011E14B076001E2A2A /* SLexer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SLexer.hpp; sourceTree = "<group>"; };
+		02D5B0031E14C841001E2A2A /* SParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SParser.cpp; sourceTree = "<group>"; };
+		02D5B0041E14C841001E2A2A /* SParser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SParser.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +52,7 @@
 		02D5AFED1E14B05E001E2A2A = {
 			isa = PBXGroup;
 			children = (
+				029F6DBC1E1C6DCF0071C2BA /* script.ss */,
 				02D5AFF81E14B05E001E2A2A /* SpudScript */,
 				02D5AFF71E14B05E001E2A2A /* Products */,
 			);
@@ -57,6 +69,13 @@
 		02D5AFF81E14B05E001E2A2A /* SpudScript */ = {
 			isa = PBXGroup;
 			children = (
+				02D5B0001E14B076001E2A2A /* SLexer.cpp */,
+				02D5B0011E14B076001E2A2A /* SLexer.hpp */,
+				02CA04C81E183EDB0031E58A /* SASTNodes.h */,
+				02D5B0031E14C841001E2A2A /* SParser.cpp */,
+				02D5B0041E14C841001E2A2A /* SParser.hpp */,
+				02CA04C91E1848A00031E58A /* SVM.cpp */,
+				02CA04CA1E1848A00031E58A /* SVM.hpp */,
 				02D5AFF91E14B05E001E2A2A /* main.cpp */,
 			);
 			path = SpudScript;
@@ -120,7 +139,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02D5B0021E14B076001E2A2A /* SLexer.cpp in Sources */,
 				02D5AFFA1E14B05E001E2A2A /* main.cpp in Sources */,
+				02CA04CB1E1848A00031E58A /* SVM.cpp in Sources */,
+				02D5B0051E14C841001E2A2A /* SParser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +271,7 @@
 				02D5AFFF1E14B05E001E2A2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
