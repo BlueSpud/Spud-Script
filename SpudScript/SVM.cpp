@@ -170,15 +170,38 @@ float SVM::evaluateNode(SASTNode* node) {
             
             SASTFunctionCall* function = (SASTFunctionCall*)node;
             
-            // Print out args
-            for (int i = 0; i < function->expressions.size(); i++) {
-                std::cout << function->expressions[i]->tokens[0].string << std::endl;
-            }
-            
             // Check if there is a script function
-            if (script_functions.count(function->identifier.string))
-                evaluateNode(script_functions[function->identifier.string]);
-            else if (functions.count(function->identifier.string)) {
+            if (script_functions.count(function->identifier.string)) {
+                
+                // Clear the variables from the last function call
+                SFunctionDefinition* def = script_functions[function->identifier.string];
+                SBlock* block = script_functions[function->identifier.string]->block;
+                
+                block->variables.erase(block->variables.begin(), block->variables.end());
+                
+                // Define the new variables of the argument types
+                if (function->expressions.size() == def->args.size()) {
+                    
+                    for (int i = 0; i < function->expressions.size(); i++) {
+                        
+                        // Check type matching TEMP, not done
+                        block->variables[def->args[i]->identifier.string].value = evaluateNode(function->expressions[i]);
+                        block->variables[def->args[i]->identifier.string].type = def->args[i]->type.string;
+                        
+                    }
+                    
+                    // Call the function
+                    evaluateNode(block);
+                    
+                    
+                } else {
+                    
+                    std::cout << "Invalid number of arguments, got " << function->expressions.size() << " expected " << def->args.size() << std::endl;
+                    return 0;
+                    
+                }
+                
+            } else if (functions.count(function->identifier.string)) {
                 
                 // Call C++ function
                 functions[function->identifier.string]();
@@ -187,6 +210,7 @@ float SVM::evaluateNode(SASTNode* node) {
             
                 // Neither a script function existed nor a C++ one did
                 std::cout << "Unknown Function: " << function->identifier.string << std::endl;
+                return 0;
                 
             }
             
@@ -213,7 +237,7 @@ float SVM::evaluateNode(SASTNode* node) {
             SFunctionDefinition* def = (SFunctionDefinition*)node;
             
             // Register the block that we have for the name of the function
-            script_functions[def->identifier.string] = def->block;
+            script_functions[def->identifier.string] = def;
             
         } break;
             

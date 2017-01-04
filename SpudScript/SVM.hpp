@@ -21,12 +21,13 @@ class SVM {
     
         SVariable* resolveVarible(std::string name);
     
-    //private:
+        std::map<std::string, void(*)()> functions;
+    
+    private:
     
         void castVariable(std::string type, std::string name);
         std::map<std::string, SVariable> global_variables;
-        std::map<std::string, void(*)()> functions;
-        std::map<std::string, SBlock*> script_functions;
+        std::map<std::string, SFunctionDefinition*> script_functions;
     
         SBlock* current_block;
     
