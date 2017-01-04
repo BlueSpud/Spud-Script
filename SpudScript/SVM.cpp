@@ -32,8 +32,9 @@ float SVM::evaluateNode(SASTNode* node) {
                     
                 } else if (expresison->tokens[i].type == STokenTypeIdentifier) {
                     
-                    if (variables.count(expresison->tokens[i].string))
-                        numbers.push_back(variables[expresison->tokens[i].string].value);
+                    SVariable* variable = resolveVarible(expresison->tokens[i].string);
+                    if (variable)
+                        numbers.push_back(variable->value);
                     else {
                         
                         std::cout << expresison->tokens[i].string << " was not defined in this scope" << std::endl;
@@ -101,8 +102,32 @@ float SVM::evaluateNode(SASTNode* node) {
         case SASTTypeDeclaration: {
             
             SASTDeclaration* declaration = (SASTDeclaration*)node;
-            variables[declaration->identifier.string].value = 0.0;
-            variables[declaration->identifier.string].type = declaration->type.string;
+            
+            if (!current_block) {
+                
+                // Declare a variable in the global scope
+                global_variables[declaration->identifier.string].value = 0.0;
+                global_variables[declaration->identifier.string].type = declaration->type.string;
+                
+            } else {
+                
+                // Make sure that the variable is not already defined
+                SVariable* variable = resolveVarible(declaration->identifier.string);
+                
+                if (!variable) {
+                
+                    // Declare a variable in a scope
+                    current_block->variables[declaration->identifier.string].value = 0.0;
+                    current_block->variables[declaration->identifier.string].type = declaration->type.string;
+                    
+                } else {
+                    
+                    std::cout << "Redefinition of " << declaration->identifier.string << std::endl;
+                    return 0;
+                    
+                }
+                
+            }
             
         } break;
             
@@ -117,15 +142,18 @@ float SVM::evaluateNode(SASTNode* node) {
             if (assignment->declaration) {
                 
                 evaluateNode(assignment->declaration);
-                variables[assignment->declaration->identifier.string].value = expression_result;
-                castVariable(variables[assignment->declaration->identifier.string].type, assignment->declaration->identifier.string);
+                SVariable* variable = resolveVarible(assignment->declaration->identifier.string);
+                
+                variable->value = expression_result;
+                castVariable(variable->type, assignment->declaration->identifier.string);
                 
             } else {
                 
-                if (variables.count(assignment->identifier.string)) {
+                SVariable* variable = resolveVarible(assignment->identifier.string);
+                if (variable) {
                     
-                    variables[assignment->identifier.string].value = expression_result;
-                    castVariable(variables[assignment->identifier.string].type, assignment->identifier.string);
+                    variable->value = expression_result;
+                    castVariable(variable->type, assignment->identifier.string);
                     
                 } else {
                     
@@ -168,9 +196,14 @@ float SVM::evaluateNode(SASTNode* node) {
             
             SBlock* block = (SBlock*)node;
             
+            SBlock* last_block = current_block;
+            current_block = block;
+            
             // Go through all the nodes in the block and evaluate them
             for (int i = 0; i < block->nodes.size(); i++)
                 evaluateNode(block->nodes[i]);
+            
+            current_block = last_block;
             
             
         } break;
@@ -194,10 +227,37 @@ float SVM::evaluateNode(SASTNode* node) {
     
 }
 
-void SVM::castVariable(std::string type, std:: string variable) {
+SVariable* SVM::resolveVarible(std::string name) {
+    
+    // Go through the scopes and try to find the variable
+    SBlock* search_block = current_block;
+    
+    while (search_block) {
+        
+        if (search_block->variables.count(name))
+            return &search_block->variables[name];
+        
+        // Check the next block
+        if (!strcmp(typeid(search_block->owner).name(), typeid(search_block).name()))
+            search_block = (SBlock*)search_block->owner;
+        else search_block = nullptr;
+        
+    }
+    
+    if (global_variables.count(name))
+        return &global_variables[name];
+    
+    return nullptr;
+    
+}
+
+void SVM::castVariable(std::string type, std:: string name) {
+    
+    SVariable* variable = resolveVarible(name);
     
     // See what type it is and cast if
     if (!type.compare("int"))
-        variables[variable].value = (int)variables[variable].value;
+        variable->value = (int)variable->value;
     
 }
+

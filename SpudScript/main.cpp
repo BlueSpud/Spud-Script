@@ -15,7 +15,7 @@ SVM vm;
 void cppFunction() {
     
     std::cout << "INCREMENTING A\n";
-    vm.variables["a"].value++;
+    vm.resolveVarible("a")->value++;
     
 }
 
@@ -60,8 +60,8 @@ int main(int argc, const char * argv[]) {
     
     vm.executeCode(nodes);
     
-    std::cout << vm.variables["a"].value << std::endl;
-    std::cout << vm.variables["b"].value << std::endl;
-    std::cout << vm.variables["c"].value << std::endl;
+    std::cout << vm.resolveVarible("a")->value << std::endl;
+    //std::cout << *vm.resolveVarible<float>("b") << std::endl;
+    //std::cout << *vm.resolveVarible<float>("c") << std::endl;
     
 }

@@ -9,6 +9,8 @@
 #ifndef SASTNodes_h
 #define SASTNodes_h
 
+#include <map>
+
 enum SASTNodeType {
     
     SASTTypeExpression,
@@ -51,10 +53,19 @@ struct SASTFunctionCall : public SASTNode {
 
 };
 
+struct SVariable {
+    
+    float value;
+    std::string type;
+    
+};
+
 struct SBlock : public SASTNode {
     
     std::vector<SASTNode*> nodes;
     SASTNode* owner = nullptr;
+    
+    std::map<std::string, SVariable> variables;
     
 };
 

@@ -12,13 +12,6 @@
 #include <map>
 #include "SParser.hpp"
 
-struct SVariable {
-    
-    float value;
-    std::string type;
-    
-};
-
 class SVM {
     
     public:
@@ -26,12 +19,16 @@ class SVM {
         void executeCode(std::vector<SASTNode*> nodes);
         float evaluateNode(SASTNode* node);
     
+        SVariable* resolveVarible(std::string name);
+    
     //private:
     
-        void castVariable(std::string type, std:: string variable);
-        std::map<std::string, SVariable> variables;
+        void castVariable(std::string type, std::string name);
+        std::map<std::string, SVariable> global_variables;
         std::map<std::string, void(*)()> functions;
         std::map<std::string, SBlock*> script_functions;
+    
+        SBlock* current_block;
     
 };
 
