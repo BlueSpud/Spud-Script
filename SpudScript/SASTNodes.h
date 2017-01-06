@@ -9,7 +9,7 @@
 #ifndef SASTNodes_h
 #define SASTNodes_h
 
-#include <map>
+#include "STypes.hpp"
 
 enum SASTNodeType {
     
@@ -51,13 +51,6 @@ struct SASTFunctionCall : public SASTNode {
     SToken identifier;
     std::vector<SASTExpression*> expressions;
 
-};
-
-struct SVariable {
-    
-    float value;
-    std::string type;
-    
 };
 
 struct SBlock : public SASTNode {

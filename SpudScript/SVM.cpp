@@ -34,7 +34,7 @@ float SVM::evaluateNode(SASTNode* node) {
                     
                     SVariable* variable = resolveVarible(expresison->tokens[i].string);
                     if (variable)
-                        numbers.push_back(variable->value);
+                        numbers.push_back(*(double*)variable->value);
                     else {
                         
                         std::cout << expresison->tokens[i].string << " was not defined in this scope" << std::endl;
@@ -106,8 +106,7 @@ float SVM::evaluateNode(SASTNode* node) {
             if (!current_block) {
                 
                 // Declare a variable in the global scope
-                global_variables[declaration->identifier.string].value = 0.0;
-                global_variables[declaration->identifier.string].type = declaration->type.string;
+                global_variables[declaration->identifier.string] = declareVariable(declaration->identifier.string, declaration->type.string);
                 
             } else {
                 
@@ -117,8 +116,7 @@ float SVM::evaluateNode(SASTNode* node) {
                 if (!variable) {
                 
                     // Declare a variable in a scope
-                    current_block->variables[declaration->identifier.string].value = 0.0;
-                    current_block->variables[declaration->identifier.string].type = declaration->type.string;
+                    current_block->variables[declaration->identifier.string] = declareVariable(declaration->identifier.string, declaration->type.string);
                     
                 } else {
                     
@@ -144,7 +142,7 @@ float SVM::evaluateNode(SASTNode* node) {
                 evaluateNode(assignment->declaration);
                 SVariable* variable = resolveVarible(assignment->declaration->identifier.string);
                 
-                variable->value = expression_result;
+                *(double*)variable->value = expression_result;
                 castVariable(variable->type, assignment->declaration->identifier.string);
                 
             } else {
@@ -152,7 +150,7 @@ float SVM::evaluateNode(SASTNode* node) {
                 SVariable* variable = resolveVarible(assignment->identifier.string);
                 if (variable) {
                     
-                    variable->value = expression_result;
+                    *(double*)variable->value = expression_result;
                     castVariable(variable->type, assignment->identifier.string);
                     
                 } else {
@@ -185,7 +183,8 @@ float SVM::evaluateNode(SASTNode* node) {
                     for (int i = 0; i < function->expressions.size(); i++) {
                         
                         // Check type matching TEMP, not done
-                        block->variables[def->args[i]->identifier.string].value = evaluateNode(function->expressions[i]);
+                        block->variables[def->args[i]->identifier.string].value = new double;
+                        *(double*)block->variables[def->args[i]->identifier.string].value = evaluateNode(function->expressions[i]);
                         block->variables[def->args[i]->identifier.string].type = def->args[i]->type.string;
                         
                     }
@@ -251,27 +250,94 @@ float SVM::evaluateNode(SASTNode* node) {
     
 }
 
+SVariable SVM::declareVariable(std::string& identifier, std::string& type) {
+
+    SVariable to_declare;
+
+    // If we have a type for this, declare it
+    if (STypeRegistry::instance()->factories.count(type))
+        to_declare.value = STypeRegistry::instance()->factories[type]->createObject();
+    else to_declare.value = new double;
+    
+    to_declare.type = type;
+    
+    return to_declare;
+
+}
+
 SVariable* SVM::resolveVarible(std::string name) {
     
     // Go through the scopes and try to find the variable
     SBlock* search_block = current_block;
     
+    std::stringstream stream(name);
+    std::string var_name;
+    std::getline(stream, var_name, '.');
+    
+    SVariable* var = nullptr;
+    
     while (search_block) {
         
-        if (search_block->variables.count(name))
-            return &search_block->variables[name];
+        if (search_block->variables.count(var_name))
+            var =  &search_block->variables[var_name];
         
         // Check the next block
-        if (!strcmp(typeid(search_block->owner).name(), typeid(search_block).name()))
+        if (!strcmp(typeid(search_block->owner).name(), typeid(SBlock).name()))
             search_block = (SBlock*)search_block->owner;
         else search_block = nullptr;
         
     }
     
-    if (global_variables.count(name))
-        return &global_variables[name];
+    if (global_variables.count(var_name))
+        var = &global_variables[var_name];
     
-    return nullptr;
+    // If we didnt find it, we didnt find if
+    if (!var)
+        return nullptr;
+    
+    // Now we check if we have members
+    std::string member_name;
+    SVariable* member = new SVariable();
+    member->type = var->type;
+    member->value = var->value;
+    
+    while (std::getline(stream, member_name, '.')) {
+    
+        // See if this has a varaible that can be resolved
+        if (STypeRegistry::instance()->variable_lookups.count(member->type)) {
+            
+            // Attempt to resolve the member
+            SVariable new_member = STypeRegistry::instance()->getMemeber(member, member_name);
+            if (new_member.type.length()) {
+            
+                member->value = new_member.value;
+                member->type = new_member.type;
+                
+            } else {
+            
+                std::cout << "Could not find member " << member_name;
+                return nullptr;
+            
+            }
+        
+        } else {
+        
+            std::cout << "Class has no members\n";
+            return nullptr;
+        
+        }
+    
+    }
+    
+    // Check if we found a member or not
+    if (member->type.length())
+        return member;
+    else {
+    
+        delete member;
+        return var;
+        
+    }
     
 }
 
@@ -281,7 +347,7 @@ void SVM::castVariable(std::string type, std:: string name) {
     
     // See what type it is and cast if
     if (!type.compare("int"))
-        variable->value = (int)variable->value;
+        *(double*)variable->value = (int)*(double*)variable->value;
     
 }
 

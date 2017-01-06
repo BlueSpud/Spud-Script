@@ -10,6 +10,7 @@
 #define SVM_hpp
 
 #include <map>
+#include <sstream>
 #include "SParser.hpp"
 
 class SVM {
@@ -26,6 +27,8 @@ class SVM {
     private:
     
         void castVariable(std::string type, std::string name);
+        SVariable declareVariable(std::string& identifier, std::string& type);
+    
         std::map<std::string, SVariable> global_variables;
         std::map<std::string, SFunctionDefinition*> script_functions;
     

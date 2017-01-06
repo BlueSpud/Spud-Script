@@ -72,7 +72,7 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
             } else {
                 
                 // Check if we need to restore the owning block
-                if (!strcmp(typeid(current_block->owner).name(), typeid(current_block).name()))
+                if (!strcmp(typeid(current_block->owner).name(), typeid(SBlock).name()))
                     current_block = (SBlock*)current_block->owner;
                 else current_block = nullptr;
                 

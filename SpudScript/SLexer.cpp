@@ -178,7 +178,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
                 char_at = source.substr(i, 1);
                 
                 // If it not a letter, we're done
-                if (!(char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') && !(char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z'))
+                if (!(char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') && !(char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z') && char_at.c_str()[0] != '.')
                     break;
              
                 i++;
