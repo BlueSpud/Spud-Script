@@ -50,6 +50,15 @@ STypeRegistry* STypeRegistry::instance() {
 
 }
 
+size_t STypeRegistry::getTypeSize(std::string type) {
+	
+	// Check if it is a custom data type
+	if (factories.count(type))
+		return factories[type]->size;
+	else return 4;
+	
+}
+
 SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
 
     SVariable member;

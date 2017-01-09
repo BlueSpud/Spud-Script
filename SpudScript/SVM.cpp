@@ -15,7 +15,7 @@ void SVM::executeCode(std::vector<SASTNode*> nodes) {
 
 }
 
-float SVM::evaluateNode(SASTNode* node) {
+void* SVM::evaluateNode(SASTNode* node) {
 
     switch (node->node_type) {
             
@@ -23,79 +23,106 @@ float SVM::evaluateNode(SASTNode* node) {
             
             // Get the numbers
             SASTExpression* expresison = (SASTExpression*)node;
-            std::vector<double> numbers;
+            std::vector<SVariable> vars;
+			bool allocated = false;
             
-            for (int i = 0; i < expresison->tokens.size(); i++)
+			for (int i = 0; i < expresison->tokens.size(); i++) {
+				
                 if (expresison->tokens[i].type == STokenTypeNumber) {
-                    
-                    numbers.push_back(atof(expresison->tokens[i].string.c_str()));
+					
+					// Create a numbers
+					SVariable var;
+					if (expresison->tokens[i].string.find('.') != std::string::npos) {
+						
+						var.value = malloc(sizeof(float));
+						*(float*)var.value = atof(expresison->tokens[i].string.c_str());
+						var.type = "float";
+						
+					} else {
+						
+						var.value = malloc(sizeof(int));
+						*(int*)var.value = atoi(expresison->tokens[i].string.c_str());
+						var.type = "int";
+						
+					}
+					
+					vars.push_back(var);
                     
                 } else if (expresison->tokens[i].type == STokenTypeIdentifier) {
                     
-                    SVariable* variable = resolveVarible(expresison->tokens[i].string);
-                    if (variable)
-                        numbers.push_back(*(double*)variable->value);
+                    SVariable* var = resolveVarible(expresison->tokens[i].string);
+                    if (var)
+                        vars.push_back(*var);
                     else {
                         
                         std::cout << expresison->tokens[i].string << " was not defined in this scope" << std::endl;
                         return 0;
                         
                     }
-                    
-                }
+					
+				}
+				
+			}
             
             // Go through again, evaluating operators
-            int number = -1;
+            int var = -1;
             
             for (int i = 0; i < expresison->tokens.size(); i++) {
                 if (expresison->tokens[i].type == STokenTypeOperator && (!expresison->tokens[i].string.compare("*") || !expresison->tokens[i].string.compare("/") || !expresison->tokens[i].string.compare("%"))) {
                         
-                    float new_number = 0.0;
-                        
-                    // Perform adition or multiplication
-                    if (!expresison->tokens[i].string.compare("*"))
-                        new_number = numbers[number] * numbers[number + 1];
-                        
-                    if (!expresison->tokens[i].string.compare("/"))
-                        new_number = numbers[number] / numbers[number + 1];
-                    
-                    if (!expresison->tokens[i].string.compare("%"))
-                        new_number = (int)numbers[number] % (int)numbers[number + 1];
-                    
+                    void* new_value = SOperatorRegistry::instance()->performOperation(&vars[var], &vars[var + 1], expresison->tokens[i].string);
+					allocated = true;
+					
                     // Set and remove
-                    numbers[number] = new_number;
-                    std::vector<double>::iterator itterator = numbers.begin() + number + 1;
-                    numbers.erase(itterator);
-                    numbers.shrink_to_fit();
+                    vars[var].value = new_value;
+					
+                    std::vector<SVariable>::iterator itterator = vars.begin() + var + 1;
+                    vars.erase(itterator);
+                    vars.shrink_to_fit();
                         
                     // Incremenent i to skip the next number
                     i++;
                         
                         
                 } else if (expresison->tokens[i].type == STokenTypeNumber || expresison->tokens[i].type == STokenTypeIdentifier)
-                    number++;
+                    var++;
             }
             
-            double result = numbers[0];
-            number = 1;
-            
+			SVariable result;
+			result.type = vars[0].type;
+			result.value = vars[0].value;
+            var = 1;
+			
             // Do addition and subtraction
             for (int i = 0; i < expresison->tokens.size(); i++) {
                 if (expresison->tokens[i].type == STokenTypeOperator && (!expresison->tokens[i].string.compare("+") || !expresison->tokens[i].string.compare("-"))) {
+					
+                    void* new_value = SOperatorRegistry::instance()->performOperation(&result, &vars[var], expresison->tokens[i].string);
+					allocated = true;
+					result.value = new_value;
                     
-                    if (!expresison->tokens[i].string.compare("+"))
-                        result = result + numbers[number];
-                    
-                    if (!expresison->tokens[i].string.compare("-"))
-                        result = result - numbers[number];
-                    
-                    number++;
+                    var++;
                     
                 }
                 
             }
-            
-            return result;
+			
+			// Do a cast if we need to
+			if (result.type.compare(expresison->destination_type))
+				result.value = SOperatorRegistry::instance()->performCast(&result, expresison->destination_type);
+			
+			// Copy it to a new pointer if we pulled directly from a variable
+			if (!allocated) {
+				
+				size_t size = STypeRegistry::instance()->getTypeSize(result.type);
+				void* new_ptr = malloc(size);
+				memcpy(new_ptr, result.value, size);
+				result.value = new_ptr;
+				
+			}
+			
+			return result.value;
+			
             
         }  break;
             
@@ -106,12 +133,15 @@ float SVM::evaluateNode(SASTNode* node) {
             if (!current_block) {
                 
                 // Declare a variable in the global scope
-                if (!global_variables.count(declaration->identifier.string))
-                    global_variables[declaration->identifier.string] = declareVariable(declaration->identifier.string, declaration->type.string);
-                else {
-                
+				if (!global_variables.count(declaration->identifier.string)) {
+					
+                    global_variables[declaration->identifier.string] = declareVariable(declaration->type.string);
+					return &global_variables[declaration->identifier.string];
+					
+				} else {
+					
                     std::cout << "Redefinition of " << declaration->identifier.string << std::endl;
-                    return 0;
+                    return nullptr;
                 
                 }
                 
@@ -119,16 +149,16 @@ float SVM::evaluateNode(SASTNode* node) {
                 
                 // Make sure that the variable is not already defined
                 SVariable* variable = resolveVarible(declaration->identifier.string);
-                
                 if (!variable) {
                 
                     // Declare a variable in a scope
-                    current_block->variables[declaration->identifier.string] = declareVariable(declaration->identifier.string, declaration->type.string);
+                    current_block->variables[declaration->identifier.string] = declareVariable(declaration->type.string);
+					return &current_block->variables[declaration->identifier.string];
                     
                 } else {
                     
                     std::cout << "Redefinition of " << declaration->identifier.string << std::endl;
-                    return 0;
+                    return nullptr;
                     
                 }
                 
@@ -140,26 +170,30 @@ float SVM::evaluateNode(SASTNode* node) {
             
             SASTAssignment* assignment = (SASTAssignment*)node;
             
-            // Evaluate the expression
-            float expression_result = evaluateNode(assignment->expression);
-            
             // If we need to declare, declare
             if (assignment->declaration) {
-                
-                evaluateNode(assignment->declaration);
-                SVariable* variable = resolveVarible(assignment->declaration->identifier.string);
-                
-                *(double*)variable->value = expression_result;
-                castVariable(variable->type, assignment->declaration->identifier.string);
-                
+				
+				// Evaluate the expression
+				assignment->expression->destination_type = assignment->declaration->type.string;
+				void* expression_result = evaluateNode(assignment->expression);
+				
+				// COPY the result
+                SVariable* variable = (SVariable*)evaluateNode(assignment->declaration);
+				memcpy(variable->value, expression_result, STypeRegistry::instance()->getTypeSize(variable->type));
+				free(expression_result);
+				
             } else {
                 
                 SVariable* variable = resolveVarible(assignment->identifier.string);
                 if (variable) {
-                    
-                    *(double*)variable->value = expression_result;
-                    castVariable(variable->type, assignment->identifier.string);
-                    
+					
+					assignment->expression->destination_type = variable->type;
+					void* expression_result = evaluateNode(assignment->expression);
+					
+					// COPY the result
+					memcpy(variable->value, expression_result, STypeRegistry::instance()->getTypeSize(variable->type));
+					free(expression_result);
+					
                 } else {
                     
                     // Variable was not declared
@@ -190,10 +224,13 @@ float SVM::evaluateNode(SASTNode* node) {
                     for (int i = 0; i < function->expressions.size(); i++) {
                         
                         // Check type matching TEMP, not done
-                        block->variables[def->args[i]->identifier.string].value = new double;
-                        *(double*)block->variables[def->args[i]->identifier.string].value = evaluateNode(function->expressions[i]);
-                        block->variables[def->args[i]->identifier.string].type = def->args[i]->type.string;
-                        
+						block->variables[def->args[i]->identifier.string] = declareVariable(def->args[i]->type.string);
+						
+						function->expressions[i]->destination_type = def->args[i]->type.string;
+						void* expression_result = evaluateNode(function->expressions[i]);
+						memcpy(block->variables[def->args[i]->identifier.string].value, expression_result, STypeRegistry::instance()->getTypeSize(def->args[i]->type.string));
+						free(expression_result);
+						
                     }
                     
                     // Call the function
@@ -207,10 +244,20 @@ float SVM::evaluateNode(SASTNode* node) {
                     
                 }
                 
-            } else if (functions.count(function->identifier.string)) {
+            } else if (cpp_functions.count(function->identifier.string)) {
                 
                 // Call C++ function
-                functions[function->identifier.string]();
+				std::vector<void*> params;
+				
+				for (int i = 0; i < function->expressions.size(); i++) {
+					
+					function->expressions[i]->destination_type = "float";
+					void* expression_result = evaluateNode(function->expressions[i]);
+					params.push_back(expression_result);
+					
+				}
+				
+                cpp_functions[function->identifier.string]->operator()(params);
                 
             } else {
             
@@ -257,14 +304,14 @@ float SVM::evaluateNode(SASTNode* node) {
     
 }
 
-SVariable SVM::declareVariable(std::string& identifier, std::string& type) {
+SVariable SVM::declareVariable(std::string& type) {
 
     SVariable to_declare;
 
     // If we have a type for this, declare it
     if (STypeRegistry::instance()->factories.count(type))
         to_declare.value = STypeRegistry::instance()->factories[type]->createObject();
-    else to_declare.value = new double;
+    else to_declare.value = malloc(sizeof(4));
     
     to_declare.type = type;
     
@@ -286,7 +333,7 @@ SVariable* SVM::resolveVarible(std::string name) {
     while (search_block) {
         
         if (search_block->variables.count(var_name))
-            var =  &search_block->variables[var_name];
+            var = &search_block->variables[var_name];
         
         // Check the next block
         if (!strcmp(typeid(search_block->owner).name(), typeid(SBlock).name()))

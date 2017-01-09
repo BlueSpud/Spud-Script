@@ -8,11 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		029A61D91E1EF1130004DF66 /* STypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 029A61D71E1EF1130004DF66 /* STypes.cpp */; };
-		029F6DBE1E1C6F460071C2BA /* script.ss in CopyFiles */ = {isa = PBXBuildFile; fileRef = 029F6DBD1E1C6F3C0071C2BA /* script.ss */; };
+		029F6DBE1E1C6F460071C2BA /* sample.ss in CopyFiles */ = {isa = PBXBuildFile; fileRef = 029F6DBD1E1C6F3C0071C2BA /* sample.ss */; };
 		02CA04CB1E1848A00031E58A /* SVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02CA04C91E1848A00031E58A /* SVM.cpp */; };
 		02D5AFFA1E14B05E001E2A2A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D5AFF91E14B05E001E2A2A /* main.cpp */; };
 		02D5B0021E14B076001E2A2A /* SLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D5B0001E14B076001E2A2A /* SLexer.cpp */; };
 		02D5B0051E14C841001E2A2A /* SAST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02D5B0031E14C841001E2A2A /* SAST.cpp */; };
+		02E377EE1E24282000FBBA82 /* SOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E377EC1E24282000FBBA82 /* SOperator.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -22,7 +23,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				029F6DBE1E1C6F460071C2BA /* script.ss in CopyFiles */,
+				029F6DBE1E1C6F460071C2BA /* sample.ss in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -31,7 +32,7 @@
 /* Begin PBXFileReference section */
 		029A61D71E1EF1130004DF66 /* STypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = STypes.cpp; sourceTree = "<group>"; };
 		029A61D81E1EF1130004DF66 /* STypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = STypes.hpp; sourceTree = "<group>"; };
-		029F6DBD1E1C6F3C0071C2BA /* script.ss */ = {isa = PBXFileReference; lastKnownFileType = text; path = script.ss; sourceTree = "<group>"; };
+		029F6DBD1E1C6F3C0071C2BA /* sample.ss */ = {isa = PBXFileReference; lastKnownFileType = text; path = sample.ss; sourceTree = "<group>"; };
 		02CA04C81E183EDB0031E58A /* SASTNodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SASTNodes.h; sourceTree = "<group>"; };
 		02CA04C91E1848A00031E58A /* SVM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SVM.cpp; sourceTree = "<group>"; };
 		02CA04CA1E1848A00031E58A /* SVM.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SVM.hpp; sourceTree = "<group>"; };
@@ -41,6 +42,9 @@
 		02D5B0011E14B076001E2A2A /* SLexer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SLexer.hpp; sourceTree = "<group>"; };
 		02D5B0031E14C841001E2A2A /* SAST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SAST.cpp; sourceTree = "<group>"; };
 		02D5B0041E14C841001E2A2A /* SAST.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SAST.hpp; sourceTree = "<group>"; };
+		02E377EB1E24181700FBBA82 /* SFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SFunctional.hpp; sourceTree = "<group>"; };
+		02E377EC1E24282000FBBA82 /* SOperator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SOperator.cpp; sourceTree = "<group>"; };
+		02E377ED1E24282000FBBA82 /* SOperator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SOperator.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +61,7 @@
 		02D5AFED1E14B05E001E2A2A = {
 			isa = PBXGroup;
 			children = (
-				029F6DBD1E1C6F3C0071C2BA /* script.ss */,
+				029F6DBD1E1C6F3C0071C2BA /* sample.ss */,
 				02D5AFF81E14B05E001E2A2A /* SpudScript */,
 				02D5AFF71E14B05E001E2A2A /* Products */,
 			);
@@ -74,10 +78,13 @@
 		02D5AFF81E14B05E001E2A2A /* SpudScript */ = {
 			isa = PBXGroup;
 			children = (
-				029A61D71E1EF1130004DF66 /* STypes.cpp */,
-				029A61D81E1EF1130004DF66 /* STypes.hpp */,
 				02D5B0001E14B076001E2A2A /* SLexer.cpp */,
 				02D5B0011E14B076001E2A2A /* SLexer.hpp */,
+				029A61D71E1EF1130004DF66 /* STypes.cpp */,
+				029A61D81E1EF1130004DF66 /* STypes.hpp */,
+				02E377EC1E24282000FBBA82 /* SOperator.cpp */,
+				02E377ED1E24282000FBBA82 /* SOperator.hpp */,
+				02E377EB1E24181700FBBA82 /* SFunctional.hpp */,
 				02CA04C81E183EDB0031E58A /* SASTNodes.h */,
 				02D5B0031E14C841001E2A2A /* SAST.cpp */,
 				02D5B0041E14C841001E2A2A /* SAST.hpp */,
@@ -147,6 +154,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				029A61D91E1EF1130004DF66 /* STypes.cpp in Sources */,
+				02E377EE1E24282000FBBA82 /* SOperator.cpp in Sources */,
 				02D5B0021E14B076001E2A2A /* SLexer.cpp in Sources */,
 				02D5AFFA1E14B05E001E2A2A /* main.cpp in Sources */,
 				02CA04CB1E1848A00031E58A /* SVM.cpp in Sources */,
@@ -162,7 +170,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -209,7 +217,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;

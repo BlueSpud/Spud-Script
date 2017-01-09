@@ -35,7 +35,12 @@ static std::string SASTNodeTypeNames[] = {
 
 struct SASTNode { SASTNodeType node_type; };
 
-struct SASTExpression : public SASTNode { std::vector<SToken> tokens; };
+struct SASTExpression : public SASTNode {
+	
+	std::vector<SToken> tokens;
+	std::string destination_type = "int";
+	
+};
 struct SASTDeclaration : public SASTNode { SToken type, identifier; };
 
 struct SASTAssignment : public SASTNode {

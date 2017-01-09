@@ -13,8 +13,12 @@
 #include <vector>
 #include <map>
 
+class STypeRegistry;
+
 class SClassFactory {
 
+	friend class STypeRegistry;
+	
     public:
     
         SClassFactory(void* _template_object, size_t _size);
@@ -43,6 +47,10 @@ struct SVariable {
     
 };
 
+// Function to cast a type to c++
+template <class T>
+T castCPP(void* value) { return (*(T*)value); }
+
 struct SVariableMember {
     
     void* value;
@@ -57,7 +65,9 @@ class STypeRegistry {
         static STypeRegistry* instance();
     
         SVariable getMemeber(SVariable* variable, std::string name);
-    
+	
+		size_t getTypeSize(std::string type);
+	
         std::map<std::string, SClassFactory*> factories;
         std::map<std::string, std::map<std::string, SVariableLocation>> variable_lookups;
     
