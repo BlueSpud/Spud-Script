@@ -7,8 +7,12 @@ func test(float b) {
 }
 
 Test t;
+Test b;
+
+//Other b;
 
 t.a = t.b + t.o.a;
+b.c = t.a * 2;
 
 test(10);
 test(11);

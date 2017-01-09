@@ -11,7 +11,7 @@
 
 #include <map>
 #include <sstream>
-#include "SParser.hpp"
+#include "SAST.hpp"
 
 class SVM {
     
@@ -30,7 +30,7 @@ class SVM {
         SVariable declareVariable(std::string& identifier, std::string& type);
     
         std::map<std::string, SVariable> global_variables;
-        std::map<std::string, SFunctionDefinition*> script_functions;
+        std::map<std::string, SASTFunctionDefinition*> script_functions;
     
         SBlock* current_block;
     

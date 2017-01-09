@@ -106,7 +106,14 @@ float SVM::evaluateNode(SASTNode* node) {
             if (!current_block) {
                 
                 // Declare a variable in the global scope
-                global_variables[declaration->identifier.string] = declareVariable(declaration->identifier.string, declaration->type.string);
+                if (!global_variables.count(declaration->identifier.string))
+                    global_variables[declaration->identifier.string] = declareVariable(declaration->identifier.string, declaration->type.string);
+                else {
+                
+                    std::cout << "Redefinition of " << declaration->identifier.string << std::endl;
+                    return 0;
+                
+                }
                 
             } else {
                 
@@ -172,7 +179,7 @@ float SVM::evaluateNode(SASTNode* node) {
             if (script_functions.count(function->identifier.string)) {
                 
                 // Clear the variables from the last function call
-                SFunctionDefinition* def = script_functions[function->identifier.string];
+                SASTFunctionDefinition* def = script_functions[function->identifier.string];
                 SBlock* block = script_functions[function->identifier.string]->block;
                 
                 block->variables.erase(block->variables.begin(), block->variables.end());
@@ -233,7 +240,7 @@ float SVM::evaluateNode(SASTNode* node) {
             
         case SASTTypeFunctionDef: {
             
-            SFunctionDefinition* def = (SFunctionDefinition*)node;
+            SASTFunctionDefinition* def = (SASTFunctionDefinition*)node;
             
             // Register the block that we have for the name of the function
             script_functions[def->identifier.string] = def;
@@ -288,7 +295,7 @@ SVariable* SVM::resolveVarible(std::string name) {
         
     }
     
-    if (global_variables.count(var_name))
+    if (global_variables.count(var_name) && !var)
         var = &global_variables[var_name];
     
     // If we didnt find it, we didnt find if
@@ -313,19 +320,9 @@ SVariable* SVM::resolveVarible(std::string name) {
                 member->value = new_member.value;
                 member->type = new_member.type;
                 
-            } else {
-            
-                std::cout << "Could not find member " << member_name;
-                return nullptr;
-            
-            }
+            } else return nullptr;
         
-        } else {
-        
-            std::cout << "Class has no members\n";
-            return nullptr;
-        
-        }
+        } else { return nullptr; }
     
     }
     

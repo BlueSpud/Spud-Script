@@ -33,8 +33,18 @@ STypeRegistry* STypeRegistry::instance() {
 
     static STypeRegistry* instance = NULL;
     
-    if (instance == NULL)
+    if (instance == NULL) {
+    
         instance = new STypeRegistry();
+        
+        // Register the simple types
+        instance->registered_types.push_back("int");
+        instance->registered_types.push_back("float");
+        instance->registered_types.push_back("double");
+        instance->registered_types.push_back("bool");
+        instance->registered_types.push_back("char");
+        
+    }
     
     return instance;
 
@@ -51,7 +61,7 @@ SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
         member.value = reinterpret_cast<void*>(base_pointer + instance()->variable_lookups[variable->type][name].byte_offset);
         member.type = instance()->variable_lookups[variable->type][name].type.c_str();
     
-    } else std::cout << "Variable did not have member neamed " << name << std::endl;
+    }
     
     return member;
 

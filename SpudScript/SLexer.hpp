@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include "STypes.hpp"
+
 enum STokenType {
     
     STokenTypeKeyword,
@@ -57,7 +59,6 @@ class SLexer {
     public:
     
         std::vector<std::string> keywords;
-        std::vector<std::string> types;
         std::vector<std::string >operators;
         std::vector<SToken> lexSource(std::string source);
     

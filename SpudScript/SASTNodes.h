@@ -62,7 +62,7 @@ struct SBlock : public SASTNode {
     
 };
 
-struct SFunctionDefinition : public SASTNode {
+struct SASTFunctionDefinition : public SASTNode {
     
     SToken identifier;
     SBlock* block;

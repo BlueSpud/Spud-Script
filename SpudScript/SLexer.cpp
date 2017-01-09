@@ -109,7 +109,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
         }
         
         // Check for types
-        SToken type_token = getTokenFromArray(types, i, source, STokenTypeType);
+        SToken type_token = getTokenFromArray(STypeRegistry::instance()->registered_types, i, source, STokenTypeType);
         if (type_token.string.length()) {
             
             tokens.push_back(type_token);

@@ -10,6 +10,7 @@
 #define STypes_hpp
 
 #include <iostream>
+#include <vector>
 #include <map>
 
 class SClassFactory {
@@ -60,9 +61,11 @@ class STypeRegistry {
         std::map<std::string, SClassFactory*> factories;
         std::map<std::string, std::map<std::string, SVariableLocation>> variable_lookups;
     
+        std::vector<std::string> registered_types;
+    
 };
 
-#define EXPOSE_SCRIPT_TYPE(c)  { c* template_object = new c(); STypeRegistry::instance()->factories[#c] = new SClassFactory((void*)template_object, sizeof(c)); delete template_object; }
+#define EXPOSE_SCRIPT_TYPE(c)  { c* template_object = new c(); STypeRegistry::instance()->factories[#c] = new SClassFactory((void*)template_object, sizeof(c)); delete template_object; } STypeRegistry::instance()->registered_types.push_back(#c);
 
 #define EXPOSE_SCRIPT_VARIABLE(c, n, t) STypeRegistry::instance()->variable_lookups[#c][#n].byte_offset = offsetof(c, n); STypeRegistry::instance()->variable_lookups[#c][#n].type = #t;
 
