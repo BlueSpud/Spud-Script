@@ -34,6 +34,20 @@ class SVM {
 		
 		}
 	
+		template<class T>
+		T* getScriptValue(std::string name) {
+		
+			SVariable* var = resolveVarible(name);
+			
+			// Check if this is a valid cast
+			if (STypeRegistry::instance()->cpp_class_names.count(var->type) && !strcmp(STypeRegistry::instance()->cpp_class_names[var->type].c_str(), typeid(T).name()))
+				return (T*)var->value;
+			
+			throw std::runtime_error("Script variable could not be cast to c++ type");
+			return nullptr;
+		
+		}
+	
 		#define EXPOSE_FUNC(vm, f) bool bound_##f = vm.bindFunction(f, #f);
 	
     private:

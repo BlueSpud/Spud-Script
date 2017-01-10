@@ -24,7 +24,6 @@ void* SVM::evaluateNode(SASTNode* node) {
             // Get the numbers
             SASTExpression* expresison = (SASTExpression*)node;
             std::vector<SVariable> vars;
-			bool allocated = false;
             
 			for (int i = 0; i < expresison->tokens.size(); i++) {
 				
@@ -51,9 +50,20 @@ void* SVM::evaluateNode(SASTNode* node) {
                 } else if (expresison->tokens[i].type == STokenTypeIdentifier) {
                     
                     SVariable* var = resolveVarible(expresison->tokens[i].string);
-                    if (var)
-                        vars.push_back(*var);
-                    else {
+					if (var) {
+					
+						// Create a copy of the variable
+						vars.push_back(SVariable());
+						SVariable& new_var = vars.back();
+						
+						size_t size = STypeRegistry::instance()->getTypeSize(var->type);
+						new_var.value = malloc(size);
+						memcpy(new_var.value, var->value, size);
+						
+						new_var.type = var->type;
+
+						
+					} else {
                         
                         std::cout << expresison->tokens[i].string << " was not defined in this scope" << std::endl;
                         return 0;
@@ -71,11 +81,12 @@ void* SVM::evaluateNode(SASTNode* node) {
                 if (expresison->tokens[i].type == STokenTypeOperator && (!expresison->tokens[i].string.compare("*") || !expresison->tokens[i].string.compare("/") || !expresison->tokens[i].string.compare("%"))) {
                         
                     void* new_value = SOperatorRegistry::instance()->performOperation(&vars[var], &vars[var + 1], expresison->tokens[i].string);
-					allocated = true;
 					
                     // Set and remove
                     vars[var].value = new_value;
 					
+					// Free the value and delete
+					free(vars[var + 1].value);
                     std::vector<SVariable>::iterator itterator = vars.begin() + var + 1;
                     vars.erase(itterator);
                     vars.shrink_to_fit();
@@ -88,9 +99,7 @@ void* SVM::evaluateNode(SASTNode* node) {
                     var++;
             }
             
-			SVariable result;
-			result.type = vars[0].type;
-			result.value = vars[0].value;
+			SVariable& result = vars[0];
             var = 1;
 			
             // Do addition and subtraction
@@ -98,9 +107,10 @@ void* SVM::evaluateNode(SASTNode* node) {
                 if (expresison->tokens[i].type == STokenTypeOperator && (!expresison->tokens[i].string.compare("+") || !expresison->tokens[i].string.compare("-"))) {
 					
                     void* new_value = SOperatorRegistry::instance()->performOperation(&result, &vars[var], expresison->tokens[i].string);
-					allocated = true;
+					
+					// Free allocation
+					free(vars[var].value);
 					result.value = new_value;
-                    
                     var++;
                     
                 }
@@ -110,16 +120,6 @@ void* SVM::evaluateNode(SASTNode* node) {
 			// Do a cast if we need to
 			if (result.type.compare(expresison->destination_type))
 				result.value = SOperatorRegistry::instance()->performCast(&result, expresison->destination_type);
-			
-			// Copy it to a new pointer if we pulled directly from a variable
-			if (!allocated) {
-				
-				size_t size = STypeRegistry::instance()->getTypeSize(result.type);
-				void* new_ptr = malloc(size);
-				memcpy(new_ptr, result.value, size);
-				result.value = new_ptr;
-				
-			}
 			
 			return result.value;
 			
@@ -374,6 +374,7 @@ SVariable* SVM::resolveVarible(std::string name) {
     }
     
     // Check if we found a member or not
+	// TODO, smart pointer
     if (member->type.length())
         return member;
     else {

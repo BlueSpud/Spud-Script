@@ -8,27 +8,6 @@
 
 #include "STypes.hpp"
 
-
-SClassFactory::SClassFactory(void* _template_object, size_t _size) {
-    
-    // Caller is responsible for deleting _template_object
-    size = _size;
-    template_object = malloc(size);
-    memcpy(template_object, _template_object, size);
-    
-}
-
-SClassFactory::~SClassFactory() { free(template_object); }
-
-void* SClassFactory::createObject() {
-
-    // Copy template object and return allocated object
-    void* new_object = malloc(size);
-    memcpy(new_object, template_object, size);
-    return new_object;
-
-}
-
 STypeRegistry* STypeRegistry::instance() {
 
     static STypeRegistry* instance = NULL;
@@ -43,6 +22,10 @@ STypeRegistry* STypeRegistry::instance() {
         instance->registered_types.push_back("double");
         instance->registered_types.push_back("bool");
         instance->registered_types.push_back("char");
+		
+		// Make sure that we know that we can cast ints and floats
+		instance->cpp_class_names["int"] = typeid(int).name();
+		instance->cpp_class_names["float"] = typeid(float).name();
         
     }
     

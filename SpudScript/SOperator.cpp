@@ -59,8 +59,7 @@ void* SOperatorRegistry::performCast(SCAST_ARGS) {
 		
 	}
 	
-	std::cout << "Type cannot be cast\n";
-	// ERROR
+	throw std::runtime_error("Type cannot be cast");
 	
 	return nullptr;
 	
@@ -79,8 +78,7 @@ void* SOperatorRegistry::performOperation(SVariable* first, SVariable* second, c
 	
 	}
 	
-	std::cout << "Invalid operation " << first->type << " " << o << " " << second->type << std::endl;
-	// ERROR
+	throw std::runtime_error("Undefined operation\n");
 	
 	return nullptr;
 	

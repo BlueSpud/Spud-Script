@@ -63,12 +63,8 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
         
     }
     
-	if (current_block) {
-		
-        std::cout << "Missing }\n";
-		// ERROR
-		
-	}
+	if (current_block)
+		throw std::runtime_error("Missing }");
 	
     return nodes;
     
@@ -176,9 +172,8 @@ SASTDeclaration* SAST::parseDeclaration(PARSE_ARGS) {
 			
 		} else {
 			
-			std::cout << "expected identifier\n";
 			delete decl_node;
-			// ERROR
+			throw std::runtime_error("Expected identifier");
 		
 		}
 		
@@ -227,9 +222,8 @@ SASTFunctionCall* SAST::parseFunctionCall(PARSE_ARGS) {
 				
 			} else {
 				
-				std::cout << ") Expected\n";
 				delete call_node;
-				// ERROR
+				throw std::runtime_error(") Expected");
 			}
 			
 		}
@@ -345,36 +339,32 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 					} else {
 						
 						// Misisng open bracket
-						std::cout << "{ expected\n";
 						delete func_def;
-						// ERROR
+						throw std::runtime_error("{ expected");
 						
 					}
 					
 				} else {
 					
 					// Missing end of args
-					std::cout << ") Expected\n";
 					delete func_def;
-					// ERROR
+					throw std::runtime_error(") Expected");
 					
 				}
 				
 			} else {
 				
 				// Missing start of args
-				std::cout << "( Expected\n";
 				delete func_def;
-				// ERROR
+				throw std::runtime_error("( Expected");
 				
 			}
 			
 		} else {
 			
 			// Missing identifier
-			std::cout << "Expected identifier\n";
 			delete func_def;
-			// ERROR
+			throw std::runtime_error("Expected identifier");
 			
 		}
 		

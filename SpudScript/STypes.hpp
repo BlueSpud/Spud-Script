@@ -15,21 +15,29 @@
 
 class STypeRegistry;
 
-class SClassFactory {
+class SClassFactoryBase {
 
 	friend class STypeRegistry;
 	
+	public:
+	
+		virtual void* createObject() = 0;
+	
+	protected:
+	
+		size_t size;
+	
+};
+
+template <class T>
+class SClassFactory : public SClassFactoryBase {
+	
     public:
     
-        SClassFactory(void* _template_object, size_t _size);
+		SClassFactory(size_t _size) { size = _size; }
         ~SClassFactory();
     
-        void* createObject();
-    
-    private:
-    
-        void* template_object;
-        size_t size;
+		virtual void* createObject() { return new T(); }
 
 };
 
@@ -68,15 +76,27 @@ class STypeRegistry {
 	
 		size_t getTypeSize(std::string type);
 	
-        std::map<std::string, SClassFactory*> factories;
+		template <class T>
+		bool registerCPPClass(const char* name) {
+		
+			// Create a class factory and make sure we know we registered it as a type
+			instance()->factories[name] = new SClassFactory<T>(sizeof(T));
+			instance()->registered_types.push_back(name);
+			instance()->cpp_class_names[name] = typeid(T).name();
+			
+			return true;
+			
+		}
+	
+        std::map<std::string, SClassFactoryBase*> factories;
         std::map<std::string, std::map<std::string, SVariableLocation>> variable_lookups;
-    
+		std::map<std::string, std::string> cpp_class_names;
+	
         std::vector<std::string> registered_types;
     
 };
 
-#define EXPOSE_SCRIPT_TYPE(c)  { c* template_object = new c(); STypeRegistry::instance()->factories[#c] = new SClassFactory((void*)template_object, sizeof(c)); delete template_object; } STypeRegistry::instance()->registered_types.push_back(#c);
-
+#define EXPOSE_SCRIPT_TYPE(c) bool class_reg_##c = STypeRegistry::instance()->registerCPPClass<c>(#c);
 #define EXPOSE_SCRIPT_VARIABLE(c, n, t) STypeRegistry::instance()->variable_lookups[#c][#n].byte_offset = offsetof(c, n); STypeRegistry::instance()->variable_lookups[#c][#n].type = #t;
 
 #endif /* STypes_hpp */

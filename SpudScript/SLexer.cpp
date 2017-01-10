@@ -144,8 +144,8 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
                     // If there was already a decimal, create another number
                     // This should be an error when the tree is made
                     if (found_decimal == true)
-                        break;
-                    
+						throw std::runtime_error("Unexpected .");
+						
                     found_decimal = true;
                     
                     

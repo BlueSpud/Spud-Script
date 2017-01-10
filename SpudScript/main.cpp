@@ -39,6 +39,8 @@ void cppFunction(float a, float b, float c) {
 }
 
 EXPOSE_FUNC(vm, cppFunction)
+EXPOSE_SCRIPT_TYPE(Other);
+EXPOSE_SCRIPT_TYPE(Test);
 
 int main(int argc, const char * argv[]) {
     
@@ -46,14 +48,13 @@ int main(int argc, const char * argv[]) {
     SLexer lexer;
     SAST parser;
 	
-	EXPOSE_SCRIPT_TYPE(Other);
+
 	EXPOSE_SCRIPT_VARIABLE(Other, a, int);
 	
-    EXPOSE_SCRIPT_TYPE(Test);
-    EXPOSE_SCRIPT_VARIABLE(Test, a, float);
-    EXPOSE_SCRIPT_VARIABLE(Test, b, float);
-    EXPOSE_SCRIPT_VARIABLE(Test, c, float);
-    EXPOSE_SCRIPT_VARIABLE(Test, d, float);
+    EXPOSE_SCRIPT_VARIABLE(Test, a, int);
+    EXPOSE_SCRIPT_VARIABLE(Test, b, int);
+    EXPOSE_SCRIPT_VARIABLE(Test, c, int);
+    EXPOSE_SCRIPT_VARIABLE(Test, d, int);
     EXPOSE_SCRIPT_VARIABLE(Test, o, Other);
     
     // Tokens for lexer
@@ -69,9 +70,6 @@ int main(int argc, const char * argv[]) {
     lexer.operators.push_back("/");
     lexer.operators.push_back("%");
     
-    // Add in a test function to the VM
-	//vm.functions["cppFunction"] = &cppFunction;
-    
     // Read the code
     std::ifstream in_stream = std::ifstream("./sample.ss");
     std::string code, line;
@@ -85,14 +83,10 @@ int main(int argc, const char * argv[]) {
 
     vm.executeCode(nodes);
 	
-	std::cout << *(int*)vm.resolveVarible("a")->value << std::endl;
-	std::cout << *(float*)vm.resolveVarible("b")->value << std::endl;
-	std::cout << *(float*)vm.resolveVarible("c")->value << std::endl;
-	std::cout << *(int*)vm.resolveVarible("d")->value << std::endl;
-	//std::cout << *(float*)vm.resolveVarible("t.a")->value << std::endl;
-//    std::cout << *(float*)vm.resolveVarible("t.c")->value << std::endl;
-//    std::cout << *(float*)vm.resolveVarible("t.d")->value << std::endl;
-//    std::cout << *(float*)vm.resolveVarible("t.o.a")->value << std::endl;
-//    std::cout << *(float*)vm.resolveVarible("b.a")->value << std::endl;
+	std::cout << "a: " << *vm.getScriptValue<int>("a") << std::endl;
+	std::cout << "b: " << *vm.getScriptValue<float>("b") << std::endl;
+	std::cout << "c: " << *vm.getScriptValue<float>("c") << std::endl;
+	std::cout << "d: " << *vm.getScriptValue<int>("d") << std::endl;
+	std::cout << "t.a: " << vm.getScriptValue<Test>("t")->a << std::endl;
 	
 }
