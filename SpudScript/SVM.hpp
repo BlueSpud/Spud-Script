@@ -24,29 +24,10 @@ class SVM {
         SVariable* resolveVarible(std::string name);
 	
 		template <class... params>
-		bool bindFunction(void(*func)(params ...), std::string name) {
-		
-			// Get the function container
-			SFunctionContainer* container = CreateSFunction(func);
-			cpp_functions[name] = container;
-			
-			return true;
-		
-		}
+		bool bindFunction(void(*func)(params ...), std::string name);
 	
 		template<class T>
-		T* getScriptValue(std::string name) {
-		
-			SVariable* var = resolveVarible(name);
-			
-			// Check if this is a valid cast
-			if (STypeRegistry::instance()->cpp_class_names.count(var->type) && !strcmp(STypeRegistry::instance()->cpp_class_names[var->type].c_str(), typeid(T).name()))
-				return (T*)var->value;
-			
-			throw std::runtime_error("Script variable could not be cast to c++ type");
-			return nullptr;
-		
-		}
+		T* getScriptValue(std::string name);
 	
 		#define EXPOSE_FUNC(vm, f) bool bound_##f = vm.bindFunction(f, #f);
 	
@@ -59,9 +40,38 @@ class SVM {
         std::map<std::string, SVariable> global_variables;
         std::map<std::string, SASTFunctionDefinition*> script_functions;
 		std::map<std::string, SFunctionContainer*> cpp_functions;
-    
+	
+		void* evaluateExpression(SASTExpression* expression);
+		void* evaluateFuncitonCall(SASTFunctionCall* call);
+	
         SBlock* current_block;
     
 };
+
+template <class... params>
+bool SVM::bindFunction(void(*func)(params ...), std::string name) {
+	
+	// Get the function container
+	SFunctionContainer* container = CreateSFunction(func);
+	cpp_functions[name] = container;
+	
+	return true;
+	
+}
+
+template<class T>
+T* SVM::getScriptValue(std::string name) {
+	
+	SVariable* var = resolveVarible(name);
+	
+	// Check if this is a valid cast
+	if (STypeRegistry::instance()->cpp_class_names.count(var->type) && !strcmp(STypeRegistry::instance()->cpp_class_names[var->type].c_str(), typeid(T).name()))
+		return (T*)var->value;
+	
+	throw std::runtime_error("Script variable could not be cast to c++ type");
+	return nullptr;
+	
+}
+
 
 #endif /* SVM_hpp */

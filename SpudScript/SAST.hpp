@@ -23,6 +23,7 @@ class SAST {
 		#define PARSE_ARGS std::vector<SToken>& tokens, int& i
 	
         bool parseSemi(PARSE_ARGS);
+		bool parseStartBlock(PARSE_ARGS, SBlock*& current_block);
         bool parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block);
 		bool parseAssignment(PARSE_ARGS, std::vector<SASTNode*>* node_place);
 	

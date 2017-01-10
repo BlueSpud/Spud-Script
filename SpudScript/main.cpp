@@ -83,11 +83,11 @@ int main(int argc, const char * argv[]) {
 
     vm.executeCode(nodes);
 	
-	std::cout << "a: " << *vm.getScriptValue<int>("a") << std::endl;
-	std::cout << "b: " << *vm.getScriptValue<float>("b") << std::endl;
-	std::cout << "c: " << *vm.getScriptValue<float>("c") << std::endl;
-	std::cout << "d: " << *vm.getScriptValue<int>("d") << std::endl;
+	std::cout << "a: " <<  *vm.getScriptValue<int>("a") << std::endl;
+	std::cout << "b: " <<  *vm.getScriptValue<float>("b") << std::endl;
+	std::cout << "c: " <<  *vm.getScriptValue<float>("c") << std::endl;
+	std::cout << "d: " <<  *vm.getScriptValue<int>("d") << std::endl;
 	std::cout << "t.a: " << vm.getScriptValue<Test>("t")->a << std::endl;
-	std::cout << "f: " << *vm.getScriptValue<double>("f") << std::endl;
+	std::cout << "f: " <<  *vm.getScriptValue<double>("f") << std::endl;
 	
 }

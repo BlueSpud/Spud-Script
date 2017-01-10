@@ -30,7 +30,7 @@ class SFunction : public SFunctionContainer {
 		
 			// Make sure we have correct # of parameters in the vector
 			if (sizeof...(params) != variables.size())
-				std::cout << "Wrong number of arguments\n";
+				throw std::runtime_error("Wrong number of arguments");
 			else call<std::tuple<params...>>(variables, std::make_index_sequence<sizeof...(params)>());
 		
 		}

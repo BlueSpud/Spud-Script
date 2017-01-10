@@ -22,17 +22,6 @@ enum SASTNodeType {
     
 };
 
-static std::string SASTNodeTypeNames[] = {
-    
-    "Expression",
-    "Declaration",
-    "Assignment",
-    "Function Call",
-    "Block",
-    "Function Def"
-    
-};
-
 struct SASTNode { SASTNodeType node_type; };
 
 struct SASTExpression : public SASTNode {

@@ -23,6 +23,10 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
             return nodes;
 		
 		// Parse a }, ending a block
+		if (!parseStartBlock(tokens, i, current_block))
+			return nodes;
+		
+		// Parse a }, ending a block
         if (!parseEndBlock(tokens, i, nodes, current_block))
             return nodes;
         
@@ -90,6 +94,35 @@ bool SAST::parseSemi(PARSE_ARGS) {
 
 }
 
+bool SAST::parseStartBlock(PARSE_ARGS, SBlock*& current_block) {
+	
+	// Check for block information
+	if (tokens[i].type == STokenTypeOpenBrack) {
+	 
+		// If we dont have a block, this is a root level block
+		if (!current_block) {
+		 
+			current_block = new SBlock();
+			current_block->node_type = SASTTypeBlock;
+		 
+		} else {
+			 
+			SBlock* new_block  = new SBlock();
+			new_block->node_type = SASTTypeBlock;
+			new_block->owner = current_block;
+			 
+			// This is a block within a block, add the last block, make this one owned
+			current_block->nodes.push_back(new_block);
+			current_block = new_block;
+			 
+		}
+		
+	}
+	
+	return true;
+	
+}
+
 bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block) {
 
     if (tokens[i].type == STokenTypeCloseBrack) {
@@ -97,7 +130,7 @@ bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& cur
         // Need to be working on a block before we do anything
         if (!current_block) {
                 
-            std::cout << "Unexpected }\n";
+			throw std::runtime_error("Unexpected }");
             return false;
                 
         }
@@ -236,8 +269,8 @@ SASTFunctionCall* SAST::parseFunctionCall(PARSE_ARGS) {
 	
 }
 
-// Declaration to parse an expresison specifically for an assignment
-#define ASS_EXP_PARSE i++; SASTExpression* expression_node = parseExpression(tokens, i); if (expression_node) assign_node->expression = expression_node; else { std::cout << "Expected expression\n"; return false; }
+// Declaration to parse an expression specifically for an assignment
+#define ASS_EXP_PARSE i++; SASTExpression* expression_node = parseExpression(tokens, i); if (expression_node) assign_node->expression = expression_node; else { throw std::runtime_error("Expected expression"); return false; }
 
 bool SAST::parseAssignment(PARSE_ARGS, std::vector<SASTNode*>* node_place) {
 	
