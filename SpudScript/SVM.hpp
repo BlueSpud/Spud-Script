@@ -54,7 +54,6 @@ class SVM {
 	
 		void* evaluateNode(SASTNode* node);
 	
-        void castVariable(std::string type, std::string name);
         SVariable declareVariable(std::string& type);
     
         std::map<std::string, SVariable> global_variables;

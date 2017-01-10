@@ -28,20 +28,84 @@ class SOperatorRegistry {
 		bool registerOperator(operator_func func, std::string type);
 		bool registerCast(cast_func func, std::string type);
 	
-		void* performOperation(SVariable* first, SVariable* second, const std::string& o);
+		void* performOperation(SOPERATOR_ARGS);
 		void* performCast(SCAST_ARGS);
+	
+		template <class first_c, class second_c>
+		void* standardArithmatic(SOPERATOR_ARGS);
+	
+		template <class from, class to>
+		void* standardCast(SCAST_ARGS);
 	
 	private:
 	
 		std::map<std::string, operator_func> operator_funcs;
 		std::map<std::string, cast_func> cast_funcs;
 	
-		SOPERATOR(oInt);
+		SOPERATOR(oInt)
 		SCAST(cInt)
 	
-		SOPERATOR(oFloat);
+		SOPERATOR(oFloat)
 		SCAST(cFloat)
 	
+		SOPERATOR(oDouble)
+		SCAST(cDouble)
+	
+		SOPERATOR(oLong)
+		SCAST(cLong)
+	
 };
+
+template <class first_c, class second_c>
+void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
+
+	first_c a = *(first_c*)first->value;
+	second_c b = *(second_c*)second->value;
+	
+	if (!o.compare("+")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a + (first_c)b;
+		return out;
+		
+	}
+	
+	if (!o.compare("-")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a - (first_c)b;
+		return out;
+		
+	}
+	
+	if (!o.compare("/")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a / (first_c)b;
+		return out;
+		
+	}
+	
+	if (!o.compare("*")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a * (first_c)b;
+		
+		return out;
+		
+	}
+	
+	return nullptr;
+	
+}
+
+template <class from, class to>
+void* SOperatorRegistry::standardCast(SCAST_ARGS) {
+	
+	to* f = (to*)malloc(sizeof(to));
+	*f = (to)*(from*)var->value;
+	return f;
+	
+}
 
 #endif /* SOperator_hpp */

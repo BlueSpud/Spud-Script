@@ -19,10 +19,14 @@ SOperatorRegistry* SOperatorRegistry::instance() {
 		// Register default operators
 		instance->registerOperator(oInt, "int");
 		instance->registerOperator(oFloat, "float");
+		instance->registerOperator(oDouble, "double");
+		instance->registerOperator(oLong, "long");
 		
 		// Register default casts
 		instance->registerCast(cInt, "int");
 		instance->registerCast(cFloat, "float");
+		instance->registerCast(cDouble, "double");
+		instance->registerCast(cLong, "long");
 		
 	}
 	
@@ -59,13 +63,13 @@ void* SOperatorRegistry::performCast(SCAST_ARGS) {
 		
 	}
 	
-	throw std::runtime_error("Type cannot be cast");
+	throw std::runtime_error("Type cannot be cast: " + var->type);
 	
 	return nullptr;
 	
 }
 
-void* SOperatorRegistry::performOperation(SVariable* first, SVariable* second, const std::string& o) {
+void* SOperatorRegistry::performOperation(SOPERATOR_ARGS) {
 	
 	// See if we have an operator
 	if (operator_funcs.count(first->type)) {
@@ -87,86 +91,24 @@ void* SOperatorRegistry::performOperation(SVariable* first, SVariable* second, c
 void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 	
 	// Int to int
-	if (!second->type.compare("int")) {
-		
-		// Get the float and the int
-		int a = *(int*)first->value;
-		int b = *(int*)second->value;
-		
-		if (!o.compare("+")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a + b;
-			return out;
-			
-		}
-		
-		if (!o.compare("-")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a - b;
-			return out;
-			
-		}
-		
-		if (!o.compare("/")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a / b;
-			return out;
-			
-		}
-		
-		if (!o.compare("*")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a * b;
-			return out;
-			
-		}
-		
-	}
+	if (!second->type.compare("int"))
+		return instance()->standardArithmatic<int, int>(first, second, o);
 	
 	// Int to float
-	if (!second->type.compare("float")) {
-		
-		// Get the float and the int
-		int a = *(int*)first->value;
-		float b = *(float*)second->value;
-		
-		if (!o.compare("+")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a + b;
-			return out;
-			
-		}
-		
-		if (!o.compare("-")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a - b;
-			return out;
-			
-		}
-		
-		if (!o.compare("/")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a / b;
-			return out;
-			
-		}
-		
-		if (!o.compare("*")) {
-			
-			int* out = (int*)malloc(sizeof(int));
-			*out = a * b;
-			return out;
-			
-		}
-		
-	}
+	if (!second->type.compare("float"))
+		return instance()->standardArithmatic<int, float>(first, second, o);
+	
+	// Int to double
+	if (!second->type.compare("double"))
+		return instance()->standardArithmatic<int, double>(first, second, o);
+	
+	// Int to long
+	if (!second->type.compare("long"))
+		return instance()->standardArithmatic<int, long>(first, second, o);
+	
+	// Int to char
+	if (!second->type.compare("char"))
+		return instance()->standardArithmatic<int, char>(first, second, o);
 
 	return nullptr;
 	
@@ -174,87 +116,77 @@ void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 
 void* SOperatorRegistry::oFloat(SOPERATOR_ARGS) {
 	
-	// float to int
-	if (!second->type.compare("int")) {
-		
-		// Get the float and the int
-		float a = *(float*)first->value;
-		int b = *(int*)second->value;
-		
-		if (!o.compare("+")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a + b;
-			return out;
-			
-		}
-		
-		if (!o.compare("-")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a - b;
-			return out;
-			
-		}
-		
-		if (!o.compare("/")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a / b;
-			return out;
-			
-		}
-		
-		if (!o.compare("*")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a * b;
-			return out;
-			
-		}
-		
-	}
+	// Float to int
+	if (!second->type.compare("int"))
+		return instance()->standardArithmatic<float, int>(first, second, o);
 	
-	// float to float
-	if (!second->type.compare("float")) {
-		
-		// Get the float and the int
-		float a = *(float*)first->value;
-		float b = *(float*)second->value;
-		
-		if (!o.compare("+")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a + b;
-			return out;
-			
-		}
-		
-		if (!o.compare("-")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a - b;
-			return out;
-			
-		}
-		
-		if (!o.compare("/")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a / b;
-			return out;
-			
-		}
-		
-		if (!o.compare("*")) {
-			
-			float* out = (float*)malloc(sizeof(float));
-			*out = a * b;
-			return out;
-			
-		}
-		
-	}
+	// Float to float
+	if (!second->type.compare("float"))
+		return instance()->standardArithmatic<float, float>(first, second, o);
+	
+	// Float to double
+	if (!second->type.compare("double"))
+		return instance()->standardArithmatic<float, double>(first, second, o);
+	
+	// Float to long
+	if (!second->type.compare("long"))
+		return instance()->standardArithmatic<float, long>(first, second, o);
+	
+	// Float to char
+	if (!second->type.compare("char"))
+		return instance()->standardArithmatic<float, char>(first, second, o);
+	
+	return nullptr;
+	
+}
+
+void* SOperatorRegistry::oDouble(SOPERATOR_ARGS) {
+	
+	// Float to int
+	if (!second->type.compare("int"))
+		return instance()->standardArithmatic<double, int>(first, second, o);
+	
+	// Float to float
+	if (!second->type.compare("float"))
+		return instance()->standardArithmatic<double, float>(first, second, o);
+	
+	// Float to double
+	if (!second->type.compare("double"))
+		return instance()->standardArithmatic<double, double>(first, second, o);
+	
+	// Float to long
+	if (!second->type.compare("long"))
+		return instance()->standardArithmatic<double, long>(first, second, o);
+	
+	// Float to char
+	if (!second->type.compare("char"))
+		return instance()->standardArithmatic<double, char>(first, second, o);
+	
+	return nullptr;
+	
+}
+
+void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
+	
+	// Float to int
+	if (!second->type.compare("int"))
+		return instance()->standardArithmatic<long, int>(first, second, o);
+	
+	// Float to float
+	if (!second->type.compare("float"))
+		return instance()->standardArithmatic<long, float>(first, second, o);
+	
+	// Float to double
+	if (!second->type.compare("double"))
+		return instance()->standardArithmatic<long, double>(first, second, o);
+	
+	// Float to long
+	if (!second->type.compare("long"))
+		return instance()->standardArithmatic<long, long>(first, second, o);
+	
+	// Float to char
+	if (!second->type.compare("char"))
+		return instance()->standardArithmatic<long, char>(first, second, o);
 	
 	return nullptr;
 	
@@ -262,13 +194,23 @@ void* SOperatorRegistry::oFloat(SOPERATOR_ARGS) {
 
 void* SOperatorRegistry::cInt(SCAST_ARGS) {
 	
-	if (!type.compare("float")) {
-		
-		float* f = (float*)malloc(sizeof(float));
-		*f = (float)*(int*)var->value;
-		return f;
-		
-	}
+	if (!type.compare("int"))
+		return instance()->standardCast<int, int>(var, type);
+	
+	if (!type.compare("float"))
+		return instance()->standardCast<int, float>(var, type);
+	
+	if (!type.compare("double"))
+		return instance()->standardCast<int, double>(var, type);
+	
+	if (!type.compare("long"))
+		return instance()->standardCast<int, long>(var, type);
+	
+	if (!type.compare("char"))
+		return instance()->standardCast<int, char>(var, type);
+	
+	if (!type.compare("bool"))
+		return instance()->standardCast<int, bool>(var, type);
 	
 	return nullptr;
 	
@@ -276,13 +218,71 @@ void* SOperatorRegistry::cInt(SCAST_ARGS) {
 
 void* SOperatorRegistry::cFloat(SCAST_ARGS) {
 	
-	if (!type.compare("int")) {
-		
-		int* i = (int*)malloc(sizeof(int));
-		*i = (int)*(float*)var->value;
-		return i;
-		
-	}
+	if (!type.compare("int"))
+		return instance()->standardCast<float, int>(var, type);
+	
+	if (!type.compare("float"))
+		return instance()->standardCast<float, float>(var, type);
+	
+	if (!type.compare("double"))
+		return instance()->standardCast<float, double>(var, type);
+	
+	if (!type.compare("long"))
+		return instance()->standardCast<float, long>(var, type);
+	
+	if (!type.compare("char"))
+		return instance()->standardCast<float, char>(var, type);
+	
+	if (!type.compare("bool"))
+		return instance()->standardCast<float, bool>(var, type);
+	
+	return nullptr;
+	
+}
+
+void* SOperatorRegistry::cDouble(SCAST_ARGS) {
+	
+	if (!type.compare("int"))
+		return instance()->standardCast<double, int>(var, type);
+	
+	if (!type.compare("float"))
+		return instance()->standardCast<double, float>(var, type);
+	
+	if (!type.compare("double"))
+		return instance()->standardCast<double, double>(var, type);
+	
+	if (!type.compare("long"))
+		return instance()->standardCast<double, long>(var, type);
+	
+	if (!type.compare("char"))
+		return instance()->standardCast<double, char>(var, type);
+	
+	if (!type.compare("bool"))
+		return instance()->standardCast<double, bool>(var, type);
+	
+	return nullptr;
+	
+}
+
+void* SOperatorRegistry::cLong(SCAST_ARGS) {
+	
+	if (!type.compare("int"))
+		return instance()->standardCast<long, int>(var, type);
+	
+	if (!type.compare("float"))
+		return instance()->standardCast<long, float>(var, type);
+	
+	if (!type.compare("double"))
+		return instance()->standardCast<long, double>(var, type);
+	
+	if (!type.compare("long"))
+		return instance()->standardCast<long, long>(var, type);
+	
+	if (!type.compare("char"))
+		return instance()->standardCast<long, char>(var, type);
+	
+	if (!type.compare("bool"))
+		return instance()->standardCast<long, bool>(var, type);
 	
 	return nullptr;
 	

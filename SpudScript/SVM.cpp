@@ -311,7 +311,7 @@ SVariable SVM::declareVariable(std::string& type) {
     // If we have a type for this, declare it
     if (STypeRegistry::instance()->factories.count(type))
         to_declare.value = STypeRegistry::instance()->factories[type]->createObject();
-    else to_declare.value = malloc(sizeof(4));
+    else throw std::runtime_error("Unknown type");
     
     to_declare.type = type;
     
@@ -383,16 +383,6 @@ SVariable* SVM::resolveVarible(std::string name) {
         return var;
         
     }
-    
-}
-
-void SVM::castVariable(std::string type, std:: string name) {
-    
-    SVariable* variable = resolveVarible(name);
-    
-    // See what type it is and cast if
-    if (!type.compare("int"))
-        *(double*)variable->value = (int)*(double*)variable->value;
     
 }
 

@@ -8,26 +8,19 @@
 
 #include "STypes.hpp"
 
+EXPOSE_SCRIPT_TYPE(int);
+EXPOSE_SCRIPT_TYPE(float);
+EXPOSE_SCRIPT_TYPE(long);
+EXPOSE_SCRIPT_TYPE(double);
+EXPOSE_SCRIPT_TYPE(char);
+EXPOSE_SCRIPT_TYPE(bool);
+
 STypeRegistry* STypeRegistry::instance() {
 
     static STypeRegistry* instance = NULL;
     
-    if (instance == NULL) {
-    
+    if (instance == NULL)
         instance = new STypeRegistry();
-        
-        // Register the simple types
-        instance->registered_types.push_back("int");
-        instance->registered_types.push_back("float");
-        instance->registered_types.push_back("double");
-        instance->registered_types.push_back("bool");
-        instance->registered_types.push_back("char");
-		
-		// Make sure that we know that we can cast ints and floats
-		instance->cpp_class_names["int"] = typeid(int).name();
-		instance->cpp_class_names["float"] = typeid(float).name();
-        
-    }
     
     return instance;
 
