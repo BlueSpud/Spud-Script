@@ -1,16 +1,14 @@
-int a = 2 + 2;
-float b = 2.0;
-float c = a * b;
-int d = b + c;
+int ga = 0;
+int gb = 0;
 
-double f = 2.0 * 10.2 + a;
+func test(int a, int c) {
 
-{
+	ga = a;
+	gb = c;
 
-	int w = 20;
-	a = a + 2 + w;
+	prints(ga);
+	prints(gb);
+	prints(ga + gb);
 
 }
 
-Test t;
-t.a = b + c;

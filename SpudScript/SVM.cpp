@@ -124,6 +124,17 @@ void* SVM::evaluateNode(SASTNode* node) {
             for (int i = 0; i < block->nodes.size(); i++)
                 evaluateNode(block->nodes[i]);
 			
+			// Delete every variable in the block
+			std::map<std::string, SVariable>::iterator i = block->variables.begin();
+			while (i != block->variables.end()) {
+				
+				// Make sure to free the memory
+				free(i->second.value);
+				block->variables.erase(i);
+				i = block->variables.begin();
+	
+			}
+			
             current_block = last_block;
             
             
@@ -343,8 +354,6 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 		SASTFunctionDefinition* def = script_functions[call->identifier.string];
 		SBlock* block = script_functions[call->identifier.string]->block;
 		
-		block->variables.erase(block->variables.begin(), block->variables.end());
-		
 		// Define the new variables of the argument types
 		if (call->expressions.size() == def->args.size()) {
 			
@@ -363,7 +372,6 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 			// Call the function
 			evaluateNode(block);
 			
-			
 		} else {
 			
 			throw std::runtime_error("Invalid number of arguments, got " + std::to_string(call->expressions.size()) + " expected " + std::to_string(def->args.size()));
@@ -378,13 +386,17 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 		
 		for (int i = 0; i < call->expressions.size(); i++) {
 			
-			call->expressions[i]->destination_type = "float";
+			call->expressions[i]->destination_type = cpp_functions[call->identifier.string]->signature[i];
 			void* expression_result = evaluateNode(call->expressions[i]);
 			params.push_back(expression_result);
 			
 		}
 		
 		cpp_functions[call->identifier.string]->operator()(params);
+		
+		// Make sure that we free what we allocated
+		for (int i = 0; i < call->expressions.size(); i++)
+			free(params[i]);
 		
 	} else {
 		

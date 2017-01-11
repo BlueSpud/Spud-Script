@@ -73,20 +73,13 @@ class STypeRegistry {
         static STypeRegistry* instance();
     
         SVariable getMemeber(SVariable* variable, std::string name);
-	
 		size_t getTypeSize(std::string type);
 	
 		template <class T>
-		bool registerCPPClass(const char* name) {
-		
-			// Create a class factory and make sure we know we registered it as a type
-			instance()->factories[name] = new SClassFactory<T>(sizeof(T));
-			instance()->registered_types.push_back(name);
-			instance()->cpp_class_names[name] = typeid(T).name();
-			
-			return true;
-			
-		}
+		bool registerCPPClass(const char* name);
+	
+		template <class T>
+		std::string& resolveType(T t);
 	
         std::map<std::string, SClassFactoryBase*> factories;
         std::map<std::string, std::map<std::string, SVariableLocation>> variable_lookups;
@@ -98,5 +91,25 @@ class STypeRegistry {
 
 #define EXPOSE_SCRIPT_TYPE(c) bool class_reg_##c = STypeRegistry::instance()->registerCPPClass<c>(#c);
 #define EXPOSE_SCRIPT_VARIABLE(c, n, t) STypeRegistry::instance()->variable_lookups[#c][#n].byte_offset = offsetof(c, n); STypeRegistry::instance()->variable_lookups[#c][#n].type = #t;
+
+template <class T>
+bool STypeRegistry::registerCPPClass(const char* name) {
+	
+	// Create a class factory and make sure we know we registered it as a type
+	instance()->factories[name] = new SClassFactory<T>(sizeof(T));
+	instance()->registered_types.push_back(name);
+	instance()->cpp_class_names[typeid(T).name()] = name;
+	
+	return true;
+	
+}
+
+template <class T>
+std::string& STypeRegistry::resolveType(T t) {
+	
+	
+	
+	
+}
 
 #endif /* STypes_hpp */

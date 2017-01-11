@@ -10,6 +10,8 @@
 #include <fstream>
 #include "SVM.hpp"
 
+#include <stdarg.h>
+
 SVM vm;
 
 class Other {
@@ -30,6 +32,8 @@ class Test {
 
 };
 
+void prints(int a) { std::cout << a << std::endl; }
+
 void cppFunction(float a, float b, float c) {
 	
 	std::cout << "a " << a << std::endl;
@@ -38,9 +42,12 @@ void cppFunction(float a, float b, float c) {
     
 }
 
-EXPOSE_FUNC(vm, cppFunction)
-EXPOSE_SCRIPT_TYPE(Other);
-EXPOSE_SCRIPT_TYPE(Test);
+EXPOSE_FUNC(vm, cppFunction, void, float float float)
+EXPOSE_FUNC(vm, prints, void, int)
+
+EXPOSE_SCRIPT_TYPE(Other)
+
+EXPOSE_SCRIPT_TYPE(Test)
 
 int main(int argc, const char * argv[]) {
     
@@ -48,7 +55,6 @@ int main(int argc, const char * argv[]) {
     SLexer lexer;
     SAST parser;
 	
-
 	EXPOSE_SCRIPT_VARIABLE(Other, a, int);
 	
     EXPOSE_SCRIPT_VARIABLE(Test, a, int);
@@ -83,11 +89,13 @@ int main(int argc, const char * argv[]) {
 
     vm.executeCode(nodes);
 	
-	std::cout << "a: " <<  *vm.getScriptValue<int>("a") << std::endl;
-	std::cout << "b: " <<  *vm.getScriptValue<float>("b") << std::endl;
-	std::cout << "c: " <<  *vm.getScriptValue<float>("c") << std::endl;
-	std::cout << "d: " <<  *vm.getScriptValue<int>("d") << std::endl;
-	std::cout << "t.a: " << vm.getScriptValue<Test>("t")->a << std::endl;
-	std::cout << "f: " <<  *vm.getScriptValue<double>("f") << std::endl;
+	vm.callFunction("test", 28, 12);
+	
+//	std::cout << "ga: " <<  *vm.getScriptValue<int>("ga") << std::endl;
+//	std::cout << "gb: " <<  *vm.getScriptValue<int>("gb") << std::endl;
+//	std::cout << "c: " <<  *vm.getScriptValue<float>("c") << std::endl;
+//	std::cout << "d: " <<  *vm.getScriptValue<int>("d") << std::endl;
+//	std::cout << "t.a: " << vm.getScriptValue<Test>("t")->a << std::endl;
+//	std::cout << "f: " <<  *vm.getScriptValue<double>("f") << std::endl;
 	
 }
