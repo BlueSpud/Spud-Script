@@ -6,9 +6,14 @@ func test(int a, int c) {
 	ga = a;
 	gb = c;
 
-	prints(ga);
-	prints(gb);
-	prints(ga + gb);
+	if (ga * gb) {
+
+		prints(ga);
+		prints(gb);
+		prints(ga + gb);
+
+	}
 
 }
 
+test(0, 0);

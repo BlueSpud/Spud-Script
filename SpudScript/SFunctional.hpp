@@ -22,6 +22,8 @@ class SFunctionContainer {
 	
 };
 
+
+// Special thanks to n.m. on Stack Overflow for help with this class
 template <class ...params>
 class SFunction : public SFunctionContainer {
 	

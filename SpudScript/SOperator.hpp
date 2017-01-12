@@ -54,6 +54,9 @@ class SOperatorRegistry {
 		SOPERATOR(oLong)
 		SCAST(cLong)
 	
+		SOPERATOR(oBool)
+		SCAST(cBool)
+	
 };
 
 template <class first_c, class second_c>

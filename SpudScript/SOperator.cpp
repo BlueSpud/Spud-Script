@@ -142,23 +142,23 @@ void* SOperatorRegistry::oFloat(SOPERATOR_ARGS) {
 
 void* SOperatorRegistry::oDouble(SOPERATOR_ARGS) {
 	
-	// Float to int
+	// Double to int
 	if (!second->type.compare("int"))
 		return instance()->standardArithmatic<double, int>(first, second, o);
 	
-	// Float to float
+	// Double to float
 	if (!second->type.compare("float"))
 		return instance()->standardArithmatic<double, float>(first, second, o);
 	
-	// Float to double
+	// Double to double
 	if (!second->type.compare("double"))
 		return instance()->standardArithmatic<double, double>(first, second, o);
 	
-	// Float to long
+	// Double to long
 	if (!second->type.compare("long"))
 		return instance()->standardArithmatic<double, long>(first, second, o);
 	
-	// Float to char
+	// Double to char
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<double, char>(first, second, o);
 	
@@ -168,25 +168,51 @@ void* SOperatorRegistry::oDouble(SOPERATOR_ARGS) {
 
 void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
 	
-	// Float to int
+	// Long to int
 	if (!second->type.compare("int"))
 		return instance()->standardArithmatic<long, int>(first, second, o);
 	
-	// Float to float
+	// Long to float
 	if (!second->type.compare("float"))
 		return instance()->standardArithmatic<long, float>(first, second, o);
 	
-	// Float to double
+	// Long to double
 	if (!second->type.compare("double"))
 		return instance()->standardArithmatic<long, double>(first, second, o);
 	
-	// Float to long
+	// Long to long
 	if (!second->type.compare("long"))
 		return instance()->standardArithmatic<long, long>(first, second, o);
 	
-	// Float to char
+	// Long to char
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<long, char>(first, second, o);
+	
+	return nullptr;
+	
+}
+
+void* SOperatorRegistry::oBool(SOPERATOR_ARGS) {
+	
+	// Bool to int
+	if (!second->type.compare("int"))
+		return instance()->standardArithmatic<bool, int>(first, second, o);
+	
+	// Bool to float
+	if (!second->type.compare("float"))
+		return instance()->standardArithmatic<bool, float>(first, second, o);
+	
+	// Bool to double
+	if (!second->type.compare("double"))
+		return instance()->standardArithmatic<bool, double>(first, second, o);
+	
+	// Bool to long
+	if (!second->type.compare("long"))
+		return instance()->standardArithmatic<bool, long>(first, second, o);
+	
+	// Bool to char
+	if (!second->type.compare("char"))
+		return instance()->standardArithmatic<bool, char>(first, second, o);
 	
 	return nullptr;
 	
@@ -283,6 +309,30 @@ void* SOperatorRegistry::cLong(SCAST_ARGS) {
 	
 	if (!type.compare("bool"))
 		return instance()->standardCast<long, bool>(var, type);
+	
+	return nullptr;
+	
+}
+
+void* SOperatorRegistry::cBool(SCAST_ARGS) {
+	
+	if (!type.compare("int"))
+		return instance()->standardCast<bool, int>(var, type);
+	
+	if (!type.compare("float"))
+		return instance()->standardCast<bool, float>(var, type);
+	
+	if (!type.compare("double"))
+		return instance()->standardCast<bool, double>(var, type);
+	
+	if (!type.compare("long"))
+		return instance()->standardCast<bool, long>(var, type);
+	
+	if (!type.compare("char"))
+		return instance()->standardCast<bool, char>(var, type);
+	
+	if (!type.compare("bool"))
+		return instance()->standardCast<bool, bool>(var, type);
 	
 	return nullptr;
 	

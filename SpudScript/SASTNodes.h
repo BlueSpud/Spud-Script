@@ -18,8 +18,19 @@ enum SASTNodeType {
     SASTTypeAssignment,
     SASTTypeFunctionCall,
     SASTTypeBlock,
-    SASTTypeFunctionDef
+    SASTTypeFunctionDef,
+	SASTTypeIfExpression
     
+};
+
+static std::string node_names[] =  {
+	"exp",
+	"decl",
+	"ass",
+	"call",
+	"block",
+	"func def",
+	"if"
 };
 
 struct SASTNode { SASTNodeType node_type; };
@@ -63,6 +74,18 @@ struct SASTFunctionDefinition : public SASTNode {
     
     std::vector<SASTDeclaration*> args;
     
+};
+
+struct SASTIfStatement : public SASTNode {
+	
+	SBlock* block;
+	SBlock *parent_block;
+	
+	SASTExpression* expression;
+	SASTNode* else_node;
+	
+	SASTIfStatement* parent_if;
+	
 };
 
 #endif /* SASTNodes_h */

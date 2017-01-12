@@ -24,13 +24,14 @@ class SAST {
 	
         bool parseSemi(PARSE_ARGS);
 		bool parseStartBlock(PARSE_ARGS, SBlock*& current_block);
-        bool parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block);
+        bool parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block, SASTIfStatement*& current_if);
 		bool parseAssignment(PARSE_ARGS, std::vector<SASTNode*>* node_place);
 	
 		SASTExpression* parseExpression(PARSE_ARGS);
 		SASTDeclaration* parseDeclaration(PARSE_ARGS);
 		SASTFunctionCall* parseFunctionCall(PARSE_ARGS);
 		SASTFunctionDefinition* parseFunctionDef(PARSE_ARGS, SBlock*& current_block);
+		SASTIfStatement* parseIfStatement(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_if);
 	
 };
 

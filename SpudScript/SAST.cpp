@@ -14,6 +14,7 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
     
     // Store the block of code that we are working on
     SBlock* current_block = nullptr;
+	SASTIfStatement* current_if = nullptr;
     
     // Go through every token
     for (int i = 0; i < tokens.size(); i++) {
@@ -27,7 +28,7 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
 			return nodes;
 		
 		// Parse a }, ending a block
-        if (!parseEndBlock(tokens, i, nodes, current_block))
+        if (!parseEndBlock(tokens, i, nodes, current_block, current_if))
             return nodes;
         
         
@@ -36,6 +37,9 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
         if (current_block)
             node_place = &current_block->nodes;
 		
+		SASTIfStatement* if_statement = parseIfStatement(tokens, i, current_block, current_if);
+		if (if_statement)
+			node_place->push_back(if_statement);
 		
 		// Parse a function call
 		SASTFunctionCall* func_call = parseFunctionCall(tokens, i);
@@ -123,36 +127,88 @@ bool SAST::parseStartBlock(PARSE_ARGS, SBlock*& current_block) {
 	
 }
 
-bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block) {
+bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block, SASTIfStatement*& current_if) {
 
-    if (tokens[i].type == STokenTypeCloseBrack) {
-
-        // Need to be working on a block before we do anything
-        if (!current_block) {
-                
+	if (tokens[i].type == STokenTypeCloseBrack) {
+		
+		// Need to be working on a block before we do anything
+		if (!current_block) {
+			
 			throw std::runtime_error("Unexpected }");
-            return false;
-                
-        }
-        
-        // Otherwise we finish the block we were working on
-        if (!current_block->owner) {
-                
-            nodes.push_back(current_block);
-            current_block = nullptr;
-                
-        } else {
-                
-            // Check if we need to restore the owning block
-            if (!strcmp(typeid(current_block->owner).name(), typeid(SBlock).name()))
-                current_block = (SBlock*)current_block->owner;
-            else current_block = nullptr;
-                
-        }
-            
-    }
-    
-    return true;
+			return false;
+			
+		}
+		
+		// Otherwise we finish the block we were working on
+		if (!current_block->owner) {
+			
+			nodes.push_back(current_block);
+			current_block = nullptr;
+			
+		} else {
+			
+			// Check if we need to restore the owning block
+			if (current_block->owner->node_type == SASTTypeBlock)
+				current_block = (SBlock*)current_block->owner;
+			else {
+				
+				// Check if this block belonged to the current if
+				if (current_block->owner == current_if) {
+					
+					// Check for an else token
+					if (i + 1 < tokens.size() && tokens[i + 1].type == STokenTypeKeyword && !tokens[i + 1].string.compare("else")) {
+						
+						// Increment by 2 so we can check the next token
+						i = i + 2;
+						
+						SBlock* old_block = current_block;
+						parseStartBlock(tokens, i, current_block);
+						
+						if (!current_if->else_node) {
+							
+							if (old_block != current_block) {
+							
+								// REMOVE THE NEW BLOCK FROM THE CURRENT ONE
+								old_block->nodes.resize(old_block->nodes.size() - 1);
+							
+								// Started a block as else, keep that
+								current_if->else_node = current_block;
+								current_block->owner = current_if;
+							
+							} else {
+							
+								SASTIfStatement* old_if = current_if;
+								SASTIfStatement* new_if = parseIfStatement(tokens, i, current_block, current_if);
+							
+								if (new_if) {
+								
+									// If parse was successful, keep if
+									new_if->parent_block = old_if->parent_block;
+									old_if->else_node = current_if;
+								
+								} else throw std::runtime_error("Dangling else");
+							
+							}
+							
+						} else throw std::runtime_error("Already had else");
+						
+					} else {
+						
+						// This will reset, if block is null, will go back to global, if parent if is null, will exit if chain
+						current_block = current_if->parent_block;
+						current_if = current_if->parent_if;
+						
+					}
+					
+				} else current_block = nullptr;
+				
+			}
+			
+		}
+		
+	}
+	
+	return true;
 
 }
 
@@ -333,16 +389,18 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 	func_def->node_type = SASTTypeFunctionDef;
 	if (!current_block && tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("func")) {
 		
+		i++;
+		
 		// Get the identifier of the function
-		if (i + 1 < tokens.size() && tokens[i + 1].type == STokenTypeIdentifier) {
+		if (i < tokens.size() && tokens[i].type == STokenTypeIdentifier) {
 			
-			func_def->identifier = tokens[i + 1];
+			func_def->identifier = tokens[i];
+			i++;
 			
 			// Make sure we have parens
-			if (i + 2 < tokens.size() && tokens[i + 2].type == STokenTypeOpenParen) {
+			if (i < tokens.size() && tokens[i].type == STokenTypeOpenParen) {
 				
-				// Incriment i
-				i = i + 3;
+				i++;
 				
 				// Parse the arguments
 				while (i < tokens.size()) {
@@ -368,6 +426,8 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 						func_def->block->node_type = SASTTypeBlock;
 						func_def->block->owner = func_def;
 						current_block = func_def->block;
+						
+						return func_def;
 						
 					} else {
 						
@@ -402,15 +462,95 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 		}
 		
 	}
+
+	// Failed
+	delete func_def;
+	return nullptr;
+
 	
-	if (func_def->identifier.string.length())
-		return func_def;
-	else {
+}
+
+SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_if) {
+	
+	SASTIfStatement* if_statement = new SASTIfStatement();
+	if_statement->node_type = SASTTypeIfExpression;
+	
+	if (tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("if")) {
 		
-		delete func_def;
-		return nullptr;
+		i++;
+		
+		// Get the open paren
+		if (i < tokens.size() && tokens[i].type == STokenTypeOpenParen) {
+			
+			i++;
+			
+			// Parse the epxression
+			SASTExpression* expression = parseExpression(tokens, i);
+			if (expression) {
+				
+				// Check that we closed the epxresion
+				if (i < tokens.size() && tokens[i].type == STokenTypeCloseParen) {
+					
+					i++;
+					
+					// Parse block
+					if (i < tokens.size() && tokens[i].type == STokenTypeOpenBrack) {
+						
+						// Create a new block and make it the current block
+						if_statement->parent_block = current_block;
+						if_statement->block = current_block = new SBlock();
+						if_statement->block->node_type = SASTTypeBlock;
+						current_block->owner = if_statement;
+						
+						// Will always be a bool for the target type
+						expression->destination_type = "bool";
+						if_statement->expression = expression;
+						
+						// If we are inside of another if statement, make sure to remember that
+						if_statement->parent_if = current_if;
+						current_if = if_statement;
+						
+						// Parsing was complete
+						return if_statement;
+						
+					} else {
+						
+						// Missing open bracket
+						delete if_statement;
+						throw std::runtime_error("{ Expected");
+						
+					}
+				
+				
+				} else {
+					
+					// Missing close paren
+					delete if_statement;
+					throw std::runtime_error(") Expected");
+					
+				}
+				
+			} else {
+				
+				// Missing an epxression
+				delete if_statement;
+				throw std::runtime_error("Expected expression");
+				
+			}
+			
+		} else {
+			
+			// Missing open paren
+			delete if_statement;
+			throw std::runtime_error("( Expected");
+			
+		}
+		
 		
 	}
 	
+	// Failed
+	delete if_statement;
+	return nullptr;
 	
 }

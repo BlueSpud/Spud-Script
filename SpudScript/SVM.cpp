@@ -26,6 +26,25 @@ void* SVM::evaluateNode(SASTNode* node) {
 			return evaluateExpression(expression);
             
         }  break;
+			
+		case SASTTypeIfExpression: {
+			
+			SASTIfStatement* if_expression = (SASTIfStatement*)node;
+			
+			// Evaluate the expression, always returns a bool
+			void* expression_result = evaluateNode(if_expression->expression);
+			bool result = *(bool*)expression_result;
+			
+			// Check if the result was true, and if it wasnt execute the else (if it exists)
+			if (result)
+				evaluateNode(if_expression->block);
+			else if (if_expression->else_node)
+				evaluateNode(if_expression->else_node);
+			
+			// Clean up
+			free(expression_result);
+			
+		} break;
             
         case SASTTypeDeclaration: {
             
