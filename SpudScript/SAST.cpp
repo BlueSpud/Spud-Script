@@ -318,10 +318,32 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 			
 		} else if (tokens[i].type == STokenTypeOperator && tokens[i].string.compare("=") && !last_operator) {
 			
-			// Parse an operator
-			SExpressionNodeOperator* operator_node = new SExpressionNodeOperator(tokens[i].string);
-			expression_node->nodes.push_back(operator_node);
+			// Check and and or operators
+			if (!tokens[i].string.compare("||") || !tokens[i].string.compare("&&")) {
+				
+				SASTExpression* new_expression = new SASTExpression();
+				new_expression->node_type = SASTTypeExpression;
+
+				// Create an expression node to store the expression that was already parsed
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(expression_node);
+				new_expression->nodes.push_back(sub_expression_node);
+
+				// If this is an or operator, we use addition, but if its an and we use multiplication
+				if (!tokens[i].string.compare("&&"))
+					new_expression->nodes.push_back(new SExpressionNodeOperator("*"));
+				else new_expression->nodes.push_back(new SExpressionNodeOperator("+"));
+				
+				// Keep parsing for this one
+				expression_node = new_expression;
+				
+			} else {
 			
+				// Parse an normal operator
+				SExpressionNodeOperator* operator_node = new SExpressionNodeOperator(tokens[i].string);
+				expression_node->nodes.push_back(operator_node);
+			
+			}
+				
 			// Was an operator, save that an icrement
 			last_operator = true;
 			i++;

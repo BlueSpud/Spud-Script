@@ -1,43 +1,8 @@
-int ga = 0;
-int gb = 2 * (2 + 5);
+int a = 1;
+int b = 2;
 
-func test(int a, int c) {
-
-	ga = a;
-	gb = c;
-
-	if (ga * gb) {
-
-		prints(ga);
-		prints(gb);
-		prints(ga + gb);
-
-	} else if (ga) {
-
-	} else { prints(2); }
-
-}
-
-
-prints(ga);
-prints(gb);
-
-if (ga == gb) {
+if (a < b && b && a != 1) {
 
 	prints(1);
 
-} else {
-
-	prints(2);
-
 }
-
-string s;
-
-func poop(string n) {
-
-	s = s + n;
-
-}
-
-poop(123 + 2245);

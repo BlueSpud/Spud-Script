@@ -74,6 +74,9 @@ int main(int argc, const char * argv[]) {
 	lexer.operators.push_back("!=");
     lexer.operators.push_back("=");
 	
+	lexer.operators.push_back("&&");
+	lexer.operators.push_back("||");
+	
     lexer.operators.push_back("+");
     lexer.operators.push_back("-");
     lexer.operators.push_back("*");
@@ -99,7 +102,7 @@ int main(int argc, const char * argv[]) {
 	
 	//vm.callFunction("test", 28, 12);
 	
-	std::cout << "s: " <<  *vm.getScriptValue<std::string>("s") << std::endl;
+//	std::cout << "s: " <<  *vm.getScriptValue<std::string>("s") << std::endl;
 //	std::cout << "gb: " <<  *vm.getScriptValue<int>("gb") << std::endl;
 //	std::cout << "c: " <<  *vm.getScriptValue<float>("c") << std::endl;
 //	std::cout << "d: " <<  *vm.getScriptValue<int>("d") << std::endl;
