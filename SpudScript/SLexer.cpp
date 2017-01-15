@@ -93,20 +93,29 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
         }
         
         // Check for operators
+		bool operator_success = false;
         for (int o = 0; o < operators.size(); o++) {
             
-            if (!char_at.compare(operators[o])) {
-                
+            if (i + operators[o].length() - 1 < source.length() && !source.substr(i, operators[o].length()).compare(operators[o])) {
+				
                 SToken token;
                 token.type = STokenTypeOperator;
-                token.string = char_at;
+                token.string = source.substr(i, operators[o].length());
                 
                 tokens.push_back(token);
-                continue;
-                
+				
+				// Save that we succeded and we have to incremenet i by any additional length
+				operator_success = true;
+				i = i + (int)operators[o].length() - 1;
+				break;
+				
+				
             }
             
         }
+		
+		if (operator_success)
+			continue;
         
         // Check for types
         SToken type_token = getTokenFromArray(STypeRegistry::instance()->registered_types, i, source, STokenTypeType);
@@ -195,6 +204,32 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
             continue;
 
         }
+		
+		// Check for strings
+		if (!char_at.compare("\"")) {
+			
+			// A string was opened, start filling it
+			i++;
+			
+			SToken token;
+			token.type = STokenTypeString;
+			char_at = source.substr(i, 1);
+			
+			while (char_at.compare("\"")) {
+				
+				token.string = token.string + char_at;
+				i++;
+				
+				if (i < source.length())
+					char_at = source.substr(i, 1);
+				else throw std::runtime_error("\" expected");
+				
+			}
+
+			tokens.push_back(token);
+			continue;
+		
+		}
         
     }
     

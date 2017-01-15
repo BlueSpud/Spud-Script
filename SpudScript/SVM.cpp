@@ -23,7 +23,7 @@ void* SVM::evaluateNode(SASTNode* node) {
             
             // Get the numbers
             SASTExpression* expression = (SASTExpression*)node;
-			return evaluateExpression(expression);
+			return evaluateExpression(expression).value;
             
         }  break;
 			
@@ -260,107 +260,164 @@ SVariable* SVM::resolveVarible(std::string name) {
     
 }
 
-void* SVM::evaluateExpression(SASTExpression* expression) {
+SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	
 	std::vector<SVariable> vars;
 	
-	for (int i = 0; i < expression->tokens.size(); i++) {
+	for (int i = 0; i < expression->nodes.size(); i++) {
 		
-		if (expression->tokens[i].type == STokenTypeNumber) {
-			
-			// Create a numbers
-			SVariable var;
-			if (expression->tokens[i].string.find('.') != std::string::npos) {
+		switch (expression->nodes[i]->type) {
 				
-				var.value = malloc(sizeof(float));
-				*(float*)var.value = atof(expression->tokens[i].string.c_str());
-				var.type = "float";
+			case SExpressionNodeTypeLiteral: {
 				
-			} else {
+					SExpressionNodeLiteral* literal_node = (SExpressionNodeLiteral*)expression->nodes[i];
 				
-				var.value = malloc(sizeof(int));
-				*(int*)var.value = atoi(expression->tokens[i].string.c_str());
-				var.type = "int";
+					vars.push_back(SVariable());
+					SVariable& literal = vars.back();
 				
-			}
-			
-			vars.push_back(var);
-			
-		} else if (expression->tokens[i].type == STokenTypeIdentifier) {
-			
-			SVariable* var = resolveVarible(expression->tokens[i].string);
-			if (var) {
+					// Copy the data
+					literal.type = literal_node->literal_type;
 				
-				// Create a copy of the variable
-				vars.push_back(SVariable());
-				SVariable& new_var = vars.back();
+					literal.value = malloc(literal_node->size);
+					memcpy(literal.value, literal_node->value, literal_node->size);
+    
+				} break;
 				
-				size_t size = STypeRegistry::instance()->getTypeSize(var->type);
-				new_var.value = malloc(size);
-				memcpy(new_var.value, var->value, size);
+			case SExpressionNodeTypeVariable: {
 				
-				new_var.type = var->type;
+					SExpressionNodeVariable* variable_node = (SExpressionNodeVariable*)expression->nodes[i];
+					SVariable* resolved_var = resolveVarible(variable_node->var_name);
+				
+					if (resolved_var) {
+					
+						vars.push_back(SVariable());
+						SVariable& var = vars.back();
+						
+						// Copy the data
+						size_t size = STypeRegistry::instance()->getTypeSize(resolved_var->type);
+						var.type = resolved_var->type;
+						var.value = malloc(size);
+						memcpy(var.value, resolved_var->value, size);
+					
+					} else {
+						
+						// Couln't find the variable
+						throw std::runtime_error(variable_node->var_name + " was not defined in this scope");
+						
+					}
 				
 				
-			} else {
+				} break;
 				
-				throw std::runtime_error(expression->tokens[i].string + " was not defined in this scope");
-				return 0;
+			case SExpressionNodeTypeExpression: {
 				
-			}
-			
+					// We evaluate the expression
+					SExpressionNodeExpression* expression_node = (SExpressionNodeExpression*)expression->nodes[i];
+					vars.push_back(evaluateExpression(expression_node->expression));
+    
+				} break;
+				
+			default:
+				break;
+				
 		}
+		
 		
 	}
 	
 	// Go through again, evaluating operators
 	int var = -1;
 	
-	for (int i = 0; i < expression->tokens.size(); i++) {
-		if (expression->tokens[i].type == STokenTypeOperator && (!expression->tokens[i].string.compare("*") || !expression->tokens[i].string.compare("/") || !expression->tokens[i].string.compare("%"))) {
+	// Compare operators
+	for (int i = 0; i < expression->nodes.size(); i++) {
+		if (expression->nodes[i]->type == SExpressionNodeTypeOperator) {
 			
-			void* new_value = SOperatorRegistry::instance()->performOperation(&vars[var], &vars[var + 1], expression->tokens[i].string);
+			SExpressionNodeOperator* node = (SExpressionNodeOperator*)expression->nodes[i];
 			
-			// Set and remove
-			vars[var].value = new_value;
+			if (!node->op.compare("==") || !node->op.compare("!=") || !node->op.compare("<") || !node->op.compare(">") || !node->op.compare(">=") || !node->op.compare("<=")) {
+				
+				void* new_value = SOperatorRegistry::instance()->performOperation(&vars[var], &vars[var + 1], node->op);
+				
+				// Set and remove
+				vars[var].value = new_value;
+				
+				// Free the value and delete
+				free(vars[var + 1].value);
+				std::vector<SVariable>::iterator itterator = vars.begin() + var + 1;
+				vars.erase(itterator);
+				vars.shrink_to_fit();
+				
+				// Incremenent i to skip the next number
+				i++;
+				
+			}
 			
-			// Free the value and delete
-			free(vars[var + 1].value);
-			std::vector<SVariable>::iterator itterator = vars.begin() + var + 1;
-			vars.erase(itterator);
-			vars.shrink_to_fit();
+		} else var++;
+	}
+	
+	// Reset var
+	var = -1;
+	
+	// Multiplication and division
+	for (int i = 0; i < expression->nodes.size(); i++) {
+		if (expression->nodes[i]->type == SExpressionNodeTypeOperator) {
 			
-			// Incremenent i to skip the next number
-			i++;
+			SExpressionNodeOperator* node = (SExpressionNodeOperator*)expression->nodes[i];
 			
+			if (!node->op.compare("*") || !node->op.compare("/") || !node->op.compare("%")) {
 			
-		} else if (expression->tokens[i].type == STokenTypeNumber || expression->tokens[i].type == STokenTypeIdentifier)
-			var++;
+				void* new_value = SOperatorRegistry::instance()->performOperation(&vars[var], &vars[var + 1], node->op);
+			
+				// Set and remove
+				vars[var].value = new_value;
+			
+				// Free the value and delete
+				free(vars[var + 1].value);
+				std::vector<SVariable>::iterator itterator = vars.begin() + var + 1;
+				vars.erase(itterator);
+				vars.shrink_to_fit();
+			
+				// Incremenent i to skip the next number
+				i++;
+			
+			}
+	
+		} else var++;
 	}
 	
 	SVariable& result = vars[0];
 	var = 1;
 	
 	// Do addition and subtraction
-	for (int i = 0; i < expression->tokens.size(); i++) {
-		if (expression->tokens[i].type == STokenTypeOperator && (!expression->tokens[i].string.compare("+") || !expression->tokens[i].string.compare("-"))) {
+	for (int i = 0; i < expression->nodes.size(); i++) {
+		if (expression->nodes[i]->type == SExpressionNodeTypeOperator) {
 			
-			void* new_value = SOperatorRegistry::instance()->performOperation(&result, &vars[var], expression->tokens[i].string);
+			SExpressionNodeOperator* node = (SExpressionNodeOperator*)expression->nodes[i];
 			
-			// Free allocation
-			free(vars[var].value);
-			result.value = new_value;
-			var++;
+			if (!node->op.compare("+") || !node->op.compare("-")) {
 			
+				void* new_value = SOperatorRegistry::instance()->performOperation(&result, &vars[var], node->op);
+			
+				// Free allocation
+				free(vars[var].value);
+				result.value = new_value;
+				var++;
+			
+			}
+		
 		}
 		
 	}
 	
 	// Do a cast if we need to
-	if (result.type.compare(expression->destination_type))
-		result.value = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
+	if (result.type.compare(expression->destination_type)) {
 	
-	return result.value;
+		result.value = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
+		result.type = expression->destination_type;
+		
+	}
+	
+	return result;
 	
 }
 

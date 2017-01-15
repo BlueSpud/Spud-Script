@@ -44,7 +44,7 @@ class SVM {
         std::map<std::string, SASTFunctionDefinition*> script_functions;
 		std::map<std::string, SFunctionContainer*> cpp_functions;
 	
-		void* evaluateExpression(SASTExpression* expression);
+		SVariable evaluateExpression(SASTExpression* expression);
 		void* evaluateFuncitonCall(SASTFunctionCall* call);
 	
         SBlock* current_block;
@@ -92,7 +92,7 @@ void* SVM::callFunction(std::string name, params... p){
 		}
 		
 		// Call the function
-		evaluateNode(block);
+		return evaluateNode(block);
 		
 	}
 	

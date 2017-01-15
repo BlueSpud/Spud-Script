@@ -51,3 +51,7 @@ SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
     return member;
 
 }
+
+// Expose this while being in the std namespace
+using namespace std;
+EXPOSE_SCRIPT_TYPE(string);

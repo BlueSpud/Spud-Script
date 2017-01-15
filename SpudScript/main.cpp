@@ -55,26 +55,34 @@ int main(int argc, const char * argv[]) {
     SLexer lexer;
     SAST parser;
 	
-	EXPOSE_SCRIPT_VARIABLE(Other, a, int);
+	EXPOSE_SCRIPT_MEMBER(Other, a, int);
 	
-    EXPOSE_SCRIPT_VARIABLE(Test, a, int);
-    EXPOSE_SCRIPT_VARIABLE(Test, b, int);
-    EXPOSE_SCRIPT_VARIABLE(Test, c, int);
-    EXPOSE_SCRIPT_VARIABLE(Test, d, int);
-    EXPOSE_SCRIPT_VARIABLE(Test, o, Other);
+    EXPOSE_SCRIPT_MEMBER(Test, a, int);
+    EXPOSE_SCRIPT_MEMBER(Test, b, int);
+    EXPOSE_SCRIPT_MEMBER(Test, c, int);
+    EXPOSE_SCRIPT_MEMBER(Test, d, int);
+    EXPOSE_SCRIPT_MEMBER(Test, o, Other);
     
     // Tokens for lexer
     lexer.keywords.push_back("if");
     lexer.keywords.push_back("return");
     lexer.keywords.push_back("else");
     lexer.keywords.push_back("func");
-    
+	
+	// Order does matter for some of these
+	lexer.operators.push_back("==");
+	lexer.operators.push_back("!=");
     lexer.operators.push_back("=");
+	
     lexer.operators.push_back("+");
     lexer.operators.push_back("-");
     lexer.operators.push_back("*");
     lexer.operators.push_back("/");
-    lexer.operators.push_back("%");
+	
+	lexer.operators.push_back("<=");
+	lexer.operators.push_back(">=");
+	lexer.operators.push_back("<");
+	lexer.operators.push_back(">");
     
     // Read the code
     std::ifstream in_stream = std::ifstream("./sample.ss");
@@ -89,9 +97,9 @@ int main(int argc, const char * argv[]) {
 
     vm.executeCode(nodes);
 	
-	vm.callFunction("test", 28, 12);
+	//vm.callFunction("test", 28, 12);
 	
-//	std::cout << "ga: " <<  *vm.getScriptValue<int>("ga") << std::endl;
+	std::cout << "s: " <<  *vm.getScriptValue<std::string>("s") << std::endl;
 //	std::cout << "gb: " <<  *vm.getScriptValue<int>("gb") << std::endl;
 //	std::cout << "c: " <<  *vm.getScriptValue<float>("c") << std::endl;
 //	std::cout << "d: " <<  *vm.getScriptValue<int>("d") << std::endl;

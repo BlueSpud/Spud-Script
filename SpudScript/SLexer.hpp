@@ -26,7 +26,8 @@ enum STokenType {
     STokenTypeCloseParen,
     STokenTypeOpenBrack,
     STokenTypeCloseBrack,
-    STokenTypeSemi
+    STokenTypeSemi,
+	STokenTypeString
     
 };
 
@@ -41,7 +42,8 @@ static std::string STokenNames[] = {
     "close paren",
     "open brack",
     "close brack",
-    "semi"
+    "semi",
+	"string"
     
 };
 

@@ -152,55 +152,9 @@ bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& cur
 				current_block = (SBlock*)current_block->owner;
 			else {
 				
-				// Check if this block belonged to the current if
-				if (current_block->owner == current_if) {
-					
-					// Check for an else token
-					if (i + 1 < tokens.size() && tokens[i + 1].type == STokenTypeKeyword && !tokens[i + 1].string.compare("else")) {
-						
-						// Increment by 2 so we can check the next token
-						i = i + 2;
-						
-						SBlock* old_block = current_block;
-						parseStartBlock(tokens, i, current_block);
-						
-						if (!current_if->else_node) {
-							
-							if (old_block != current_block) {
-							
-								// REMOVE THE NEW BLOCK FROM THE CURRENT ONE
-								old_block->nodes.resize(old_block->nodes.size() - 1);
-							
-								// Started a block as else, keep that
-								current_if->else_node = current_block;
-								current_block->owner = current_if;
-							
-							} else {
-							
-								SASTIfStatement* old_if = current_if;
-								SASTIfStatement* new_if = parseIfStatement(tokens, i, current_block, current_if);
-							
-								if (new_if) {
-								
-									// If parse was successful, keep if
-									new_if->parent_block = old_if->parent_block;
-									old_if->else_node = current_if;
-								
-								} else throw std::runtime_error("Dangling else");
-							
-							}
-							
-						} else throw std::runtime_error("Already had else");
-						
-					} else {
-						
-						// This will reset, if block is null, will go back to global, if parent if is null, will exit if chain
-						current_block = current_if->parent_block;
-						current_if = current_if->parent_if;
-						
-					}
-					
-				} else current_block = nullptr;
+				// Check if we are ending an if
+				if (!endIf(tokens, i, current_block, current_if))
+					current_block = nullptr;
 				
 			}
 			
@@ -212,32 +166,176 @@ bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& cur
 
 }
 
+bool SAST::endIf(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_if) {
+
+	// Check if this block belonged to the current if
+	if (current_block->owner == current_if) {
+		
+		// Check for an else token
+		if (i + 1 < tokens.size() && tokens[i + 1].type == STokenTypeKeyword && !tokens[i + 1].string.compare("else")) {
+			
+			// Increment by 2 so we can check the next token
+			i = i + 2;
+			
+			SBlock* old_block = current_block;
+			parseStartBlock(tokens, i, current_block);
+			
+			if (!current_if->else_node) {
+				
+				if (old_block != current_block) {
+					
+					// REMOVE THE NEW BLOCK FROM THE CURRENT ONE
+					old_block->nodes.resize(old_block->nodes.size() - 1);
+					
+					// Started a block as else, keep that
+					current_if->else_node = current_block;
+					current_block->owner = current_if;
+					
+				} else {
+					
+					SASTIfStatement* old_if = current_if;
+					SASTIfStatement* new_if = parseIfStatement(tokens, i, current_block, current_if);
+					
+					if (new_if) {
+						
+						// If parse was successful, keep if
+						new_if->parent_block = old_if->parent_block;
+						old_if->else_node = current_if;
+						
+					} else throw std::runtime_error("Dangling else");
+					
+				}
+				
+			} else throw std::runtime_error("Already had else");
+			
+		} else {
+			
+			// This will reset, if block is null, will go back to global, if parent if is null, will exit if chain
+			current_block = current_if->parent_block;
+			current_if = current_if->parent_if;
+			
+		}
+		
+		return true;
+		
+	}
+
+	return false;
+
+}
+
 SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 	
 	SASTExpression* expression_node = new SASTExpression();
 	expression_node->node_type = SASTTypeExpression;
 	bool last_operator = true;
+	bool ended = false;
 	
-	while (i < tokens.size()) {
+	while (i < tokens.size() && !ended) {
 		
-		if ((tokens[i].type == STokenTypeNumber || tokens[i].type == STokenTypeIdentifier) && last_operator) {
+		if (last_operator) {
 			
-			expression_node->tokens.push_back(tokens[i]);
-			i++;
-			last_operator = false;
+			switch (tokens[i].type) {
+					
+				case STokenTypeNumber: {
+					
+					// Use long for non-decimals and double for decimals
+					if (tokens[i].string.find('.') != std::string::npos) {
+						
+						// Double
+						SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(atof(tokens[i].string.c_str()));
+						expression_node->nodes.push_back(literal);
+						
+					} else {
+					
+						// Long
+						SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(atol(tokens[i].string.c_str()));
+						expression_node->nodes.push_back(literal);
+					
+					}
+					
+					// Found a token we can use, increment
+					last_operator = false;
+					i++;
+					
+				} break;
+					
+				case STokenTypeIdentifier: {
+					
+					// We dont resolve the variable now so we just save the name
+					SExpressionNodeVariable* var_node = new SExpressionNodeVariable(tokens[i].string);
+					expression_node->nodes.push_back(var_node);
+					
+					// Found a token we can use, increment
+					last_operator = false;
+					i++;
+					
+					
+				} break;
+					
+				case STokenTypeString: {
+					
+					// String literal
+					SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string);
+					expression_node->nodes.push_back(literal);
+					
+					// Found a token we can use, increment
+					last_operator = false;
+					i++;
+					
+				} break;
+					
+				case STokenTypeOpenParen: {
+					
+					// Have a go at parsing an expression, starting from the next token
+					i++;
+					SASTExpression* sub_expression = parseExpression(tokens, i);
+					
+					// Now we check if this token is a close paren
+					if (tokens[i].type == STokenTypeCloseParen && sub_expression) {
+						
+						// Success!
+						SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(sub_expression);
+						expression_node->nodes.push_back(sub_expression_node);
+						
+						// Found a token we can use, increment
+						last_operator = false;
+						i++;
+						
+					} else {
+						
+						throw std::runtime_error(") Expected");
+						
+					}
+					
+				} break;
+					
+				default:
+					ended = true;
+					break;
+			}
+			
 			
 		} else if (tokens[i].type == STokenTypeOperator && tokens[i].string.compare("=") && !last_operator) {
 			
-			expression_node->tokens.push_back(tokens[i]); i++; last_operator = true;
+			// Parse an operator
+			SExpressionNodeOperator* operator_node = new SExpressionNodeOperator(tokens[i].string);
+			expression_node->nodes.push_back(operator_node);
+			
+			// Was an operator, save that an icrement
+			last_operator = true;
+			i++;
 		
 		} else break;
 	
 	}
 	
 	// Check if the parse was successful
-	if (expression_node->tokens.size())
+	if (expression_node->nodes.size()) {
+		
 		return expression_node;
-	else {
+		
+	} else {
 		
 		delete expression_node;
 		return nullptr;

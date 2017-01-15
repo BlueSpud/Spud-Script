@@ -10,7 +10,7 @@
 #define SAST_hpp
 
 #include "SLexer.hpp"
-#include "SASTNodes.h"
+#include "SExpression.h"
 
 class SAST {
     
@@ -25,6 +25,7 @@ class SAST {
         bool parseSemi(PARSE_ARGS);
 		bool parseStartBlock(PARSE_ARGS, SBlock*& current_block);
         bool parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block, SASTIfStatement*& current_if);
+		bool endIf(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_if);
 		bool parseAssignment(PARSE_ARGS, std::vector<SASTNode*>* node_place);
 	
 		SASTExpression* parseExpression(PARSE_ARGS);

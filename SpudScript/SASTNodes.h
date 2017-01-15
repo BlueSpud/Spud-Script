@@ -10,6 +10,7 @@
 #define SASTNodes_h
 
 #include "STypes.hpp"
+#include "SLexer.hpp"
 
 enum SASTNodeType {
     
@@ -35,12 +36,9 @@ static std::string node_names[] =  {
 
 struct SASTNode { SASTNodeType node_type; };
 
-struct SASTExpression : public SASTNode {
-	
-	std::vector<SToken> tokens;
-	std::string destination_type = "int";
-	
-};
+// Forward declaration of an expression
+struct SASTExpression;
+
 struct SASTDeclaration : public SASTNode { SToken type, identifier; };
 
 struct SASTAssignment : public SASTNode {

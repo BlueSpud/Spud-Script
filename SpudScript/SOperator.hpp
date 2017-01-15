@@ -37,6 +37,9 @@ class SOperatorRegistry {
 		template <class from, class to>
 		void* standardCast(SCAST_ARGS);
 	
+		template <class from>
+		void* toString(SVariable* var);
+	
 	private:
 	
 		std::map<std::string, operator_func> operator_funcs;
@@ -56,6 +59,9 @@ class SOperatorRegistry {
 	
 		SOPERATOR(oBool)
 		SCAST(cBool)
+	
+		SOPERATOR(oString)
+		SCAST(cString)
 	
 };
 
@@ -98,6 +104,60 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 		
 	}
 	
+	if (!o.compare("==")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a == (first_c)b;
+		
+		return out;
+		
+	}
+	
+	if (!o.compare("!=")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a != (first_c)b;
+		
+		return out;
+		
+	}
+	
+	if (!o.compare("<")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a < (first_c)b;
+		
+		return out;
+		
+	}
+	
+	if (!o.compare(">")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a > (first_c)b;
+		
+		return out;
+		
+	}
+	
+	if (!o.compare("<=")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a <= (first_c)b;
+		
+		return out;
+		
+	}
+	
+	if (!o.compare(">=")) {
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a >= (first_c)b;
+		
+		return out;
+		
+	}
+	
 	return nullptr;
 	
 }
@@ -109,6 +169,18 @@ void* SOperatorRegistry::standardCast(SCAST_ARGS) {
 	*f = (to)*(from*)var->value;
 	return f;
 	
+}
+
+template <class from>
+void* SOperatorRegistry::toString(SVariable* var) {
+	
+	std::string string = std::to_string(*(from*)var->value);
+	
+	void* value = malloc(sizeof(string));
+	memcpy(value, &string, sizeof(string));
+	
+	return value;
+
 }
 
 #endif /* SOperator_hpp */

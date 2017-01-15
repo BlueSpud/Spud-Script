@@ -90,7 +90,7 @@ class STypeRegistry {
 };
 
 #define EXPOSE_SCRIPT_TYPE(c) bool class_reg_##c = STypeRegistry::instance()->registerCPPClass<c>(#c);
-#define EXPOSE_SCRIPT_VARIABLE(c, n, t) STypeRegistry::instance()->variable_lookups[#c][#n].byte_offset = offsetof(c, n); STypeRegistry::instance()->variable_lookups[#c][#n].type = #t;
+#define EXPOSE_SCRIPT_MEMBER(c, n, t) STypeRegistry::instance()->variable_lookups[#c][#n].byte_offset = offsetof(c, n); STypeRegistry::instance()->variable_lookups[#c][#n].type = #t;
 
 template <class T>
 bool STypeRegistry::registerCPPClass(const char* name) {

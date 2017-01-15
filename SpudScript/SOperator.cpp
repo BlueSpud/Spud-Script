@@ -21,12 +21,14 @@ SOperatorRegistry* SOperatorRegistry::instance() {
 		instance->registerOperator(oFloat, "float");
 		instance->registerOperator(oDouble, "double");
 		instance->registerOperator(oLong, "long");
+		instance->registerOperator(oString, "string");
 		
 		// Register default casts
 		instance->registerCast(cInt, "int");
 		instance->registerCast(cFloat, "float");
 		instance->registerCast(cDouble, "double");
 		instance->registerCast(cLong, "long");
+		instance->registerCast(cString, "string");
 		
 	}
 	
@@ -63,7 +65,7 @@ void* SOperatorRegistry::performCast(SCAST_ARGS) {
 		
 	}
 	
-	throw std::runtime_error("Type cannot be cast: " + var->type);
+	throw std::runtime_error(var->type + " cannot be cast to " + type);
 	
 	return nullptr;
 	
@@ -82,7 +84,7 @@ void* SOperatorRegistry::performOperation(SOPERATOR_ARGS) {
 	
 	}
 	
-	throw std::runtime_error("Undefined operation\n");
+	throw std::runtime_error("Undefined operation " + first->type + " " + o + " " + second->type);
 	
 	return nullptr;
 	
@@ -218,6 +220,32 @@ void* SOperatorRegistry::oBool(SOPERATOR_ARGS) {
 	
 }
 
+void* SOperatorRegistry::oString(SOPERATOR_ARGS) {
+	
+	// Strings are a bit special, what we have probably isnt guranteed to be a string.
+	// However, most things can be made into a string so we can try to cast it and then try the operator
+	void* casted = SOperatorRegistry::instance()->performCast(second, first->type);
+	
+	if (casted) {
+		
+		// We can only really do concatenation
+		if (!o.compare("+")) {
+			
+			std::string result = *(std::string*)first->value + *(std::string*)casted;
+			
+			void* to_return = malloc(sizeof(result));
+			memcpy(to_return, &result, sizeof(result));
+			
+			return to_return;
+			
+		}
+		
+	}
+	
+	return nullptr;
+	
+}
+
 void* SOperatorRegistry::cInt(SCAST_ARGS) {
 	
 	if (!type.compare("int"))
@@ -237,6 +265,9 @@ void* SOperatorRegistry::cInt(SCAST_ARGS) {
 	
 	if (!type.compare("bool"))
 		return instance()->standardCast<int, bool>(var, type);
+	
+	if (!type.compare("string"))
+		return instance()->toString<int>(var);
 	
 	return nullptr;
 	
@@ -262,6 +293,9 @@ void* SOperatorRegistry::cFloat(SCAST_ARGS) {
 	if (!type.compare("bool"))
 		return instance()->standardCast<float, bool>(var, type);
 	
+	if (!type.compare("string"))
+		return instance()->toString<float>(var);
+	
 	return nullptr;
 	
 }
@@ -285,6 +319,9 @@ void* SOperatorRegistry::cDouble(SCAST_ARGS) {
 	
 	if (!type.compare("bool"))
 		return instance()->standardCast<double, bool>(var, type);
+	
+	if (!type.compare("string"))
+		return instance()->toString<double>(var);
 	
 	return nullptr;
 	
@@ -310,6 +347,9 @@ void* SOperatorRegistry::cLong(SCAST_ARGS) {
 	if (!type.compare("bool"))
 		return instance()->standardCast<long, bool>(var, type);
 	
+	if (!type.compare("string"))
+		return instance()->toString<long>(var);
+	
 	return nullptr;
 	
 }
@@ -334,6 +374,19 @@ void* SOperatorRegistry::cBool(SCAST_ARGS) {
 	if (!type.compare("bool"))
 		return instance()->standardCast<bool, bool>(var, type);
 	
+	if (!type.compare("string"))
+		return instance()->toString<bool>(var);
+	
 	return nullptr;
 	
 }
+
+void* SOperatorRegistry::cString(SCAST_ARGS) {
+	
+	if (!type.compare("string"))
+		return instance()->standardCast<std::string, std::string>(var, type);
+	
+	return nullptr;
+	
+}
+

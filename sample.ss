@@ -1,5 +1,5 @@
 int ga = 0;
-int gb = 0;
+int gb = 2 * (2 + 5);
 
 func test(int a, int c) {
 
@@ -12,8 +12,32 @@ func test(int a, int c) {
 		prints(gb);
 		prints(ga + gb);
 
-	}
+	} else if (ga) {
+
+	} else { prints(2); }
 
 }
 
-test(0, 0);
+
+prints(ga);
+prints(gb);
+
+if (ga == gb) {
+
+	prints(1);
+
+} else {
+
+	prints(2);
+
+}
+
+string s;
+
+func poop(string n) {
+
+	s = s + n;
+
+}
+
+poop(123 + 2245);
