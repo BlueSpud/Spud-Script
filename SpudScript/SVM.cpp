@@ -99,7 +99,7 @@ void* SVM::evaluateNode(SASTNode* node) {
 				
 				// COPY the result
                 SVariable* variable = (SVariable*)evaluateNode(assignment->declaration);
-				memcpy(variable->value, expression_result, STypeRegistry::instance()->getTypeSize(variable->type));
+				STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
 				free(expression_result);
 				
             } else {
@@ -111,7 +111,7 @@ void* SVM::evaluateNode(SASTNode* node) {
 					void* expression_result = evaluateNode(assignment->expression);
 					
 					// COPY the result
-					memcpy(variable->value, expression_result, STypeRegistry::instance()->getTypeSize(variable->type));
+					STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
 					free(expression_result);
 					
                 } else {
@@ -181,9 +181,9 @@ void* SVM::evaluateNode(SASTNode* node) {
 SVariable SVM::declareVariable(std::string& type) {
 
     SVariable to_declare;
-
+	
     // If we have a type for this, declare it
-    if (STypeRegistry::instance()->factories.count(type))
+	if (STypeRegistry::instance()->factories.count(type))
         to_declare.value = STypeRegistry::instance()->factories[type]->createObject();
     else throw std::runtime_error("Unknown type");
     
@@ -279,7 +279,7 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 					literal.type = literal_node->literal_type;
 				
 					literal.value = malloc(literal_node->size);
-					memcpy(literal.value, literal_node->value, literal_node->size);
+					STypeRegistry::instance()->performCopy(literal.value, literal_node->value, literal_node->literal_type);
     
 				} break;
 				
@@ -297,7 +297,7 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 						size_t size = STypeRegistry::instance()->getTypeSize(resolved_var->type);
 						var.type = resolved_var->type;
 						var.value = malloc(size);
-						memcpy(var.value, resolved_var->value, size);
+						STypeRegistry::instance()->performCopy(var.value, resolved_var->value, resolved_var->type);
 					
 					} else {
 						
@@ -412,7 +412,10 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	// Do a cast if we need to
 	if (result.type.compare(expression->destination_type)) {
 	
-		result.value = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
+		void* casted = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
+		free(result.value);
+		result.value = casted;
+		
 		result.type = expression->destination_type;
 		
 	}
@@ -440,7 +443,8 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 				
 				call->expressions[i]->destination_type = def->args[i]->type.string;
 				void* expression_result = evaluateNode(call->expressions[i]);
-				memcpy(block->variables[def->args[i]->identifier.string].value, expression_result, STypeRegistry::instance()->getTypeSize(def->args[i]->type.string));
+				
+				STypeRegistry::instance()->performCopy(block->variables[def->args[i]->identifier.string].value, expression_result, def->args[i]->type.string);
 				free(expression_result);
 				
 			}

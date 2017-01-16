@@ -37,8 +37,25 @@ class SClassFactory : public SClassFactoryBase {
 		SClassFactory(size_t _size) { size = _size; }
         ~SClassFactory();
     
-		virtual void* createObject() { return new T(); }
+		virtual void* createObject() { return malloc(size); }
 
+};
+
+class SStringFactory : public SClassFactoryBase {
+
+	virtual void* createObject() {
+		
+		// First we allocate space for a string and a pointer
+		char* buffer = (char*)malloc(sizeof(char) * 2);
+		sprintf(buffer, "");
+		
+		char** ptr = (char**)malloc(sizeof(char**));
+		ptr[0] = buffer;
+		
+		return ptr;
+		
+	}
+	
 };
 
 struct SVariableLocation {
@@ -73,13 +90,12 @@ class STypeRegistry {
         static STypeRegistry* instance();
     
         SVariable getMemeber(SVariable* variable, std::string name);
-		size_t getTypeSize(std::string type);
+		size_t getTypeSize(const std::string& type);
 	
 		template <class T>
 		bool registerCPPClass(const char* name);
 	
-		template <class T>
-		std::string& resolveType(T t);
+		void performCopy(void*& dest, void* from, const std::string& type);
 	
         std::map<std::string, SClassFactoryBase*> factories;
         std::map<std::string, std::map<std::string, SVariableLocation>> variable_lookups;
@@ -101,14 +117,6 @@ bool STypeRegistry::registerCPPClass(const char* name) {
 	instance()->cpp_class_names[typeid(T).name()] = name;
 	
 	return true;
-	
-}
-
-template <class T>
-std::string& STypeRegistry::resolveType(T t) {
-	
-	
-	
 	
 }
 

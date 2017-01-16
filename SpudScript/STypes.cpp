@@ -19,16 +19,24 @@ STypeRegistry* STypeRegistry::instance() {
 
     static STypeRegistry* instance = NULL;
     
-    if (instance == NULL)
+	if (instance == NULL) {
+		
         instance = new STypeRegistry();
-    
+		
+		// We do a special registration of strings, use char*
+		instance->factories["string"] = new SStringFactory();
+		instance->registered_types.push_back("string");
+		instance->cpp_class_names[typeid(char*).name()] = "string";
+		
+	}
+	
     return instance;
 
 }
 
-size_t STypeRegistry::getTypeSize(std::string type) {
+size_t STypeRegistry::getTypeSize(const std::string& type) {
 	
-	// Check if it is a custom data type
+	// Check if it is a normal data type
 	if (factories.count(type))
 		return factories[type]->size;
 	else return 4;
@@ -52,6 +60,33 @@ SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
 
 }
 
-// Expose this while being in the std namespace
-using namespace std;
-EXPOSE_SCRIPT_TYPE(string);
+void STypeRegistry::performCopy(void*& dest, void* from, const std::string& type) {
+	
+	// Strings need to be deep copied
+	if (!type.compare("string")) {
+		
+		// Figure out how big we need to allocate
+		char** from_pointer = (char**)from;
+		size_t length = strlen(from_pointer[0]);
+		
+		// Create a new block for the contents and copy it in
+		char* buffer = (char*)malloc(sizeof(char) * (length + 1));
+		memcpy(buffer, from_pointer[0], sizeof(char) * (length + 1));
+		
+		// Make the destinaiton pointer
+		char** ptr = (char**)malloc(sizeof(char**));
+		ptr[0] = buffer;
+		
+		memcpy(dest, ptr, sizeof(char**));
+		free(ptr);
+		
+		return;
+		
+	}
+	
+	// Do a regular copy
+	size_t size = instance()->getTypeSize(type);
+	dest = malloc(size);
+	memcpy(dest, from, size);
+	
+}

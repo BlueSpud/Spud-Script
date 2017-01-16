@@ -86,8 +86,7 @@ void* SVM::callFunction(std::string name, params... p){
 			
 			// Check type matching TEMP, not done
 			block->variables[func->args[i]->identifier.string] = declareVariable(func->args[i]->type.string);
-			
-			memcpy(block->variables[func->args[i]->identifier.string].value, args[i].value, STypeRegistry::instance()->getTypeSize(func->args[i]->type.string));
+			STypeRegistry::instance()->performCopy(block->variables[func->args[i]->identifier.string].value, args[i].value, func->args[i]->type.string);
 			
 		}
 		

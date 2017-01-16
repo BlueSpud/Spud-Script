@@ -176,10 +176,15 @@ void* SOperatorRegistry::toString(SVariable* var) {
 	
 	std::string string = std::to_string(*(from*)var->value);
 	
-	void* value = malloc(sizeof(string));
-	memcpy(value, &string, sizeof(string));
+	// Create a new string buffer
+	size_t size = sizeof(char) * (string.length() + 1);
+	char* buffer = (char*)malloc(size);
+	sprintf(buffer, "%s", string.c_str());
 	
-	return value;
+	char** ptr = (char**)malloc(sizeof(char**));
+	ptr[0] = buffer;
+	
+	return ptr;
 
 }
 

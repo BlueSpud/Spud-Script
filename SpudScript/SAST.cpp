@@ -275,8 +275,8 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					
 				case STokenTypeString: {
 					
-					// String literal
-					SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string);
+					// String literal, needs to be told it is a string
+					SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), "string");
 					expression_node->nodes.push_back(literal);
 					
 					// Found a token we can use, increment

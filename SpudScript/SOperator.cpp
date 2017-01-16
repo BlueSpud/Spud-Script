@@ -54,8 +54,8 @@ bool SOperatorRegistry::registerCast(cast_func func, std::string type) {
 
 void* SOperatorRegistry::performCast(SCAST_ARGS) {
 	
-	// Check if we have a cast for this
-	if (cast_funcs.count(var->type)) {
+	// Check if we have a cast for this and we're not casting it to the same thing
+	if (var->type.compare(type) && cast_funcs.count(var->type)) {
 		
 		// Return the casted value if success
 		void* cast_result = cast_funcs[var->type](var, type);
@@ -231,14 +231,22 @@ void* SOperatorRegistry::oString(SOPERATOR_ARGS) {
 		// We can only really do concatenation
 		if (!o.compare("+")) {
 			
-			std::string result = *(std::string*)first->value + *(std::string*)casted;
+			std::string result = std::string(((char**)first->value)[0]) + std::string(((char**)casted)[0]);
+
+			// Create a new string buffer
+			size_t size = sizeof(char) * (result.length() + 1);
+			char* buffer = (char*)malloc(size);
+			sprintf(buffer, "%s", result.c_str());
 			
-			void* to_return = malloc(sizeof(result));
-			memcpy(to_return, &result, sizeof(result));
+			char** ptr = (char**)malloc(sizeof(char**));
+			ptr[0] = buffer;
 			
-			return to_return;
+			return ptr;
 			
 		}
+		
+		// Free casted
+		free(casted);
 		
 	}
 	
@@ -247,9 +255,6 @@ void* SOperatorRegistry::oString(SOPERATOR_ARGS) {
 }
 
 void* SOperatorRegistry::cInt(SCAST_ARGS) {
-	
-	if (!type.compare("int"))
-		return instance()->standardCast<int, int>(var, type);
 	
 	if (!type.compare("float"))
 		return instance()->standardCast<int, float>(var, type);
@@ -278,9 +283,6 @@ void* SOperatorRegistry::cFloat(SCAST_ARGS) {
 	if (!type.compare("int"))
 		return instance()->standardCast<float, int>(var, type);
 	
-	if (!type.compare("float"))
-		return instance()->standardCast<float, float>(var, type);
-	
 	if (!type.compare("double"))
 		return instance()->standardCast<float, double>(var, type);
 	
@@ -308,9 +310,6 @@ void* SOperatorRegistry::cDouble(SCAST_ARGS) {
 	if (!type.compare("float"))
 		return instance()->standardCast<double, float>(var, type);
 	
-	if (!type.compare("double"))
-		return instance()->standardCast<double, double>(var, type);
-	
 	if (!type.compare("long"))
 		return instance()->standardCast<double, long>(var, type);
 	
@@ -337,9 +336,6 @@ void* SOperatorRegistry::cLong(SCAST_ARGS) {
 	
 	if (!type.compare("double"))
 		return instance()->standardCast<long, double>(var, type);
-	
-	if (!type.compare("long"))
-		return instance()->standardCast<long, long>(var, type);
 	
 	if (!type.compare("char"))
 		return instance()->standardCast<long, char>(var, type);
@@ -371,9 +367,6 @@ void* SOperatorRegistry::cBool(SCAST_ARGS) {
 	if (!type.compare("char"))
 		return instance()->standardCast<bool, char>(var, type);
 	
-	if (!type.compare("bool"))
-		return instance()->standardCast<bool, bool>(var, type);
-	
 	if (!type.compare("string"))
 		return instance()->toString<bool>(var);
 	
@@ -383,8 +376,7 @@ void* SOperatorRegistry::cBool(SCAST_ARGS) {
 
 void* SOperatorRegistry::cString(SCAST_ARGS) {
 	
-	if (!type.compare("string"))
-		return instance()->standardCast<std::string, std::string>(var, type);
+	// AS of right now we dont a string to be cast to something else
 	
 	return nullptr;
 	

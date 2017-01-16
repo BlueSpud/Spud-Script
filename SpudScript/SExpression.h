@@ -36,19 +36,35 @@ class SExpressionNodeLiteral : public SExpressionNode {
 		SExpressionNodeLiteral(T _value) {
 		
 			type = SExpressionNodeTypeLiteral;
-			
-			// Keep the variable
 			size = sizeof(T);
-			value = malloc(size);
-			memcpy(value, &_value, size);
 			
 			// Get the script type based on the C++ class
 			literal_type = STypeRegistry::instance()->cpp_class_names[typeid(T).name()];
+			
+			// Keep the variable
+			value = malloc(size);
+			STypeRegistry::instance()->performCopy(value, &_value, literal_type);
 		
 		}
 	
-		std::string literal_type;
+		template <class T>
+		SExpressionNodeLiteral(T _value, const std::string& _literal_type) {
+		
+			type = SExpressionNodeTypeLiteral;
+			size = sizeof(T);
+		
+			// Get the script type based on the C++ class
+			literal_type = _literal_type;
+		
+			// Keep the variable
+			value = malloc(size);
+			STypeRegistry::instance()->performCopy(value, &_value, literal_type);
+		
+		}
+	
 		size_t size;
+	
+		std::string literal_type;
 		void* value;
 };
 

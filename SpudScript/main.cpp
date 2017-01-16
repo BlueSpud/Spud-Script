@@ -32,7 +32,11 @@ class Test {
 
 };
 
-void prints(int a) { std::cout << a << std::endl; }
+void prints(char* a) {
+	
+	std::cout << a << std::endl;
+
+}
 
 void cppFunction(float a, float b, float c) {
 	
@@ -43,7 +47,7 @@ void cppFunction(float a, float b, float c) {
 }
 
 EXPOSE_FUNC(vm, cppFunction, void, float float float)
-EXPOSE_FUNC(vm, prints, void, int)
+EXPOSE_FUNC(vm, prints, void, string)
 
 EXPOSE_SCRIPT_TYPE(Other)
 
@@ -99,14 +103,8 @@ int main(int argc, const char * argv[]) {
     std::vector<SASTNode*> nodes = parser.parseTokens(tokens);
 
     vm.executeCode(nodes);
-	
-	//vm.callFunction("test", 28, 12);
-	
-//	std::cout << "s: " <<  *vm.getScriptValue<std::string>("s") << std::endl;
-//	std::cout << "gb: " <<  *vm.getScriptValue<int>("gb") << std::endl;
-//	std::cout << "c: " <<  *vm.getScriptValue<float>("c") << std::endl;
-//	std::cout << "d: " <<  *vm.getScriptValue<int>("d") << std::endl;
-//	std::cout << "t.a: " << vm.getScriptValue<Test>("t")->a << std::endl;
-//	std::cout << "f: " <<  *vm.getScriptValue<double>("f") << std::endl;
+
+	std::cout << "w: " << *vm.getScriptValue<char*>("w") << std::endl;
+	std::cout << "s: " << *vm.getScriptValue<char*>("s") << std::endl;
 	
 }
