@@ -86,7 +86,6 @@ void STypeRegistry::performCopy(void*& dest, void* from, const std::string& type
 	
 	// Do a regular copy
 	size_t size = instance()->getTypeSize(type);
-	dest = malloc(size);
 	memcpy(dest, from, size);
 	
 }

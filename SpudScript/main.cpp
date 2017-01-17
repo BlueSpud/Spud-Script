@@ -72,10 +72,12 @@ int main(int argc, const char * argv[]) {
     lexer.keywords.push_back("return");
     lexer.keywords.push_back("else");
     lexer.keywords.push_back("func");
+	lexer.keywords.push_back("while");
 	
 	// Order does matter for some of these
 	lexer.operators.push_back("==");
 	lexer.operators.push_back("!=");
+	lexer.operators.push_back("!");
     lexer.operators.push_back("=");
 	
 	lexer.operators.push_back("&&");
@@ -104,7 +106,7 @@ int main(int argc, const char * argv[]) {
 
     vm.executeCode(nodes);
 
-	std::cout << "w: " << *vm.getScriptValue<char*>("w") << std::endl;
-	std::cout << "s: " << *vm.getScriptValue<char*>("s") << std::endl;
+//	std::cout << "w: " << *vm.getScriptValue<char*>("w") << std::endl;
+//	std::cout << "s: " << *vm.getScriptValue<char*>("s") << std::endl;
 	
 }

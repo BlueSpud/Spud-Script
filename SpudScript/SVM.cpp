@@ -27,16 +27,23 @@ void* SVM::evaluateNode(SASTNode* node) {
             
         }  break;
 			
+		case SASTTypeLoop: {
+			
+			// Get the numbers
+			SASTLoop* loop = (SASTLoop*)node;
+			evaluateLoop(loop);
+			
+		}  break;
+			
 		case SASTTypeIfExpression: {
 			
 			SASTIfStatement* if_expression = (SASTIfStatement*)node;
 			
 			// Evaluate the expression, always returns a bool
-			void* expression_result = evaluateNode(if_expression->expression);
-			bool result = *(bool*)expression_result;
+			bool* expression_result = (bool*)evaluateNode(if_expression->expression);
 			
 			// Check if the result was true, and if it wasnt execute the else (if it exists)
-			if (result)
+			if (*expression_result)
 				evaluateNode(if_expression->block);
 			else if (if_expression->else_node)
 				evaluateNode(if_expression->else_node);
@@ -68,7 +75,7 @@ void* SVM::evaluateNode(SASTNode* node) {
             } else {
                 
                 // Make sure that the variable is not already defined
-                SVariable* variable = resolveVarible(declaration->identifier.string);
+                SVariable* variable = resolveVariable(declaration->identifier.string);
                 if (!variable) {
                 
                     // Declare a variable in a scope
@@ -104,7 +111,7 @@ void* SVM::evaluateNode(SASTNode* node) {
 				
             } else {
                 
-                SVariable* variable = resolveVarible(assignment->identifier.string);
+                SVariable* variable = resolveVariable(assignment->identifier.string);
                 if (variable) {
 					
 					assignment->expression->destination_type = variable->type;
@@ -138,7 +145,8 @@ void* SVM::evaluateNode(SASTNode* node) {
             
             SBlock* last_block = current_block;
             current_block = block;
-            
+			current_block->owner = last_block;
+			
             // Go through all the nodes in the block and evaluate them
             for (int i = 0; i < block->nodes.size(); i++)
                 evaluateNode(block->nodes[i]);
@@ -193,7 +201,7 @@ SVariable SVM::declareVariable(std::string& type) {
 
 }
 
-SVariable* SVM::resolveVarible(std::string name) {
+SVariable* SVM::resolveVariable(std::string name) {
     
     // Go through the scopes and try to find the variable
     SBlock* search_block = current_block;
@@ -210,7 +218,7 @@ SVariable* SVM::resolveVarible(std::string name) {
             var = &search_block->variables[var_name];
         
         // Check the next block
-        if (!strcmp(typeid(search_block->owner).name(), typeid(SBlock).name()))
+		if (search_block->owner && search_block->owner->node_type == SASTTypeBlock)
             search_block = (SBlock*)search_block->owner;
         else search_block = nullptr;
         
@@ -286,7 +294,7 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 			case SExpressionNodeTypeVariable: {
 				
 					SExpressionNodeVariable* variable_node = (SExpressionNodeVariable*)expression->nodes[i];
-					SVariable* resolved_var = resolveVarible(variable_node->var_name);
+					SVariable* resolved_var = resolveVariable(variable_node->var_name);
 				
 					if (resolved_var) {
 					
@@ -410,7 +418,7 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	}
 	
 	// Do a cast if we need to
-	if (result.type.compare(expression->destination_type)) {
+	if (result.type.compare(expression->destination_type) && expression->destination_type.length()) {
 	
 		void* casted = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
 		free(result.value);
@@ -487,4 +495,32 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 	}
 
 	return nullptr;
+}
+
+void SVM::evaluateLoop(SASTLoop* loop) {
+	
+	if (loop->loop_type == SASTLoopWhile) {
+		
+		// While loop
+		while (true) {
+			
+			// Evaluate the condition
+			bool* expression_result = (bool*)evaluateExpression(loop->expression).value;
+			
+			if (!*expression_result) {
+				
+				// Cleanup and leave
+				free(expression_result);
+				break;
+				
+			}
+			
+			// Perform the block
+			evaluateNode(loop->block);
+			free(expression_result);
+			
+		}
+		
+	}
+	
 }

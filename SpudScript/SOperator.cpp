@@ -21,6 +21,7 @@ SOperatorRegistry* SOperatorRegistry::instance() {
 		instance->registerOperator(oFloat, "float");
 		instance->registerOperator(oDouble, "double");
 		instance->registerOperator(oLong, "long");
+		instance->registerOperator(oBool, "bool");
 		instance->registerOperator(oString, "string");
 		
 		// Register default casts
@@ -28,6 +29,7 @@ SOperatorRegistry* SOperatorRegistry::instance() {
 		instance->registerCast(cFloat, "float");
 		instance->registerCast(cDouble, "double");
 		instance->registerCast(cLong, "long");
+		instance->registerCast(cBool, "bool");
 		instance->registerCast(cString, "string");
 		
 	}
@@ -111,6 +113,10 @@ void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 	// Int to char
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<int, char>(first, second, o);
+	
+	// Int to bool
+	if (!second->type.compare("bool"))
+		return instance()->standardArithmatic<int, bool>(first, second, o);
 
 	return nullptr;
 	
@@ -138,6 +144,10 @@ void* SOperatorRegistry::oFloat(SOPERATOR_ARGS) {
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<float, char>(first, second, o);
 	
+	// Float to bool
+	if (!second->type.compare("bool"))
+		return instance()->standardArithmatic<float, bool>(first, second, o);
+	
 	return nullptr;
 	
 }
@@ -163,6 +173,10 @@ void* SOperatorRegistry::oDouble(SOPERATOR_ARGS) {
 	// Double to char
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<double, char>(first, second, o);
+	
+	// Double to bool
+	if (!second->type.compare("bool"))
+		return instance()->standardArithmatic<double, bool>(first, second, o);
 	
 	return nullptr;
 	
@@ -190,6 +204,10 @@ void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<long, char>(first, second, o);
 	
+	// Long to bool
+	if (!second->type.compare("bool"))
+		return instance()->standardArithmatic<long, bool>(first, second, o);
+	
 	return nullptr;
 	
 }
@@ -215,6 +233,10 @@ void* SOperatorRegistry::oBool(SOPERATOR_ARGS) {
 	// Bool to char
 	if (!second->type.compare("char"))
 		return instance()->standardArithmatic<bool, char>(first, second, o);
+	
+	// bool to bool
+	if (!second->type.compare("bool"))
+		return instance()->standardArithmatic<bool, bool>(first, second, o);
 	
 	return nullptr;
 	

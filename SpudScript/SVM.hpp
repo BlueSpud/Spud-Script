@@ -21,7 +21,7 @@ class SVM {
     
         void executeCode(std::vector<SASTNode*> nodes);
     
-        SVariable* resolveVarible(std::string name);
+        SVariable* resolveVariable(std::string name);
 	
 		template <class... params>
 		bool bindFunction(void(*func)(params...), std::string name, std::string return_type, std::string signature);
@@ -46,6 +46,7 @@ class SVM {
 	
 		SVariable evaluateExpression(SASTExpression* expression);
 		void* evaluateFuncitonCall(SASTFunctionCall* call);
+		void evaluateLoop(SASTLoop* loop);
 	
         SBlock* current_block;
     
@@ -102,7 +103,7 @@ void* SVM::callFunction(std::string name, params... p){
 template<class T>
 T* SVM::getScriptValue(std::string name) {
 	
-	SVariable* var = resolveVarible(name);
+	SVariable* var = resolveVariable(name);
 	
 	// Check if this is a valid cast
 	if (var) {

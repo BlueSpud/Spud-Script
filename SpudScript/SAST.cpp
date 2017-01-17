@@ -15,6 +15,7 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
     // Store the block of code that we are working on
     SBlock* current_block = nullptr;
 	SASTIfStatement* current_if = nullptr;
+	SASTLoop* current_loop = nullptr;
     
     // Go through every token
     for (int i = 0; i < tokens.size(); i++) {
@@ -28,7 +29,7 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
 			return nodes;
 		
 		// Parse a }, ending a block
-        if (!parseEndBlock(tokens, i, nodes, current_block, current_if))
+        if (!parseEndBlock(tokens, i, nodes, current_block, current_if, current_loop))
             return nodes;
         
         
@@ -57,6 +58,11 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
 		SASTDeclaration* decl_node = parseDeclaration(tokens, i);
 		if (decl_node)
 			node_place->push_back(decl_node);
+		
+		// Parse a while loop
+		SASTLoop* w_loop = parseWhileLoop(tokens, i, current_block, current_loop);
+		if (w_loop)
+			node_place->push_back(w_loop);
 		
         
         // Parse a function definition
@@ -127,7 +133,7 @@ bool SAST::parseStartBlock(PARSE_ARGS, SBlock*& current_block) {
 	
 }
 
-bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block, SASTIfStatement*& current_if) {
+bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& current_block, SASTIfStatement*& current_if, SASTLoop*& current_loop) {
 
 	if (tokens[i].type == STokenTypeCloseBrack) {
 		
@@ -154,7 +160,8 @@ bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& cur
 				
 				// Check if we are ending an if
 				if (!endIf(tokens, i, current_block, current_if))
-					current_block = nullptr;
+					if (!endLoop(current_block, current_loop))
+						current_block = nullptr;
 				
 			}
 			
@@ -224,6 +231,23 @@ bool SAST::endIf(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_i
 
 }
 
+bool SAST::endLoop(SBlock*& current_block, SASTLoop*& current_loop) {
+	
+	if (current_block->owner == current_loop) {
+		
+		// This will reset, if block is null, will go back to global, if parent if is null, will exit if chain
+		current_block = current_loop->parent_block;
+		current_loop = current_loop->parent_loop;
+		
+		return true;
+		
+	}
+	
+	return false;
+	
+}
+
+
 SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 	
 	SASTExpression* expression_node = new SASTExpression();
@@ -233,88 +257,17 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 	
 	while (i < tokens.size() && !ended) {
 		
-		if (last_operator) {
+		if (last_operator && tokens[i].type != STokenTypeOperator) {
 			
-			switch (tokens[i].type) {
-					
-				case STokenTypeNumber: {
-					
-					// Use long for non-decimals and double for decimals
-					if (tokens[i].string.find('.') != std::string::npos) {
-						
-						// Double
-						SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(atof(tokens[i].string.c_str()));
-						expression_node->nodes.push_back(literal);
-						
-					} else {
-					
-						// Long
-						SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(atol(tokens[i].string.c_str()));
-						expression_node->nodes.push_back(literal);
-					
-					}
-					
-					// Found a token we can use, increment
-					last_operator = false;
-					i++;
-					
-				} break;
-					
-				case STokenTypeIdentifier: {
-					
-					// We dont resolve the variable now so we just save the name
-					SExpressionNodeVariable* var_node = new SExpressionNodeVariable(tokens[i].string);
-					expression_node->nodes.push_back(var_node);
-					
-					// Found a token we can use, increment
-					last_operator = false;
-					i++;
-					
-					
-				} break;
-					
-				case STokenTypeString: {
-					
-					// String literal, needs to be told it is a string
-					SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), "string");
-					expression_node->nodes.push_back(literal);
-					
-					// Found a token we can use, increment
-					last_operator = false;
-					i++;
-					
-				} break;
-					
-				case STokenTypeOpenParen: {
-					
-					// Have a go at parsing an expression, starting from the next token
-					i++;
-					SASTExpression* sub_expression = parseExpression(tokens, i);
-					
-					// Now we check if this token is a close paren
-					if (tokens[i].type == STokenTypeCloseParen && sub_expression) {
-						
-						// Success!
-						SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(sub_expression);
-						expression_node->nodes.push_back(sub_expression_node);
-						
-						// Found a token we can use, increment
-						last_operator = false;
-						i++;
-						
-					} else {
-						
-						throw std::runtime_error(") Expected");
-						
-					}
-					
-				} break;
-					
-				default:
-					ended = true;
-					break;
-			}
-			
+			SExpressionNode* new_node = parseExpressionNode(tokens, i);
+			if (new_node) {
+				
+				// Found a token we can use, increment
+				expression_node->nodes.push_back(new_node);
+				last_operator = false;
+				i++;
+				
+			} else break;
 			
 		} else if (tokens[i].type == STokenTypeOperator && tokens[i].string.compare("=") && !last_operator) {
 			
@@ -348,6 +301,90 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 			last_operator = true;
 			i++;
 		
+		} else if (tokens[i].type == STokenTypeOperator && last_operator) {
+			
+			// Check for a negative sign
+			if (!tokens[i].string.compare("-")) {
+			
+				// Go to the number
+				i++;
+
+				if (tokens[i].type == STokenTypeNumber) {
+					
+					// Add in a token with a negative sign added to the number
+					if (tokens[i].string.find('.') != std::string::npos) {
+						
+						// Double
+						SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(-atof(tokens[i].string.c_str()));
+						expression_node->nodes.push_back(literal);
+						
+					} else {
+						
+						// Long
+						SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(-atol(tokens[i].string.c_str()));
+						expression_node->nodes.push_back(literal);
+						
+					}
+				
+				} else if (tokens[i].type == STokenTypeIdentifier) {
+					
+					// In order to respect the type of the variable, we create a sub equations
+					// Make sure to set the expression type to not cast
+					SASTExpression* negate_expression = new SASTExpression();
+					negate_expression->destination_type = "";
+					negate_expression->node_type = SASTTypeExpression;
+
+					negate_expression->nodes.push_back(new SExpressionNodeVariable(tokens[i].string));
+					negate_expression->nodes.push_back(new SExpressionNodeOperator("*"));
+					negate_expression->nodes.push_back(new SExpressionNodeLiteral(-1));
+					
+					expression_node->nodes.push_back(new SExpressionNodeExpression(negate_expression));
+					
+				} else break;
+				
+				// Was an literal, save that an icrement
+				last_operator = false;
+				i++;
+
+			} else if (!tokens[i].string.compare("!")) {
+				
+				// Go to the number
+				i++;
+				
+				// Incrememt by 1 and start parsind an expression node
+				SExpressionNode* new_node = parseExpressionNode(tokens, i);
+				if (new_node) {
+					
+					// There was a node after, so we can put that into an expression
+					SASTExpression* bool_expression = new SASTExpression();
+					bool_expression->node_type = SASTTypeExpression;
+					bool_expression->destination_type = "bool";
+					bool_expression->nodes.push_back(new_node);
+					
+					// Now we create a larger expression to have the 1 - bool
+					SASTExpression* one_minus = new SASTExpression();
+					one_minus->node_type = SASTTypeExpression;
+					one_minus->destination_type = "bool";
+					
+					// Push back 1 - bool_expression
+					one_minus->nodes.push_back(new SExpressionNodeLiteral(1));
+					one_minus->nodes.push_back(new SExpressionNodeOperator("-"));
+					one_minus->nodes.push_back(new SExpressionNodeExpression(bool_expression));
+					
+					// We make destination type int just in case we want to do arithmatic with it
+					one_minus->destination_type = "int";
+					
+					// Add a node for the big expression
+					expression_node->nodes.push_back(new SExpressionNodeExpression(one_minus));
+					
+					// Increment and saved literal
+					last_operator = false;
+					i++;
+					
+				} else break;
+				
+			} else break;
+			
 		} else break;
 	
 	}
@@ -364,6 +401,73 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 		
 	}
 
+}
+
+SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
+	
+	switch (tokens[i].type) {
+			
+		case STokenTypeNumber: {
+			
+			// Use long for non-decimals and double for decimals
+			if (tokens[i].string.find('.') != std::string::npos) {
+				
+				// Double
+				SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(atof(tokens[i].string.c_str()));
+				return literal;
+				
+			} else {
+				
+				// Long
+				SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(atol(tokens[i].string.c_str()));
+				return literal;
+				
+			}
+			
+		} break;
+			
+		case STokenTypeIdentifier: {
+			
+			// We dont resolve the variable now so we just save the name
+			SExpressionNodeVariable* var_node = new SExpressionNodeVariable(tokens[i].string);
+			return var_node;
+			
+		} break;
+			
+		case STokenTypeString: {
+			
+			// String literal, needs to be told it is a string
+			SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), "string");
+			return literal;
+			
+		} break;
+			
+		case STokenTypeOpenParen: {
+			
+			// Have a go at parsing an expression, starting from the next token
+			i++;
+			SASTExpression* sub_expression = parseExpression(tokens, i);
+			
+			// Now we check if this token is a close paren
+			if (tokens[i].type == STokenTypeCloseParen && sub_expression) {
+				
+				// Success!
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(sub_expression);
+				return sub_expression_node;
+				
+			} else {
+				
+				throw std::runtime_error(") Expected");
+				
+			}
+			
+		} break;
+			
+		default:
+			return nullptr;
+			break;
+	}
+	
 }
 
 SASTDeclaration* SAST::parseDeclaration(PARSE_ARGS) {
@@ -542,10 +646,9 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 					if (i < tokens.size() && tokens[i].type == STokenTypeOpenBrack) {
 						
 						// Create a block for the funciton definition
-						func_def->block = new SBlock();
+						func_def->block = current_block = new SBlock();
 						func_def->block->node_type = SASTTypeBlock;
 						func_def->block->owner = func_def;
-						current_block = func_def->block;
 						
 						return func_def;
 						
@@ -592,9 +695,6 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 
 SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_if) {
 	
-	SASTIfStatement* if_statement = new SASTIfStatement();
-	if_statement->node_type = SASTTypeIfExpression;
-	
 	if (tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("if")) {
 		
 		i++;
@@ -617,6 +717,9 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 					if (i < tokens.size() && tokens[i].type == STokenTypeOpenBrack) {
 						
 						// Create a new block and make it the current block
+						SASTIfStatement* if_statement = new SASTIfStatement();
+						if_statement->node_type = SASTTypeIfExpression;
+						
 						if_statement->parent_block = current_block;
 						if_statement->block = current_block = new SBlock();
 						if_statement->block->node_type = SASTTypeBlock;
@@ -636,7 +739,6 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 					} else {
 						
 						// Missing open bracket
-						delete if_statement;
 						throw std::runtime_error("{ Expected");
 						
 					}
@@ -645,7 +747,6 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 				} else {
 					
 					// Missing close paren
-					delete if_statement;
 					throw std::runtime_error(") Expected");
 					
 				}
@@ -653,7 +754,6 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 			} else {
 				
 				// Missing an epxression
-				delete if_statement;
 				throw std::runtime_error("Expected expression");
 				
 			}
@@ -661,7 +761,6 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 		} else {
 			
 			// Missing open paren
-			delete if_statement;
 			throw std::runtime_error("( Expected");
 			
 		}
@@ -670,7 +769,83 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 	}
 	
 	// Failed
-	delete if_statement;
+	return nullptr;
+	
+}
+
+SASTLoop* SAST::parseWhileLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& current_loop) {
+	
+	if (tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("while")) {
+		
+		// We were parsing a while loop
+		i++;
+		
+		// Get the open paren
+		if (i < tokens.size() && tokens[i].type == STokenTypeOpenParen) {
+			
+			i++;
+			
+			// Parse the epxression
+			SASTExpression* expression = parseExpression(tokens, i);
+			if (expression) {
+				
+				// Check that we closed the epxresion
+				if (i < tokens.size() && tokens[i].type == STokenTypeCloseParen) {
+					
+					i++;
+					
+					// Parse block
+					if (i < tokens.size() && tokens[i].type == STokenTypeOpenBrack) {
+						
+						// Create a new while loop
+						SASTLoop* loop = current_loop = new SASTLoop();
+						loop->node_type = SASTTypeLoop;
+						loop->loop_type = SASTLoopWhile;
+						
+						// Create a new block
+						loop->parent_block = current_block;
+						loop->block = current_block = new SBlock();
+						loop->block->node_type = SASTTypeBlock;
+						loop->block->owner = loop;
+						
+						// Will always be a bool for the target type
+						expression->destination_type = "bool";
+						loop->expression = expression;
+						
+						return loop;
+						
+
+					} else {
+						
+						// Missing open bracket
+						throw std::runtime_error("{ Expected");
+						
+					}
+					
+					
+				} else {
+					
+					// Missing close paren
+					throw std::runtime_error(") Expected");
+					
+				}
+				
+			} else {
+				
+				// Missing an epxression
+				throw std::runtime_error("Expected expression");
+				
+			}
+			
+		} else {
+			
+			// Missing open paren
+			throw std::runtime_error("( Expected");
+			
+		}
+		
+	}
+	
 	return nullptr;
 	
 }

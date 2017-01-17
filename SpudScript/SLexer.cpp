@@ -137,53 +137,53 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
             
         }
         
-        // Check for numbers
-        bool found_decimal = false;
-        if (!char_at.compare(".") || (char_at.c_str()[0] >= '0' && char_at.c_str()[0] <= '9')) {
-            
-            int start = i;
-            
-            // Start parsing the number
-            while (i < source.length()) {
-                
-                char_at = source.substr(i, 1);
-                
-                if (!char_at.compare(".")) {
-                    
-                    // If there was already a decimal, create another number
-                    // This should be an error when the tree is made
-                    if (found_decimal == true)
+		// Check for numbers
+		bool found_decimal = false;
+		if (!char_at.compare(".") || (char_at.c_str()[0] >= '0' && char_at.c_str()[0] <= '9')) {
+			
+			int start = i;
+			
+			// Start parsing the number
+			while (i < source.length()) {
+				
+				char_at = source.substr(i, 1);
+				
+				if (!char_at.compare(".")) {
+					
+					// If there was already a decimal, create another number
+					// This should be an error when the tree is made
+					if (found_decimal == true)
 						throw std::runtime_error("Unexpected .");
-						
-                    found_decimal = true;
-                    
-                    
-                } else if (!(char_at.c_str()[0] >= '0' && char_at.c_str()[0] <= '9'))
-                    break;
-                
-                i++;
-                
-            }
-            
-            // Get the token for the number
-            SToken token;
-            token.type = STokenTypeNumber;
-            token.string = source.substr(start, i - start);
-            
-            tokens.push_back(token);
-            i--;
-            continue;
-            
-        }
-        
+					
+					found_decimal = true;
+					
+					
+				} else if (!(char_at.c_str()[0] >= '0' && char_at.c_str()[0] <= '9'))
+					break;
+				
+				i++;
+				
+			}
+			
+			// Get the token for the number
+			SToken token;
+			token.type = STokenTypeNumber;
+			token.string = source.substr(start, i - start);
+			
+			tokens.push_back(token);
+			i--;
+			continue;
+			
+		}
+		
         // If all else failed, we can assume that this was an identifier
         if ((char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') || (char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z')) {
-            
+			
             // Start parsing the identifier
             int start = i;
-            
+			
             while (i < source.length()) {
-                
+				
                 char_at = source.substr(i, 1);
                 
                 // If it not a letter, we're done

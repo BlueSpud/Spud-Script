@@ -1,2 +1,2 @@
-string w = "abcdef";
-string s = w + 1235;
+float a = 5.12345;
+prints(2 - !(-1));

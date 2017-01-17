@@ -20,18 +20,9 @@ enum SASTNodeType {
     SASTTypeFunctionCall,
     SASTTypeBlock,
     SASTTypeFunctionDef,
-	SASTTypeIfExpression
+	SASTTypeIfExpression,
+	SASTTypeLoop
     
-};
-
-static std::string node_names[] =  {
-	"exp",
-	"decl",
-	"ass",
-	"call",
-	"block",
-	"func def",
-	"if"
 };
 
 struct SASTNode { SASTNodeType node_type; };
@@ -83,6 +74,25 @@ struct SASTIfStatement : public SASTNode {
 	SASTNode* else_node;
 	
 	SASTIfStatement* parent_if;
+	
+};
+
+enum SASTLoopType {
+	
+	SASTLoopWhile,
+	SASTLoopFor
+	
+};
+
+struct SASTLoop : public SASTNode {
+	
+	SBlock* block;
+	SBlock* parent_block;
+	
+	SASTExpression* expression;
+	SASTLoop* parent_loop;
+	
+	SASTLoopType loop_type;
 	
 };
 
