@@ -1,2 +1,7 @@
-float a = 5.12345;
-prints(2 - !(-1));
+int i = 12;
+
+for(i = 0; i < 12; i = i + 1) {
+
+	prints(i);
+
+}

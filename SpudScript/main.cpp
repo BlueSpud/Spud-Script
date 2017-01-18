@@ -73,6 +73,7 @@ int main(int argc, const char * argv[]) {
     lexer.keywords.push_back("else");
     lexer.keywords.push_back("func");
 	lexer.keywords.push_back("while");
+	lexer.keywords.push_back("for");
 	
 	// Order does matter for some of these
 	lexer.operators.push_back("==");

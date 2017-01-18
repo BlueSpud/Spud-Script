@@ -79,8 +79,8 @@ struct SASTIfStatement : public SASTNode {
 
 enum SASTLoopType {
 	
-	SASTLoopWhile,
-	SASTLoopFor
+	SASTLoopTypeWhile,
+	SASTLoopTypeFor
 	
 };
 
@@ -93,6 +93,13 @@ struct SASTLoop : public SASTNode {
 	SASTLoop* parent_loop;
 	
 	SASTLoopType loop_type;
+	
+};
+
+struct SASTLoopFor : public SASTLoop {
+	
+	SASTAssignment* initial_assign;
+	SASTAssignment* increment;
 	
 };
 

@@ -499,7 +499,7 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 
 void SVM::evaluateLoop(SASTLoop* loop) {
 	
-	if (loop->loop_type == SASTLoopWhile) {
+	if (loop->loop_type == SASTLoopTypeWhile) {
 		
 		// While loop
 		while (true) {
@@ -517,6 +517,39 @@ void SVM::evaluateLoop(SASTLoop* loop) {
 			
 			// Perform the block
 			evaluateNode(loop->block);
+			free(expression_result);
+			
+		}
+		
+	}
+	
+	if (loop->loop_type == SASTLoopTypeFor) {
+		
+		SASTLoopFor* loop_f = (SASTLoopFor*)loop;
+		
+		// Do initial asignment
+		evaluateNode(loop_f->initial_assign);
+		
+		// While loop
+		while (true) {
+			
+			// Evaluate the condition
+			bool* expression_result = (bool*)evaluateExpression(loop_f->expression).value;
+			
+			if (!*expression_result) {
+				
+				// Cleanup and leave
+				free(expression_result);
+				break;
+				
+			}
+			
+			// Perform the block
+			evaluateNode(loop_f->block);
+			
+			// Perform increment
+			evaluateNode(loop_f->increment);
+			
 			free(expression_result);
 			
 		}

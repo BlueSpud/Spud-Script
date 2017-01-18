@@ -60,9 +60,14 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
 			node_place->push_back(decl_node);
 		
 		// Parse a while loop
-		SASTLoop* w_loop = parseWhileLoop(tokens, i, current_block, current_loop);
-		if (w_loop)
-			node_place->push_back(w_loop);
+		SASTLoop* loop = parseWhileLoop(tokens, i, current_block, current_loop);
+		if (loop)
+			node_place->push_back(loop);
+		
+		// Parse a for loop
+		loop = parseForLoop(tokens, i, current_block, current_loop);
+		if (loop)
+			node_place->push_back(loop);
 		
         
         // Parse a function definition
@@ -800,7 +805,7 @@ SASTLoop* SAST::parseWhileLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& cu
 						// Create a new while loop
 						SASTLoop* loop = current_loop = new SASTLoop();
 						loop->node_type = SASTTypeLoop;
-						loop->loop_type = SASTLoopWhile;
+						loop->loop_type = SASTLoopTypeWhile;
 						
 						// Create a new block
 						loop->parent_block = current_block;
@@ -834,6 +839,127 @@ SASTLoop* SAST::parseWhileLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& cu
 				
 				// Missing an epxression
 				throw std::runtime_error("Expected expression");
+				
+			}
+			
+		} else {
+			
+			// Missing open paren
+			throw std::runtime_error("( Expected");
+			
+		}
+		
+	}
+	
+	return nullptr;
+	
+}
+
+SASTLoop* SAST::parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& current_loop) {
+	
+	if (tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("for")) {
+		
+		// We were parsing a while loop
+		i++;
+		
+		// Get the open paren
+		if (i < tokens.size() && tokens[i].type == STokenTypeOpenParen) {
+			
+			i++;
+			
+			std::vector<SASTNode*> temp;
+			SASTDeclaration* dec = parseDeclaration(tokens, i);
+			if (dec)
+				temp.push_back(dec);
+			else i++;
+			
+			parseAssignment(tokens, i, &temp);
+			
+			if (temp.size() && temp.back()->node_type == SASTTypeAssignment) {
+				
+				SASTAssignment* initial_assign = (SASTAssignment*)temp.back();
+			
+				// Increment to skip the semicolon
+				i++;
+				
+				// Parse the epxression
+				SASTExpression* expression = parseExpression(tokens, i);
+				if (expression) {
+					
+					// Increment twice (for asignment)
+					i = i + 2;
+				
+					// Parse another asignment
+					temp.clear();
+					parseAssignment(tokens, i, &temp);
+					if (temp.size()) {
+						
+						SASTAssignment* increment = (SASTAssignment*)temp.back();
+				
+						// Check that we closed the epxresion
+						if (i < tokens.size() && tokens[i].type == STokenTypeCloseParen) {
+					
+							i++;
+							
+							// Parse block
+							if (i < tokens.size() && tokens[i].type == STokenTypeOpenBrack) {
+						
+								// Create a new while loop
+								SASTLoopFor* loop = new SASTLoopFor();
+								current_loop = loop;
+								loop->node_type = SASTTypeLoop;
+								loop->loop_type = SASTLoopTypeFor;
+						
+								// Create a new block
+								loop->parent_block = current_block;
+								loop->block = current_block = new SBlock();
+								loop->block->node_type = SASTTypeBlock;
+								loop->block->owner = loop;
+						
+								loop->initial_assign = initial_assign;
+								
+								// Will always be a bool for the target type
+								expression->destination_type = "bool";
+								loop->expression = expression;
+						
+								loop->increment = increment;
+								
+								return loop;
+						
+						
+							} else {
+						
+								// Missing open bracket
+								throw std::runtime_error("{ Expected");
+						
+							}
+					
+					
+						} else {
+					
+							// Missing close paren
+							throw std::runtime_error(") Expected");
+					
+						}
+					
+					} else {
+					
+						// Missing an assignemnt
+						throw std::runtime_error("Expected assignemnt");
+				
+					}
+				
+				} else {
+				
+					// Missing an epxression
+					throw std::runtime_error("Expected expression");
+				
+				}
+				
+			} else {
+				
+				// Missing an assignemnt
+				throw std::runtime_error("Expected assignemnt");
 				
 			}
 			
