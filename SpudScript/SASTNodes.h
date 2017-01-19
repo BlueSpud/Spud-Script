@@ -53,6 +53,8 @@ struct SBlock : public SASTNode {
     SASTNode* owner = nullptr;
     
     std::map<std::string, SVariable> variables;
+	
+	bool func_override = false;
     
 };
 

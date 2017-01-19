@@ -49,6 +49,7 @@ void cppFunction(float a, float b, float c) {
 EXPOSE_FUNC(vm, cppFunction, void, float float float)
 EXPOSE_FUNC(vm, prints, void, string)
 
+
 EXPOSE_SCRIPT_TYPE(Other)
 
 EXPOSE_SCRIPT_TYPE(Test)

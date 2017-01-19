@@ -141,8 +141,8 @@ void* SVM::evaluateNode(SASTNode* node) {
             
         case SASTTypeBlock: {
             
-            SBlock* block = (SBlock*)node;
-            
+            SBlock* block = new SBlock(*(SBlock*)node);
+			
             SBlock* last_block = current_block;
             current_block = block;
 			current_block->owner = last_block;
@@ -218,7 +218,7 @@ SVariable* SVM::resolveVariable(std::string name) {
             var = &search_block->variables[var_name];
         
         // Check the next block
-		if (search_block->owner && search_block->owner->node_type == SASTTypeBlock)
+		if (search_block->owner && search_block->owner->node_type == SASTTypeBlock && !search_block->func_override)
             search_block = (SBlock*)search_block->owner;
         else search_block = nullptr;
         
@@ -440,6 +440,7 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 		// Clear the variables from the last function call
 		SASTFunctionDefinition* def = script_functions[call->identifier.string];
 		SBlock* block = script_functions[call->identifier.string]->block;
+		block->func_override = true;
 		
 		// Define the new variables of the argument types
 		if (call->expressions.size() == def->args.size()) {

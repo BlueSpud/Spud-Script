@@ -1,7 +1,19 @@
-int i = 12;
+func test(int a) {
 
-for(i = 0; i < 12; i = i + 1) {
+	int b = 0;
 
-	prints(i);
+	if (a < 5) {
+
+		b = b + 1;
+
+		prints(a);
+		a = a + 1;
+		test(a);
+
+	}
+
+	prints(b);
 
 }
+
+test(1);
