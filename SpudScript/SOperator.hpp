@@ -15,9 +15,9 @@
 #define SOPERATOR(n) static void* n(SOPERATOR_ARGS);
 typedef void*(*operator_func)(SVariable*, SVariable*, const std::string&);
 
-#define SCAST_ARGS SVariable* var, const std::string& type
+#define SCAST_ARGS SVariable* var, const size_t type
 #define SCAST(n) static void* n(SCAST_ARGS);
-typedef void*(*cast_func)(SVariable*, const std::string&);
+typedef void*(*cast_func)(SVariable*, const size_t);
 
 class SOperatorRegistry {
 	
@@ -25,8 +25,8 @@ class SOperatorRegistry {
 	
 		static SOperatorRegistry* instance();
 	
-		bool registerOperator(operator_func func, std::string type);
-		bool registerCast(cast_func func, std::string type);
+		bool registerOperator(operator_func func, const std::string type);
+		bool registerCast(cast_func func, const std::string type);
 	
 		void* performOperation(SOPERATOR_ARGS);
 		void* performCast(SCAST_ARGS);
@@ -42,8 +42,8 @@ class SOperatorRegistry {
 	
 	private:
 	
-		std::map<std::string, operator_func> operator_funcs;
-		std::map<std::string, cast_func> cast_funcs;
+		std::map<size_t, operator_func> operator_funcs;
+		std::map<size_t, cast_func> cast_funcs;
 	
 		SOPERATOR(oInt)
 		SCAST(cInt)

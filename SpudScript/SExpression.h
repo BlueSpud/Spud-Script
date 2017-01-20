@@ -39,7 +39,7 @@ class SExpressionNodeLiteral : public SExpressionNode {
 			size = sizeof(T);
 			
 			// Get the script type based on the C++ class
-			literal_type = STypeRegistry::instance()->cpp_class_names[typeid(T).name()];
+			literal_type = STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())];
 			
 			// Keep the variable
 			value = malloc(size);
@@ -48,7 +48,7 @@ class SExpressionNodeLiteral : public SExpressionNode {
 		}
 	
 		template <class T>
-		SExpressionNodeLiteral(T _value, const std::string& _literal_type) {
+		SExpressionNodeLiteral(T _value, size_t _literal_type) {
 		
 			type = SExpressionNodeTypeLiteral;
 			size = sizeof(T);
@@ -64,7 +64,7 @@ class SExpressionNodeLiteral : public SExpressionNode {
 	
 		size_t size;
 	
-		std::string literal_type;
+		size_t literal_type;
 		void* value;
 };
 
@@ -117,7 +117,7 @@ class SExpressionNodeOperator : public SExpressionNode {
 struct SASTExpression : public SASTNode {
 	
 	std::vector<SExpressionNode*> nodes;
-	std::string destination_type = "int";
+	size_t destination_type = STypeRegistry::hashString("int");
 	
 };
 

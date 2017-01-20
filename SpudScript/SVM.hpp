@@ -38,15 +38,19 @@ class SVM {
 	
 		void* evaluateNode(SASTNode* node);
 	
-        SVariable declareVariable(std::string& type);
+        SVariable declareVariable(size_t type);
     
         std::map<std::string, SVariable> global_variables;
         std::map<std::string, SASTFunctionDefinition*> script_functions;
 		std::map<std::string, SFunctionContainer*> cpp_functions;
 	
 		SVariable evaluateExpression(SASTExpression* expression);
+		void evaluateBlock(SBlock* block);
 		void* evaluateFuncitonCall(SASTFunctionCall* call);
 		void evaluateLoop(SASTLoop* loop);
+		void* evaluateDeclaration(SASTDeclaration* declaration);
+		void evaluateAssignment(SASTAssignment* assignment);
+		void evaluateIf(SASTIfStatement* if_statement);
 	
         SBlock* current_block;
     
@@ -86,8 +90,8 @@ void* SVM::callFunction(std::string name, params... p){
 		for (int i = 0; i < sizeof...(params); i++) {
 			
 			// Check type matching TEMP, not done
-			block->variables[func->args[i]->identifier.string] = declareVariable(func->args[i]->type.string);
-			STypeRegistry::instance()->performCopy(block->variables[func->args[i]->identifier.string].value, args[i].value, func->args[i]->type.string);
+			block->variables[func->args[i]->identifier.string] = declareVariable(STypeRegistry::hashString(func->args[i]->type.string));
+			STypeRegistry::instance()->performCopy(block->variables[func->args[i]->identifier.string].value, args[i].value, STypeRegistry::hashString(func->args[i]->type.string));
 			
 		}
 		
@@ -108,8 +112,8 @@ T* SVM::getScriptValue(std::string name) {
 	// Check if this is a valid cast
 	if (var) {
 		
-		if (STypeRegistry::instance()->cpp_class_names.count(typeid(T).name()) &&
-			!STypeRegistry::instance()->cpp_class_names[typeid(T).name()].compare(var->type))
+		if (STypeRegistry::instance()->cpp_class_names.count(STypeRegistry::hashString(typeid(T).name())) &&
+			(STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())] != var->type))
 		return (T*)var->value;
 	
 		throw std::runtime_error("Script variable could not be cast to c++ type");

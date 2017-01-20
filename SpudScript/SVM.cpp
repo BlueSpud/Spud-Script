@@ -37,99 +37,23 @@ void* SVM::evaluateNode(SASTNode* node) {
 			
 		case SASTTypeIfExpression: {
 			
-			SASTIfStatement* if_expression = (SASTIfStatement*)node;
-			
-			// Evaluate the expression, always returns a bool
-			bool* expression_result = (bool*)evaluateNode(if_expression->expression);
-			
-			// Check if the result was true, and if it wasnt execute the else (if it exists)
-			if (*expression_result)
-				evaluateNode(if_expression->block);
-			else if (if_expression->else_node)
-				evaluateNode(if_expression->else_node);
-			
-			// Clean up
-			free(expression_result);
+			SASTIfStatement* if_statement = (SASTIfStatement*)node;
+			evaluateIf(if_statement);
 			
 		} break;
             
         case SASTTypeDeclaration: {
             
             SASTDeclaration* declaration = (SASTDeclaration*)node;
-            
-            if (!current_block) {
-                
-                // Declare a variable in the global scope
-				if (!global_variables.count(declaration->identifier.string)) {
-					
-                    global_variables[declaration->identifier.string] = declareVariable(declaration->type.string);
-					return &global_variables[declaration->identifier.string];
-					
-				} else {
-					
-					throw std::runtime_error("Redefinition of " + declaration->identifier.string);
-                    return nullptr;
-                
-                }
-                
-            } else {
-                
-                // Make sure that the variable is not already defined
-                SVariable* variable = resolveVariable(declaration->identifier.string);
-                if (!variable) {
-                
-                    // Declare a variable in a scope
-                    current_block->variables[declaration->identifier.string] = declareVariable(declaration->type.string);
-					return &current_block->variables[declaration->identifier.string];
-                    
-                } else {
-                    
-                    throw std::runtime_error("Redefinition of " + declaration->identifier.string);
-                    return nullptr;
-                    
-                }
-                
-            }
-            
+			return evaluateDeclaration(declaration);
+			
         } break;
             
         case SASTTypeAssignment: {
             
             SASTAssignment* assignment = (SASTAssignment*)node;
-            
-            // If we need to declare, declare
-            if (assignment->declaration) {
-				
-				// Evaluate the expression
-				assignment->expression->destination_type = assignment->declaration->type.string;
-				void* expression_result = evaluateNode(assignment->expression);
-				
-				// COPY the result
-                SVariable* variable = (SVariable*)evaluateNode(assignment->declaration);
-				STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
-				free(expression_result);
-				
-            } else {
-                
-                SVariable* variable = resolveVariable(assignment->identifier.string);
-                if (variable) {
-					
-					assignment->expression->destination_type = variable->type;
-					void* expression_result = evaluateNode(assignment->expression);
-					
-					// COPY the result
-					STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
-					free(expression_result);
-					
-                } else {
-                    
-                    // Variable was not declared
-					throw std::runtime_error(assignment->identifier.string + " was not defined in this scope");
-					
-                }
-                
-            }
-            
+			evaluateAssignment(assignment);
+			
         } break;
             
         case SASTTypeFunctionCall: {
@@ -142,36 +66,14 @@ void* SVM::evaluateNode(SASTNode* node) {
         case SASTTypeBlock: {
             
             SBlock* block = new SBlock(*(SBlock*)node);
-			
-            SBlock* last_block = current_block;
-            current_block = block;
-			current_block->owner = last_block;
-			
-            // Go through all the nodes in the block and evaluate them
-            for (int i = 0; i < block->nodes.size(); i++)
-                evaluateNode(block->nodes[i]);
-			
-			// Delete every variable in the block
-			std::map<std::string, SVariable>::iterator i = block->variables.begin();
-			while (i != block->variables.end()) {
-				
-				// Make sure to free the memory
-				free(i->second.value);
-				block->variables.erase(i);
-				i = block->variables.begin();
-	
-			}
-			
-            current_block = last_block;
-            
+			evaluateBlock(block);
             
         } break;
             
         case SASTTypeFunctionDef: {
-            
+			
+			// Register the block that we have for the name of the function
             SASTFunctionDefinition* def = (SASTFunctionDefinition*)node;
-            
-            // Register the block that we have for the name of the function
             script_functions[def->identifier.string] = def;
             
         } break;
@@ -186,7 +88,7 @@ void* SVM::evaluateNode(SASTNode* node) {
     
 }
 
-SVariable SVM::declareVariable(std::string& type) {
+SVariable SVM::declareVariable(size_t type) {
 
     SVariable to_declare;
 	
@@ -244,7 +146,7 @@ SVariable* SVM::resolveVariable(std::string name) {
             
             // Attempt to resolve the member
             SVariable new_member = STypeRegistry::instance()->getMemeber(member, member_name);
-            if (new_member.type.length()) {
+            if (new_member.type) {
             
                 member->value = new_member.value;
                 member->type = new_member.type;
@@ -257,7 +159,7 @@ SVariable* SVM::resolveVariable(std::string name) {
     
     // Check if we found a member or not
 	// TODO, smart pointer
-    if (member->type.length())
+    if (member->type)
         return member;
     else {
     
@@ -418,7 +320,7 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	}
 	
 	// Do a cast if we need to
-	if (result.type.compare(expression->destination_type) && expression->destination_type.length()) {
+	if (result.type != expression->destination_type && expression->destination_type) {
 	
 		void* casted = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
 		free(result.value);
@@ -429,6 +331,31 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	}
 	
 	return result;
+	
+}
+
+void SVM::evaluateBlock(SBlock* block) {
+	
+	SBlock* last_block = current_block;
+	current_block = block;
+	current_block->owner = last_block;
+	
+	// Go through all the nodes in the block and evaluate them
+	for (int i = 0; i < block->nodes.size(); i++)
+		evaluateNode(block->nodes[i]);
+	
+	// Delete every variable in the block
+	std::map<std::string, SVariable>::iterator i = block->variables.begin();
+	while (i != block->variables.end()) {
+		
+		// Make sure to free the memory
+		free(i->second.value);
+		block->variables.erase(i);
+		i = block->variables.begin();
+		
+	}
+	
+	current_block = last_block;
 	
 }
 
@@ -448,12 +375,12 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 			for (int i = 0; i < call->expressions.size(); i++) {
 				
 				// Check type matching TEMP, not done
-				block->variables[def->args[i]->identifier.string] = declareVariable(def->args[i]->type.string);
+				block->variables[def->args[i]->identifier.string] = declareVariable(STypeRegistry::hashString(def->args[i]->type.string));
 				
-				call->expressions[i]->destination_type = def->args[i]->type.string;
+				call->expressions[i]->destination_type = STypeRegistry::hashString(def->args[i]->type.string);
 				void* expression_result = evaluateNode(call->expressions[i]);
 				
-				STypeRegistry::instance()->performCopy(block->variables[def->args[i]->identifier.string].value, expression_result, def->args[i]->type.string);
+				STypeRegistry::instance()->performCopy(block->variables[def->args[i]->identifier.string].value, expression_result, STypeRegistry::hashString(def->args[i]->type.string));
 				free(expression_result);
 				
 			}
@@ -475,7 +402,7 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 		
 		for (int i = 0; i < call->expressions.size(); i++) {
 			
-			call->expressions[i]->destination_type = cpp_functions[call->identifier.string]->signature[i];
+			call->expressions[i]->destination_type = STypeRegistry::hashString(cpp_functions[call->identifier.string]->signature[i]);
 			void* expression_result = evaluateNode(call->expressions[i]);
 			params.push_back(expression_result);
 			
@@ -556,5 +483,97 @@ void SVM::evaluateLoop(SASTLoop* loop) {
 		}
 		
 	}
+	
+}
+
+void* SVM::evaluateDeclaration(SASTDeclaration* declaration) {
+	
+	if (!current_block) {
+		
+		// Declare a variable in the global scope
+		if (!global_variables.count(declaration->identifier.string)) {
+			
+			global_variables[declaration->identifier.string] = declareVariable(STypeRegistry::hashString(declaration->type.string));
+			return &global_variables[declaration->identifier.string];
+			
+		} else {
+			
+			throw std::runtime_error("Redefinition of " + declaration->identifier.string);
+			return nullptr;
+			
+		}
+		
+	} else {
+		
+		// Make sure that the variable is not already defined
+		SVariable* variable = resolveVariable(declaration->identifier.string);
+		if (!variable) {
+			
+			// Declare a variable in a scope
+			current_block->variables[declaration->identifier.string] = declareVariable(STypeRegistry::hashString(declaration->type.string));
+			return &current_block->variables[declaration->identifier.string];
+			
+		} else {
+			
+			throw std::runtime_error("Redefinition of " + declaration->identifier.string);
+			return nullptr;
+			
+		}
+		
+	}
+	
+}
+
+void SVM::evaluateAssignment(SASTAssignment* assignment) {
+	
+	// If we need to declare, declare
+	if (assignment->declaration) {
+		
+		// Evaluate the expression
+		assignment->expression->destination_type = STypeRegistry::hashString(assignment->declaration->type.string);
+		void* expression_result = evaluateNode(assignment->expression);
+		
+		// COPY the result
+		SVariable* variable = (SVariable*)evaluateNode(assignment->declaration);
+		STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
+		free(expression_result);
+		
+	} else {
+		
+		// Variable was already declared (hopefully) check if we have
+		SVariable* variable = resolveVariable(assignment->identifier.string);
+		if (variable) {
+			
+			assignment->expression->destination_type = variable->type;
+			void* expression_result = evaluateNode(assignment->expression);
+			
+			// COPY the result
+			STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
+			free(expression_result);
+			
+		} else {
+			
+			// Variable was not declared
+			throw std::runtime_error(assignment->identifier.string + " was not defined in this scope");
+			
+		}
+		
+	}
+	
+}
+
+void SVM::evaluateIf(SASTIfStatement* if_statement) {
+	
+	// Evaluate the expression, always returns a bool
+	bool* expression_result = (bool*)evaluateNode(if_statement->expression);
+	
+	// Check if the result was true, and if it wasnt execute the else (if it exists)
+	if (*expression_result)
+		evaluateNode(if_statement->block);
+	else if (if_statement->else_node)
+		evaluateNode(if_statement->else_node);
+	
+	// Clean up
+	free(expression_result);
 	
 }

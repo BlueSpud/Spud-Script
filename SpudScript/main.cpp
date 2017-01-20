@@ -107,8 +107,5 @@ int main(int argc, const char * argv[]) {
     std::vector<SASTNode*> nodes = parser.parseTokens(tokens);
 
     vm.executeCode(nodes);
-
-//	std::cout << "w: " << *vm.getScriptValue<char*>("w") << std::endl;
-//	std::cout << "s: " << *vm.getScriptValue<char*>("s") << std::endl;
 	
 }

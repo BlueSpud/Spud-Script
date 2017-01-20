@@ -336,7 +336,7 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					// In order to respect the type of the variable, we create a sub equations
 					// Make sure to set the expression type to not cast
 					SASTExpression* negate_expression = new SASTExpression();
-					negate_expression->destination_type = "";
+					negate_expression->destination_type = 0;
 					negate_expression->node_type = SASTTypeExpression;
 
 					negate_expression->nodes.push_back(new SExpressionNodeVariable(tokens[i].string));
@@ -363,13 +363,13 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					// There was a node after, so we can put that into an expression
 					SASTExpression* bool_expression = new SASTExpression();
 					bool_expression->node_type = SASTTypeExpression;
-					bool_expression->destination_type = "bool";
+					bool_expression->destination_type = STypeRegistry::hashString("bool");
 					bool_expression->nodes.push_back(new_node);
 					
 					// Now we create a larger expression to have the 1 - bool
 					SASTExpression* one_minus = new SASTExpression();
 					one_minus->node_type = SASTTypeExpression;
-					one_minus->destination_type = "bool";
+					one_minus->destination_type = STypeRegistry::hashString("bool");
 					
 					// Push back 1 - bool_expression
 					one_minus->nodes.push_back(new SExpressionNodeLiteral(1));
@@ -377,7 +377,7 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					one_minus->nodes.push_back(new SExpressionNodeExpression(bool_expression));
 					
 					// We make destination type int just in case we want to do arithmatic with it
-					one_minus->destination_type = "int";
+					one_minus->destination_type = STypeRegistry::hashString("int");
 					
 					// Add a node for the big expression
 					expression_node->nodes.push_back(new SExpressionNodeExpression(one_minus));
@@ -442,7 +442,7 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 		case STokenTypeString: {
 			
 			// String literal, needs to be told it is a string
-			SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), "string");
+			SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), STypeRegistry::hashString("string"));
 			return literal;
 			
 		} break;
@@ -731,7 +731,7 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 						current_block->owner = if_statement;
 						
 						// Will always be a bool for the target type
-						expression->destination_type = "bool";
+						expression->destination_type = STypeRegistry::hashString("bool");
 						if_statement->expression = expression;
 						
 						// If we are inside of another if statement, make sure to remember that
@@ -814,7 +814,7 @@ SASTLoop* SAST::parseWhileLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& cu
 						loop->block->owner = loop;
 						
 						// Will always be a bool for the target type
-						expression->destination_type = "bool";
+						expression->destination_type = STypeRegistry::hashString("bool");
 						loop->expression = expression;
 						
 						return loop;
@@ -919,7 +919,7 @@ SASTLoop* SAST::parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& curr
 								loop->initial_assign = initial_assign;
 								
 								// Will always be a bool for the target type
-								expression->destination_type = "bool";
+								expression->destination_type = STypeRegistry::hashString("bool");
 								loop->expression = expression;
 						
 								loop->increment = increment;

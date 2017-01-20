@@ -77,12 +77,12 @@ template <class T>
 void parameterPushBack(std::vector<SVariable>& args, T& param) {
 
 	// Check if a C++ type was declared for this
-	if (STypeRegistry::instance()->cpp_class_names.count(typeid(T).name())) {
+	if (STypeRegistry::instance()->cpp_class_names.count(STypeRegistry::hashString(typeid(T).name()))) {
 	
 		// Create a var and add it
 		SVariable var;
 		var.value = (void*)&param;
-		var.type = STypeRegistry::instance()->cpp_class_names[typeid(T).name()];
+		var.type = STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())];
 		
 		args.push_back(var);
 		
