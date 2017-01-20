@@ -10,10 +10,12 @@ func test(int a) {
 		a = a + 1;
 		test(a);
 
-	} else { prints("RECHED THE DESTINATION!"); }
+	} else { prints("REACHED THE DESTINATION!"); }
 
 	prints(b);
 
 }
 
 test(1);
+
+int a = 2;

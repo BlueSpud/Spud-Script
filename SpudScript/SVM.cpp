@@ -19,7 +19,7 @@ void* SVM::evaluateNode(SASTNode* node) {
 
     switch (node->node_type) {
             
-        case SASTTypeExpression: {
+        case STypeExpression: {
             
             // Get the numbers
             SASTExpression* expression = (SASTExpression*)node;
@@ -27,7 +27,7 @@ void* SVM::evaluateNode(SASTNode* node) {
             
         }  break;
 			
-		case SASTTypeLoop: {
+		case STypeLoop: {
 			
 			// Get the numbers
 			SASTLoop* loop = (SASTLoop*)node;
@@ -35,42 +35,42 @@ void* SVM::evaluateNode(SASTNode* node) {
 			
 		}  break;
 			
-		case SASTTypeIfExpression: {
+		case STypeIfExpression: {
 			
 			SASTIfStatement* if_statement = (SASTIfStatement*)node;
 			evaluateIf(if_statement);
 			
 		} break;
             
-        case SASTTypeDeclaration: {
+        case STypeDeclaration: {
             
             SASTDeclaration* declaration = (SASTDeclaration*)node;
 			return evaluateDeclaration(declaration);
 			
         } break;
             
-        case SASTTypeAssignment: {
+        case STypeAssignment: {
             
             SASTAssignment* assignment = (SASTAssignment*)node;
 			evaluateAssignment(assignment);
 			
         } break;
             
-        case SASTTypeFunctionCall: {
+        case STypeFunctionCall: {
             
             SASTFunctionCall* call = (SASTFunctionCall*)node;
 			evaluateFuncitonCall(call);
 			
         } break;
             
-        case SASTTypeBlock: {
+        case STypeBlock: {
             
             SBlock* block = new SBlock(*(SBlock*)node);
 			evaluateBlock(block);
             
         } break;
             
-        case SASTTypeFunctionDef: {
+        case STypeFunctionDef: {
 			
 			// Register the block that we have for the name of the function
             SASTFunctionDefinition* def = (SASTFunctionDefinition*)node;
@@ -120,7 +120,7 @@ SVariable* SVM::resolveVariable(std::string name) {
             var = &search_block->variables[var_name];
         
         // Check the next block
-		if (search_block->owner && search_block->owner->node_type == SASTTypeBlock && !search_block->func_override)
+		if (search_block->owner && search_block->owner->node_type == STypeBlock && !search_block->func_override)
             search_block = (SBlock*)search_block->owner;
         else search_block = nullptr;
         
@@ -427,7 +427,7 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 
 void SVM::evaluateLoop(SASTLoop* loop) {
 	
-	if (loop->loop_type == SASTLoopTypeWhile) {
+	if (loop->loop_type == SLoopTypeWhile) {
 		
 		// While loop
 		while (true) {
@@ -451,7 +451,7 @@ void SVM::evaluateLoop(SASTLoop* loop) {
 		
 	}
 	
-	if (loop->loop_type == SASTLoopTypeFor) {
+	if (loop->loop_type == SLoopTypeFor) {
 		
 		SASTLoopFor* loop_f = (SASTLoopFor*)loop;
 		

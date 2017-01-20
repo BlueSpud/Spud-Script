@@ -113,12 +113,4 @@ class SExpressionNodeOperator : public SExpressionNode {
 	
 };
 
-// Actual definition for expression
-struct SASTExpression : public SASTNode {
-	
-	std::vector<SExpressionNode*> nodes;
-	size_t destination_type = STypeRegistry::hashString("int");
-	
-};
-
 #endif /* SExpression_hpp */

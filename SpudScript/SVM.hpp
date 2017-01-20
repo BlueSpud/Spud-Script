@@ -113,10 +113,10 @@ T* SVM::getScriptValue(std::string name) {
 	if (var) {
 		
 		if (STypeRegistry::instance()->cpp_class_names.count(STypeRegistry::hashString(typeid(T).name())) &&
-			(STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())] != var->type))
+			(STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())] == var->type))
 		return (T*)var->value;
 	
-		throw std::runtime_error("Script variable could not be cast to c++ type");
+		throw std::runtime_error("Script variable was not of requested type");
 		
 	}
 	

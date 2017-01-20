@@ -43,6 +43,7 @@
 		02D5B0011E14B076001E2A2A /* SLexer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SLexer.hpp; sourceTree = "<group>"; };
 		02D5B0031E14C841001E2A2A /* SAST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SAST.cpp; sourceTree = "<group>"; };
 		02D5B0041E14C841001E2A2A /* SAST.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SAST.hpp; sourceTree = "<group>"; };
+		02E0CBEA1E32695200D53E9D /* SVMNodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVMNodes.h; sourceTree = "<group>"; };
 		02E377EB1E24181700FBBA82 /* SFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SFunctional.hpp; sourceTree = "<group>"; };
 		02E377EC1E24282000FBBA82 /* SOperator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SOperator.cpp; sourceTree = "<group>"; };
 		02E377ED1E24282000FBBA82 /* SOperator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SOperator.hpp; sourceTree = "<group>"; };
@@ -88,6 +89,7 @@
 				024AB7051E2BF9DD00E8936C /* SExpression.h */,
 				02E377EB1E24181700FBBA82 /* SFunctional.hpp */,
 				02CA04C81E183EDB0031E58A /* SASTNodes.h */,
+				02E0CBEA1E32695200D53E9D /* SVMNodes.h */,
 				02D5B0031E14C841001E2A2A /* SAST.cpp */,
 				02D5B0041E14C841001E2A2A /* SAST.hpp */,
 				02CA04C91E1848A00031E58A /* SVM.cpp */,

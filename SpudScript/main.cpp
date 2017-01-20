@@ -108,4 +108,6 @@ int main(int argc, const char * argv[]) {
 
     vm.executeCode(nodes);
 	
+	std::cout << *vm.getScriptValue<int>("a") << std::endl;
+	
 }
