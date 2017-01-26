@@ -8,21 +8,21 @@
 
 #include "SVM.hpp"
 
-void SVM::executeCode(std::vector<SASTNode*> nodes) {
+void SVM::executeCode(std::vector<SVMNode*> nodes) {
 
     for (int i = 0; i < nodes.size(); i++)
         evaluateNode(nodes[i]);
 
 }
 
-void* SVM::evaluateNode(SASTNode* node) {
+void* SVM::evaluateNode(SVMNode* node) {
 
     switch (node->node_type) {
             
         case STypeExpression: {
             
             // Get the numbers
-            SASTExpression* expression = (SASTExpression*)node;
+            SVMExpression* expression = (SVMExpression*)node;
 			return evaluateExpression(expression).value;
             
         }  break;
@@ -30,42 +30,42 @@ void* SVM::evaluateNode(SASTNode* node) {
 		case STypeLoop: {
 			
 			// Get the numbers
-			SASTLoop* loop = (SASTLoop*)node;
+			SVMLoop* loop = (SVMLoop*)node;
 			evaluateLoop(loop);
 			
 		}  break;
 			
 		case STypeIfExpression: {
 			
-			SASTIfStatement* if_statement = (SASTIfStatement*)node;
+			SVMIfStatement* if_statement = (SVMIfStatement*)node;
 			evaluateIf(if_statement);
 			
 		} break;
             
         case STypeDeclaration: {
             
-            SASTDeclaration* declaration = (SASTDeclaration*)node;
+            SVMDeclaration* declaration = (SVMDeclaration*)node;
 			return evaluateDeclaration(declaration);
 			
         } break;
             
         case STypeAssignment: {
             
-            SASTAssignment* assignment = (SASTAssignment*)node;
+            SVMAssignment* assignment = (SVMAssignment*)node;
 			evaluateAssignment(assignment);
 			
         } break;
             
         case STypeFunctionCall: {
             
-            SASTFunctionCall* call = (SASTFunctionCall*)node;
+            SVMFunctionCall* call = (SVMFunctionCall*)node;
 			evaluateFuncitonCall(call);
 			
         } break;
             
         case STypeBlock: {
             
-            SBlock* block = new SBlock(*(SBlock*)node);
+            SVMBlock* block = new SVMBlock(*(SVMBlock*)node);
 			evaluateBlock(block);
             
         } break;
@@ -73,8 +73,8 @@ void* SVM::evaluateNode(SASTNode* node) {
         case STypeFunctionDef: {
 			
 			// Register the block that we have for the name of the function
-            SASTFunctionDefinition* def = (SASTFunctionDefinition*)node;
-            script_functions[def->identifier.string] = def;
+            SVMFunctionDefinition* def = (SVMFunctionDefinition*)node;
+            script_functions[def->identifier] = def;
             
         } break;
             
@@ -106,7 +106,7 @@ SVariable SVM::declareVariable(size_t type) {
 SVariable* SVM::resolveVariable(std::string name) {
     
     // Go through the scopes and try to find the variable
-    SBlock* search_block = current_block;
+    SVMBlock* search_block = current_block;
     
     std::stringstream stream(name);
     std::string var_name;
@@ -121,7 +121,7 @@ SVariable* SVM::resolveVariable(std::string name) {
         
         // Check the next block
 		if (search_block->owner && search_block->owner->node_type == STypeBlock && !search_block->func_override)
-            search_block = (SBlock*)search_block->owner;
+            search_block = (SVMBlock*)search_block->owner;
         else search_block = nullptr;
         
     }
@@ -170,7 +170,7 @@ SVariable* SVM::resolveVariable(std::string name) {
     
 }
 
-SVariable SVM::evaluateExpression(SASTExpression* expression) {
+SVariable SVM::evaluateExpression(SVMExpression* expression) {
 	
 	std::vector<SVariable> vars;
 	
@@ -275,7 +275,7 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 			SExpressionNodeOperator* node = (SExpressionNodeOperator*)expression->nodes[i];
 			
 			if (!node->op.compare("*") || !node->op.compare("/") || !node->op.compare("%")) {
-			
+				
 				void* new_value = SOperatorRegistry::instance()->performOperation(&vars[var], &vars[var + 1], node->op);
 			
 				// Set and remove
@@ -322,9 +322,9 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	// Do a cast if we need to
 	if (result.type != expression->destination_type && expression->destination_type) {
 	
-		void* casted = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
+		void* cast = SOperatorRegistry::instance()->performCast(&result, expression->destination_type);
 		free(result.value);
-		result.value = casted;
+		result.value = cast;
 		
 		result.type = expression->destination_type;
 		
@@ -334,9 +334,9 @@ SVariable SVM::evaluateExpression(SASTExpression* expression) {
 	
 }
 
-void SVM::evaluateBlock(SBlock* block) {
+void SVM::evaluateBlock(SVMBlock* block) {
 	
-	SBlock* last_block = current_block;
+	SVMBlock* last_block = current_block;
 	current_block = block;
 	current_block->owner = last_block;
 	
@@ -359,14 +359,14 @@ void SVM::evaluateBlock(SBlock* block) {
 	
 }
 
-void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
+void* SVM::evaluateFuncitonCall(SVMFunctionCall* call) {
 	
 	// Check if there is a script function
-	if (script_functions.count(call->identifier.string)) {
+	if (script_functions.count(call->identifier)) {
 		
-		// Clear the variables from the last function call
-		SASTFunctionDefinition* def = script_functions[call->identifier.string];
-		SBlock* block = script_functions[call->identifier.string]->block;
+		// Clear the variables from the lVM function call
+		SVMFunctionDefinition* def = script_functions[call->identifier];
+		SVMBlock* block = script_functions[call->identifier]->block;
 		block->func_override = true;
 		
 		// Define the new variables of the argument types
@@ -375,12 +375,12 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 			for (int i = 0; i < call->expressions.size(); i++) {
 				
 				// Check type matching TEMP, not done
-				block->variables[def->args[i]->identifier.string] = declareVariable(STypeRegistry::hashString(def->args[i]->type.string));
+				block->variables[def->args[i]->identifier] = declareVariable(def->args[i]->type);
 				
-				call->expressions[i]->destination_type = STypeRegistry::hashString(def->args[i]->type.string);
+				call->expressions[i]->destination_type = def->args[i]->type;
 				void* expression_result = evaluateNode(call->expressions[i]);
 				
-				STypeRegistry::instance()->performCopy(block->variables[def->args[i]->identifier.string].value, expression_result, STypeRegistry::hashString(def->args[i]->type.string));
+				STypeRegistry::instance()->performCopy(block->variables[def->args[i]->identifier].value, expression_result, def->args[i]->type);
 				free(expression_result);
 				
 			}
@@ -395,20 +395,20 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 			
 		}
 		
-	} else if (cpp_functions.count(call->identifier.string)) {
+	} else if (cpp_functions.count(call->identifier)) {
 		
 		// Call C++ function
 		std::vector<void*> params;
 		
 		for (int i = 0; i < call->expressions.size(); i++) {
 			
-			call->expressions[i]->destination_type = STypeRegistry::hashString(cpp_functions[call->identifier.string]->signature[i]);
+			call->expressions[i]->destination_type = STypeRegistry::hashString(cpp_functions[call->identifier]->signature[i]);
 			void* expression_result = evaluateNode(call->expressions[i]);
 			params.push_back(expression_result);
 			
 		}
 		
-		cpp_functions[call->identifier.string]->operator()(params);
+		cpp_functions[call->identifier]->operator()(params);
 		
 		// Make sure that we free what we allocated
 		for (int i = 0; i < call->expressions.size(); i++)
@@ -417,7 +417,7 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 	} else {
 		
 		// Neither a script function existed nor a C++ one did
-		throw std::runtime_error("Unknown Function: " + call->identifier.string);
+		throw std::runtime_error("Unknown Function: " + call->identifier);
 		return 0;
 		
 	}
@@ -425,7 +425,7 @@ void* SVM::evaluateFuncitonCall(SASTFunctionCall* call) {
 	return nullptr;
 }
 
-void SVM::evaluateLoop(SASTLoop* loop) {
+void SVM::evaluateLoop(SVMLoop* loop) {
 	
 	if (loop->loop_type == SLoopTypeWhile) {
 		
@@ -453,11 +453,11 @@ void SVM::evaluateLoop(SASTLoop* loop) {
 	
 	if (loop->loop_type == SLoopTypeFor) {
 		
-		SASTLoopFor* loop_f = (SASTLoopFor*)loop;
+		SVMLoopFor* loop_f = (SVMLoopFor*)loop;
 		
 		// Do initial asignment
 		evaluateNode(loop_f->initial_assign);
-		
+		    
 		// While loop
 		while (true) {
 			
@@ -486,19 +486,19 @@ void SVM::evaluateLoop(SASTLoop* loop) {
 	
 }
 
-void* SVM::evaluateDeclaration(SASTDeclaration* declaration) {
+void* SVM::evaluateDeclaration(SVMDeclaration* declaration) {
 	
 	if (!current_block) {
 		
 		// Declare a variable in the global scope
-		if (!global_variables.count(declaration->identifier.string)) {
+		if (!global_variables.count(declaration->identifier)) {
 			
-			global_variables[declaration->identifier.string] = declareVariable(STypeRegistry::hashString(declaration->type.string));
-			return &global_variables[declaration->identifier.string];
+			global_variables[declaration->identifier] = declareVariable(declaration->type);
+			return &global_variables[declaration->identifier];
 			
 		} else {
 			
-			throw std::runtime_error("Redefinition of " + declaration->identifier.string);
+			throw std::runtime_error("Redefinition of " + declaration->identifier);
 			return nullptr;
 			
 		}
@@ -506,16 +506,16 @@ void* SVM::evaluateDeclaration(SASTDeclaration* declaration) {
 	} else {
 		
 		// Make sure that the variable is not already defined
-		SVariable* variable = resolveVariable(declaration->identifier.string);
+		SVariable* variable = resolveVariable(declaration->identifier);
 		if (!variable) {
 			
 			// Declare a variable in a scope
-			current_block->variables[declaration->identifier.string] = declareVariable(STypeRegistry::hashString(declaration->type.string));
-			return &current_block->variables[declaration->identifier.string];
+			current_block->variables[declaration->identifier] = declareVariable(declaration->type);
+			return &current_block->variables[declaration->identifier];
 			
 		} else {
 			
-			throw std::runtime_error("Redefinition of " + declaration->identifier.string);
+			throw std::runtime_error("Redefinition of " + declaration->identifier);
 			return nullptr;
 			
 		}
@@ -524,13 +524,13 @@ void* SVM::evaluateDeclaration(SASTDeclaration* declaration) {
 	
 }
 
-void SVM::evaluateAssignment(SASTAssignment* assignment) {
+void SVM::evaluateAssignment(SVMAssignment* assignment) {
 	
 	// If we need to declare, declare
 	if (assignment->declaration) {
 		
 		// Evaluate the expression
-		assignment->expression->destination_type = STypeRegistry::hashString(assignment->declaration->type.string);
+		assignment->expression->destination_type = assignment->declaration->type;
 		void* expression_result = evaluateNode(assignment->expression);
 		
 		// COPY the result
@@ -541,7 +541,7 @@ void SVM::evaluateAssignment(SASTAssignment* assignment) {
 	} else {
 		
 		// Variable was already declared (hopefully) check if we have
-		SVariable* variable = resolveVariable(assignment->identifier.string);
+		SVariable* variable = resolveVariable(assignment->identifier);
 		if (variable) {
 			
 			assignment->expression->destination_type = variable->type;
@@ -554,7 +554,7 @@ void SVM::evaluateAssignment(SASTAssignment* assignment) {
 		} else {
 			
 			// Variable was not declared
-			throw std::runtime_error(assignment->identifier.string + " was not defined in this scope");
+			throw std::runtime_error(assignment->identifier + " was not defined in this scope");
 			
 		}
 		
@@ -562,7 +562,7 @@ void SVM::evaluateAssignment(SASTAssignment* assignment) {
 	
 }
 
-void SVM::evaluateIf(SASTIfStatement* if_statement) {
+void SVM::evaluateIf(SVMIfStatement* if_statement) {
 	
 	// Evaluate the expression, always returns a bool
 	bool* expression_result = (bool*)evaluateNode(if_statement->expression);

@@ -10,7 +10,7 @@
 #define SAST_hpp
 
 #include "SLexer.hpp"
-#include "SExpression.h"
+#include "SExpression.hpp"
 
 class SAST {
     

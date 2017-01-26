@@ -49,7 +49,6 @@ void cppFunction(float a, float b, float c) {
 EXPOSE_FUNC(vm, cppFunction, void, float float float)
 EXPOSE_FUNC(vm, prints, void, string)
 
-
 EXPOSE_SCRIPT_TYPE(Other)
 
 EXPOSE_SCRIPT_TYPE(Test)
@@ -89,6 +88,7 @@ int main(int argc, const char * argv[]) {
     lexer.operators.push_back("-");
     lexer.operators.push_back("*");
     lexer.operators.push_back("/");
+	lexer.operators.push_back("%");
 	
 	lexer.operators.push_back("<=");
 	lexer.operators.push_back(">=");
@@ -105,9 +105,17 @@ int main(int argc, const char * argv[]) {
     // Go!
     std::vector<SToken> tokens = lexer.lexSource(code);
     std::vector<SASTNode*> nodes = parser.parseTokens(tokens);
-
-    vm.executeCode(nodes);
+	std::vector<SVMNode*> compiled;
 	
-	std::cout << *vm.getScriptValue<int>("a") << std::endl;
+	for (int i = 0; i < nodes.size(); i++)
+		compiled.push_back(nodes[i]->compile());
+	
+	for (int i = 0; i < nodes.size(); i++)
+		delete nodes[i];
+
+    vm.executeCode(compiled);
+	
+	for (int i = 0; i < compiled.size(); i++)
+		delete compiled[i];
 	
 }

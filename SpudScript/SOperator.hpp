@@ -25,7 +25,10 @@ class SOperatorRegistry {
 	
 		static SOperatorRegistry* instance();
 	
+		#define REGISTER_OPERATOR(f, t) bool operator_registered_##t = SOperatorRegistry::instance()->registerOperator(f, #t);
 		bool registerOperator(operator_func func, const std::string type);
+	
+		#define REGISTER_CAST(f, t) bool cast_registered_##t = SOperatorRegistry::instance()->registerCast(f, #t);
 		bool registerCast(cast_func func, const std::string type);
 	
 		void* performOperation(SOPERATOR_ARGS);
@@ -34,13 +37,16 @@ class SOperatorRegistry {
 		template <class first_c, class second_c>
 		void* standardArithmatic(SOPERATOR_ARGS);
 	
+		template <class first_c, class second_c>
+		void* modulusArithmatic(SOPERATOR_ARGS);
+	
 		template <class from, class to>
 		void* standardCast(SCAST_ARGS);
 	
 		template <class from>
 		void* toString(SVariable* var);
 	
-	private:
+	//private:
 	
 		std::map<size_t, operator_func> operator_funcs;
 		std::map<size_t, cast_func> cast_funcs;
@@ -74,7 +80,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("+")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a + (first_c)b;
+		*out = (first_c)(a + b);
 		return out;
 		
 	}
@@ -82,7 +88,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("-")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a - (first_c)b;
+		*out = (first_c)(a - b);
 		return out;
 		
 	}
@@ -90,7 +96,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("/")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a / (first_c)b;
+		*out = (first_c)(a / b);
 		return out;
 		
 	}
@@ -98,7 +104,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("*")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a * (first_c)b;
+		*out = (first_c)(a * b);
 		
 		return out;
 		
@@ -107,7 +113,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("==")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a == (first_c)b;
+		*out = a == b;
 		
 		return out;
 		
@@ -116,7 +122,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("!=")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a != (first_c)b;
+		*out = a != b;
 		
 		return out;
 		
@@ -125,7 +131,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("<")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a < (first_c)b;
+		*out = a < b;
 		
 		return out;
 		
@@ -134,7 +140,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare(">")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a > (first_c)b;
+		*out = a > b;
 		
 		return out;
 		
@@ -143,7 +149,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare("<=")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a <= (first_c)b;
+		*out = a <= b;
 		
 		return out;
 		
@@ -152,7 +158,32 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	if (!o.compare(">=")) {
 		
 		first_c* out = (first_c*)malloc(sizeof(first_c));
-		*out = a >= (first_c)b;
+		*out = a >= b;
+		
+		return out;
+		
+	}
+	
+	return nullptr;
+	
+}
+
+template <class first_c, class second_c>
+void* SOperatorRegistry::modulusArithmatic(SOPERATOR_ARGS) {
+	
+	// Check if one of the standard operators worked
+	void* reg_result = standardArithmatic<first_c, second_c>(first, second, o);
+	if (reg_result)
+		return reg_result;
+	
+	// Perform modulus operation
+	if (!o.compare("%")) {
+		
+		first_c a = *(first_c*)first->value;
+		second_c b = *(second_c*)second->value;
+		
+		first_c* out = (first_c*)malloc(sizeof(first_c));
+		*out = a % b;
 		
 		return out;
 		

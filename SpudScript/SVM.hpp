@@ -19,7 +19,7 @@ class SVM {
     
     public:
     
-        void executeCode(std::vector<SASTNode*> nodes);
+        void executeCode(std::vector<SVMNode*> nodes);
     
         SVariable* resolveVariable(std::string name);
 	
@@ -36,23 +36,23 @@ class SVM {
 	
     private:
 	
-		void* evaluateNode(SASTNode* node);
+		void* evaluateNode(SVMNode* node);
 	
         SVariable declareVariable(size_t type);
     
         std::map<std::string, SVariable> global_variables;
-        std::map<std::string, SASTFunctionDefinition*> script_functions;
+        std::map<std::string, SVMFunctionDefinition*> script_functions;
 		std::map<std::string, SFunctionContainer*> cpp_functions;
 	
-		SVariable evaluateExpression(SASTExpression* expression);
-		void evaluateBlock(SBlock* block);
-		void* evaluateFuncitonCall(SASTFunctionCall* call);
-		void evaluateLoop(SASTLoop* loop);
-		void* evaluateDeclaration(SASTDeclaration* declaration);
-		void evaluateAssignment(SASTAssignment* assignment);
-		void evaluateIf(SASTIfStatement* if_statement);
+		SVariable evaluateExpression(SVMExpression* expression);
+		void evaluateBlock(SVMBlock* block);
+		void* evaluateFuncitonCall(SVMFunctionCall* call);
+		void evaluateLoop(SVMLoop* loop);
+		void* evaluateDeclaration(SVMDeclaration* declaration);
+		void evaluateAssignment(SVMAssignment* assignment);
+		void evaluateIf(SVMIfStatement* if_statement);
 	
-        SBlock* current_block;
+        SVMBlock* current_block;
     
 };
 
@@ -74,7 +74,7 @@ void* SVM::callFunction(std::string name, params... p){
 	if (script_functions.count(name)) {
 		
 		// Check we have the right number of args
-		SASTFunctionDefinition* func = script_functions[name];
+		SVMFunctionDefinition* func = script_functions[name];
 
 		if (sizeof...(params) != func->args.size()) {
 			
@@ -84,14 +84,14 @@ void* SVM::callFunction(std::string name, params... p){
 		}
 		
 		// Get the function and the args we passed in
-		SBlock* block = script_functions[name]->block;
+		SVMBlock* block = script_functions[name]->block;
 		std::vector<SVariable> args = parametersToVector(p...);
 		
 		for (int i = 0; i < sizeof...(params); i++) {
 			
 			// Check type matching TEMP, not done
-			block->variables[func->args[i]->identifier.string] = declareVariable(STypeRegistry::hashString(func->args[i]->type.string));
-			STypeRegistry::instance()->performCopy(block->variables[func->args[i]->identifier.string].value, args[i].value, STypeRegistry::hashString(func->args[i]->type.string));
+			block->variables[func->args[i]->identifier] = declareVariable(func->args[i]->type);
+			STypeRegistry::instance()->performCopy(block->variables[func->args[i]->identifier].value, args[i].value, func->args[i]->type);
 			
 		}
 		
@@ -109,7 +109,7 @@ T* SVM::getScriptValue(std::string name) {
 	
 	SVariable* var = resolveVariable(name);
 	
-	// Check if this is a valid cast
+	// Check if this is a valid cVM
 	if (var) {
 		
 		if (STypeRegistry::instance()->cpp_class_names.count(STypeRegistry::hashString(typeid(T).name())) &&

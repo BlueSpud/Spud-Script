@@ -1,21 +1,9 @@
-func test(int a) {
+for (int a = 0; a < 10; a = a + 1) {
 
-	int b = 0;
-
-	if (a < 5) {
-
-		b = b + 1;
+	if (a % 2 == 2 * 4 + 2 - 9) {
 
 		prints(a);
-		a = a + 1;
-		test(a);
 
-	} else { prints("REACHED THE DESTINATION!"); }
-
-	prints(b);
+	}
 
 }
-
-test(1);
-
-int a = 2;

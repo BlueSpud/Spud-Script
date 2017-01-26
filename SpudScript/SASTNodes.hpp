@@ -12,22 +12,23 @@
 #include "STypes.hpp"
 #include "SLexer.hpp"
 
-#include "SVMNodes.h"
+#include "SVMNodes.hpp"
 
 struct SASTNode {
 	
 	SNodeType node_type;
 
 	virtual SVMNode* compile() { return nullptr; };
+	virtual ~SASTNode() {}
 	
 };
 
-// Forward declaration of an expression node
 struct SASTExpression : public SASTNode {
 	
 	std::vector<SExpressionNode*> nodes;
 	size_t destination_type = STypeRegistry::hashString("int");
 	
+	bool compiled = false;
 	virtual SVMNode* compile() {
 		
 		SVMExpression* expression = new SVMExpression();
@@ -35,7 +36,17 @@ struct SASTExpression : public SASTNode {
 		expression->destination_type = destination_type;
 		expression->nodes = nodes;
 		
+		compiled = true;
 		return expression;
+		
+	}
+	
+	virtual ~SASTExpression() {
+		
+		// If the script was never compiled for some reason, maybe parsing failed, we need to delete these
+		if (!compiled)
+			for (int i = 0; i < nodes.size(); i++)
+				delete nodes[i];
 		
 	}
 	
@@ -68,11 +79,25 @@ struct SASTAssignment : public SASTNode {
 	
 		SVMAssignment* assignment = new SVMAssignment();
 		assignment->node_type = node_type;
-		assignment->declaration = (SVMDeclaration*)declaration->compile();
+		assignment->identifier = identifier.string;
+		
+		if (declaration)
+			assignment->declaration = (SVMDeclaration*)declaration->compile();
+		
 		assignment->expression = (SVMExpression*)expression->compile();
 		
 		return assignment;
 		
+	}
+	
+	virtual ~SASTAssignment() {
+	
+		// Declaration is optional, so we need to make sure we have one to delete it
+		if (declaration)
+			delete declaration;
+		
+		delete expression;
+	
 	}
 	
 };
@@ -96,16 +121,35 @@ struct SASTFunctionCall : public SASTNode {
 		return call;
 		
 	}
+	
+	virtual ~SASTFunctionCall() {
+	
+		for (int i = 0; i < expressions.size(); i++)
+			delete expressions[i];
+	
+	}
+	
 };
 
 struct SBlock : public SASTNode {
     
     std::vector<SASTNode*> nodes;
-    SASTNode* owner = nullptr;
-    
-    std::map<std::string, SVariable> variables;
+	SASTNode* owner = nullptr;enum SExpressionNodeType {
+		
+		SExpressionNodeTypeLiteral,
+		SExpressionNodeTypeExpression,
+		SExpressionNodeTypeVariable,
+		SExpressionNodeTypeOperator
+		
+	};
 	
-	bool func_override = false;
+	class SExpressionNode {
+		
+	public:
+		
+		SExpressionNodeType type;
+		
+	};
 	
 	virtual SVMNode* compile() {
 	
@@ -115,10 +159,15 @@ struct SBlock : public SASTNode {
 		for (int i = 0; i < nodes.size(); i++)
 			block->nodes.push_back(nodes[i]->compile());
 		
-		block->func_override = func_override;
-		
 		return block;
 		
+	}
+	
+	virtual ~SBlock() {
+	
+		for (int i = 0; i < nodes.size(); i++)
+			delete nodes[i];
+	
 	}
 	
 };
@@ -144,6 +193,14 @@ struct SASTFunctionDefinition : public SASTNode {
 		return def;
 	
 	}
+	
+	virtual ~SASTFunctionDefinition() {
+		
+		delete block;
+		for (int i = 0; i < args.size(); i++)
+			delete args[i];
+		
+	}
     
 };
 
@@ -163,9 +220,23 @@ struct SASTIfStatement : public SASTNode {
 		if_statement->node_type = node_type;
 		if_statement->expression = (SVMExpression*)expression->compile();
 		if_statement->block = (SVMBlock*)block->compile();
-		if_statement->else_node = else_node->compile();
+		
+		// Else node is optional, it doesnt have to be compiled unless its there
+		if (else_node)
+			if_statement->else_node = else_node->compile();
 	
 		return if_statement;
+		
+	}
+	
+	virtual ~SASTIfStatement() {
+		
+		delete block;
+		delete expression;
+		
+		// Else node is optional, so make sure there is one before deleting
+		if (else_node)
+			delete else_node;
 		
 	}
 	
@@ -193,6 +264,13 @@ struct SASTLoop : public SASTNode {
 	
 	}
 	
+	virtual ~SASTLoop() {
+	
+		delete block;
+		delete expression;
+		
+	}
+	
 };
 
 struct SASTLoopFor : public SASTLoop {
@@ -213,6 +291,13 @@ struct SASTLoopFor : public SASTLoop {
 		
 		return loop;
 	
+	}
+	
+	virtual ~SASTLoopFor() {
+		
+		delete initial_assign;
+		delete increment;
+		
 	}
 	
 };

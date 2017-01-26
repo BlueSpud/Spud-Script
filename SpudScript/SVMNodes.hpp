@@ -22,15 +22,43 @@ enum SNodeType {
 	
 };
 
-struct SVMNode { SNodeType node_type; };
+struct SVMNode {
+	
+	SNodeType node_type;
+	virtual ~SVMNode() {}
+	
+};
 
-// Forward declaration of expression node
-struct SExpressionNode;
+// Expression node declaration
+enum SExpressionNodeType {
+	
+	SExpressionNodeTypeLiteral,
+	SExpressionNodeTypeExpression,
+	SExpressionNodeTypeVariable,
+	SExpressionNodeTypeOperator
+	
+};
+
+class SExpressionNode {
+	
+	public:
+	
+		SExpressionNodeType type;
+		virtual ~SExpressionNode() {}
+	
+};
 
 struct SVMExpression : public SVMNode {
 	
 	std::vector<SExpressionNode*> nodes;
 	size_t destination_type;
+	
+	virtual ~SVMExpression() {
+	
+		for (int i = 0; i < nodes.size(); i++)
+			delete nodes[i];
+	
+	}
 	
 };
 
@@ -48,12 +76,29 @@ struct SVMAssignment : public SVMNode {
 	SVMExpression* expression;
 	std::string identifier;
 	
+	virtual ~SVMAssignment() {
+	
+		// Declaration is optional, make sure we have it before we delete it
+		if (declaration)
+			delete declaration;
+		
+		delete expression;
+	
+	}
+	
 };
 
 struct SVMFunctionCall : public SVMNode {
 	
 	std::string identifier;
 	std::vector<SVMExpression*> expressions;
+	
+	virtual ~SVMFunctionCall() {
+		
+		for (int i = 0; i < expressions.size(); i++)
+			delete expressions[i];
+		
+	}
 	
 };
 
@@ -63,8 +108,15 @@ struct SVMBlock : public SVMNode {
 	SVMNode* owner = nullptr;
 	
 	std::map<std::string, SVariable> variables;
-	
 	bool func_override = false;
+
+	void unload() {
+		
+		// We have an unload function instead of a delete, because blocks are duplicated at runtime, so the nodes would be deleted
+		for (int i = 0; i < nodes.size(); i++)
+			delete nodes[i];
+		
+	}
 	
 };
 
@@ -75,6 +127,16 @@ struct SVMFunctionDefinition : public SVMNode {
 	
 	std::vector<SVMDeclaration*> args;
 	
+	virtual ~SVMFunctionDefinition() {
+		
+		block->unload();
+		delete block;
+		
+		for (int i = 0; i < args.size(); i++)
+			delete args[i];
+		
+	}
+	
 };
 
 struct SVMIfStatement : public SVMNode {
@@ -82,6 +144,19 @@ struct SVMIfStatement : public SVMNode {
 	SVMBlock* block;
 	SVMExpression* expression;
 	SVMNode* else_node;
+	
+	virtual ~SVMIfStatement() {
+		
+		block->unload();
+		delete block;
+		
+		delete expression;
+		
+		// Make sure we have an else node before we delete it, it is optional
+		if (else_node)
+			delete else_node;
+		
+	}
 	
 };
 
@@ -98,12 +173,28 @@ struct SVMLoop : public SVMNode {
 	SVMExpression* expression;
 	SLoopType loop_type;
 	
+	virtual ~SVMLoop() {
+		
+		block->unload();
+		delete block;
+		
+		delete expression;
+		
+	}
+	
 };
 
 struct SVMLoopFor : public SVMLoop {
 	
 	SVMAssignment* initial_assign;
 	SVMAssignment* increment;
+	
+	virtual ~SVMLoopFor() {
+		
+		delete initial_assign;
+		delete increment;
+		
+	}
 	
 };
 

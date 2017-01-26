@@ -86,7 +86,7 @@ void* SOperatorRegistry::performOperation(SOPERATOR_ARGS) {
 	
 	}
 	
-	throw std::runtime_error("Undefined operation");
+	throw std::runtime_error("Undefined operation: " + o);
 	
 	return nullptr;
 	
@@ -96,7 +96,7 @@ void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 	
 	// Int to int
 	if (STypeRegistry::instance()->isOfType(second->type, "int"))
-		return instance()->standardArithmatic<int, int>(first, second, o);
+		return instance()->modulusArithmatic<int, int>(first, second, o);
 	
 	// Int to float
 	if (STypeRegistry::instance()->isOfType(second->type, "float"))
@@ -108,7 +108,7 @@ void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 	
 	// Int to long
 	if (STypeRegistry::instance()->isOfType(second->type, "long"))
-		return instance()->standardArithmatic<int, long>(first, second, o);
+		return instance()->modulusArithmatic<int, long>(first, second, o);
 	
 	// Int to char
 	if (STypeRegistry::instance()->isOfType(second->type, "char"))
@@ -186,7 +186,7 @@ void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
 	
 	// Long to int
 	if (STypeRegistry::instance()->isOfType(second->type, "int"))
-		return instance()->standardArithmatic<long, int>(first, second, o);
+		return instance()->modulusArithmatic<long, int>(first, second, o);
 	
 	// Long to float
 	if (STypeRegistry::instance()->isOfType(second->type, "float"))
@@ -198,7 +198,7 @@ void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
 	
 	// Long to long
 	if (STypeRegistry::instance()->isOfType(second->type, "long"))
-		return instance()->standardArithmatic<long, long>(first, second, o);
+		return instance()->modulusArithmatic<long, long>(first, second, o);
 	
 	// Long to char
 	if (STypeRegistry::instance()->isOfType(second->type, "char"))
@@ -216,7 +216,7 @@ void* SOperatorRegistry::oBool(SOPERATOR_ARGS) {
 	
 	// Bool to int
 	if (STypeRegistry::instance()->isOfType(second->type, "int"))
-		return instance()->standardArithmatic<bool, int>(first, second, o);
+		return instance()->modulusArithmatic<bool, int>(first, second, o);
 	
 	// Bool to float
 	if (STypeRegistry::instance()->isOfType(second->type, "float"))
@@ -228,7 +228,7 @@ void* SOperatorRegistry::oBool(SOPERATOR_ARGS) {
 	
 	// Bool to long
 	if (STypeRegistry::instance()->isOfType(second->type, "long"))
-		return instance()->standardArithmatic<bool, long>(first, second, o);
+		return instance()->modulusArithmatic<bool, long>(first, second, o);
 	
 	// Bool to char
 	if (STypeRegistry::instance()->isOfType(second->type, "char"))

@@ -9,24 +9,7 @@
 #ifndef SExpression_hpp
 #define SExpression_hpp
 
-#include "SASTNodes.h"
-
-enum SExpressionNodeType {
-	
-	SExpressionNodeTypeLiteral,
-	SExpressionNodeTypeExpression,
-	SExpressionNodeTypeVariable,
-	SExpressionNodeTypeOperator
-	
-};
-
-class SExpressionNode {
-	
-	public:
-	
-		SExpressionNodeType type;
-	
-};
+#include "SASTNodes.hpp"
 
 class SExpressionNodeLiteral : public SExpressionNode {
 	
@@ -62,6 +45,8 @@ class SExpressionNodeLiteral : public SExpressionNode {
 		
 		}
 	
+		virtual ~SExpressionNodeLiteral() { free(value); }
+	
 		size_t size;
 	
 		size_t literal_type;
@@ -72,14 +57,16 @@ class SExpressionNodeExpression : public SExpressionNode {
 	
 	public:
 	
-		SExpressionNodeExpression(SASTExpression* _expression) {
+		SExpressionNodeExpression(SVMExpression* _expression) {
 	
 			type = SExpressionNodeTypeExpression;
 			expression = _expression;
 			
 		}
 	
-		SASTExpression* expression;
+		virtual ~SExpressionNodeExpression() { delete expression; }
+	
+		SVMExpression* expression;
 	
 };
 

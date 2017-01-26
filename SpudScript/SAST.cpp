@@ -283,7 +283,8 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 				new_expression->node_type = STypeExpression;
 
 				// Create an expression node to store the expression that was already parsed
-				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(expression_node);
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression((SVMExpression*)expression_node->compile());
+				delete expression_node;
 				new_expression->nodes.push_back(sub_expression_node);
 
 				// If this is an or operator, we use addition, but if its an and we use multiplication
@@ -294,6 +295,27 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 				// Keep parsing for this one
 				expression_node = new_expression;
 				
+			} else if (!tokens[i].string.compare("==") || !tokens[i].string.compare("!=") || !tokens[i].string.compare("<") || !tokens[i].string.compare(">") || !tokens[i].string.compare(">=") || !tokens[i].string.compare("<=")) {
+			
+				// Comparisson operators need to have an expresison before and an expresison after
+				SASTExpression* new_expression = new SASTExpression();
+				new_expression->node_type = STypeExpression;
+				
+				// Create an expression node to store the expression that was already parsed
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression((SVMExpression*)expression_node->compile());
+				delete expression_node;
+				new_expression->nodes.push_back(sub_expression_node);
+				new_expression->nodes.push_back(new SExpressionNodeOperator(tokens[i].string));
+				
+				// Parse a new expressiona after
+				i = i + 1;
+				new_expression->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)parseExpression(tokens, i)->compile()));
+				
+				// Expression must be complete or there was an issue
+				expression_node = new_expression;
+				return expression_node;
+				
+			
 			} else {
 			
 				// Parse an normal operator
@@ -343,7 +365,8 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					negate_expression->nodes.push_back(new SExpressionNodeOperator("*"));
 					negate_expression->nodes.push_back(new SExpressionNodeLiteral(-1));
 					
-					expression_node->nodes.push_back(new SExpressionNodeExpression(negate_expression));
+					expression_node->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)negate_expression->compile()));
+					delete negate_expression;
 					
 				} else break;
 				
@@ -374,13 +397,15 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					// Push back 1 - bool_expression
 					one_minus->nodes.push_back(new SExpressionNodeLiteral(1));
 					one_minus->nodes.push_back(new SExpressionNodeOperator("-"));
-					one_minus->nodes.push_back(new SExpressionNodeExpression(bool_expression));
+					one_minus->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)bool_expression->compile()));
+					delete  bool_expression;
 					
 					// We make destination type int just in case we want to do arithmatic with it
 					one_minus->destination_type = STypeRegistry::hashString("int");
 					
 					// Add a node for the big expression
-					expression_node->nodes.push_back(new SExpressionNodeExpression(one_minus));
+					expression_node->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)one_minus->compile()));
+					delete one_minus;
 					
 					// Increment and saved literal
 					last_operator = false;
@@ -457,7 +482,8 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 			if (tokens[i].type == STokenTypeCloseParen && sub_expression) {
 				
 				// Success!
-				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(sub_expression);
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression((SVMExpression*)sub_expression->compile());
+				delete sub_expression;
 				return sub_expression_node;
 				
 			} else {
