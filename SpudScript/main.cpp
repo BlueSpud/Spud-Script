@@ -26,11 +26,15 @@ class Test {
 
     public:
 
-        int a, b = 24, c = 12, d;
+        int a = 0, b = 24, c = 12, d = 0;
     
         Other o;
+	
+		static int test;
 
 };
+
+int Test::test;
 
 void prints(char* a) {
 	
@@ -59,6 +63,7 @@ int main(int argc, const char * argv[]) {
     SLexer lexer;
     SAST parser;
 	
+	// TODO, fix this!
 	EXPOSE_SCRIPT_MEMBER(Other, a, int);
 	
     EXPOSE_SCRIPT_MEMBER(Test, a, int);
@@ -112,10 +117,15 @@ int main(int argc, const char * argv[]) {
 	
 	for (int i = 0; i < nodes.size(); i++)
 		delete nodes[i];
+	
+	Test* some = new Test;
+	vm.exposeVariable<Test>(some, "some");
 
     vm.executeCode(compiled);
 	
 	for (int i = 0; i < compiled.size(); i++)
 		delete compiled[i];
-	
+
 }
+
+

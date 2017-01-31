@@ -42,12 +42,6 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
 		if (if_statement)
 			node_place->push_back(if_statement);
 		
-		// Parse a function call
-		SASTFunctionCall* func_call = parseFunctionCall(tokens, i);
-		if (func_call)
-			node_place->push_back(func_call);
-		
-		
         // Parse an expression
 		SASTExpression* expression_node = parseExpression(tokens, i);
 		if (expression_node)
@@ -75,6 +69,10 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
         if (func_def)
             nodes.push_back(func_def);
 		
+		// Parse a return
+		SASTReturn* return_node = parseReturn(tokens, i);
+		if (return_node)
+			node_place->push_back(return_node);
 		
 		// Parse an assignement
 		if (!parseAssignment(tokens, i, node_place))
@@ -458,6 +456,18 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 			
 		case STokenTypeIdentifier: {
 			
+			// Try parsing a function call
+			SASTFunctionCall* func_call = parseFunctionCall(tokens, i);
+			if (func_call) {
+				
+				// Add a funtion call node
+				SExpressionNodeFunction* func_node = new SExpressionNodeFunction((SVMFunctionCall*)func_call->compile());
+				delete func_call;
+				return func_node;
+				
+			}
+			
+			// This was an ordinary variable
 			// We dont resolve the variable now so we just save the name
 			SExpressionNodeVariable* var_node = new SExpressionNodeVariable(tokens[i].string);
 			return var_node;
@@ -995,6 +1005,29 @@ SASTLoop* SAST::parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& curr
 			throw std::runtime_error("( Expected");
 			
 		}
+		
+	}
+	
+	return nullptr;
+	
+}
+
+SASTReturn* SAST::parseReturn(PARSE_ARGS) {
+	
+	if (tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("return")) {
+	
+		// Parse an expression, the destination type is no type because we want it to be determined by the contents
+		i++;
+		SASTExpression* expression = parseExpression(tokens, i);
+		expression->destination_type = 0;
+		
+		// The expression can be null, which means that it was just a blank return to leave the function
+		SASTReturn* return_node = new SASTReturn();
+		return_node->node_type = STypeReturn;
+		
+		return_node->expression = expression;
+		
+		return return_node;
 		
 	}
 	

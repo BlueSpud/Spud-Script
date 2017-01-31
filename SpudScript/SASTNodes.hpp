@@ -302,4 +302,22 @@ struct SASTLoopFor : public SASTLoop {
 	
 };
 
+struct SASTReturn : public SASTNode {
+	
+	SASTExpression* expression;
+	
+	virtual SVMNode* compile() {
+		
+		SVMReturn* node = new SVMReturn();
+		node->node_type = STypeReturn;
+		node->expression = (SVMExpression*)expression->compile();
+		
+		return node;
+		
+	}
+	
+	virtual ~SASTReturn() { delete expression; }
+
+};
+
 #endif /* SASTNodes_h */

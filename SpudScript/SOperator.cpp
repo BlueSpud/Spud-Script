@@ -257,10 +257,10 @@ void* SOperatorRegistry::oString(SOPERATOR_ARGS) {
 
 			// Create a new string buffer
 			size_t size = sizeof(char) * (result.length() + 1);
-			char* buffer = (char*)malloc(size);
+			char* buffer = (char*)calloc(1,size);
 			sprintf(buffer, "%s", result.c_str());
 			
-			char** ptr = (char**)malloc(sizeof(char**));
+			char** ptr = (char**)calloc(1,sizeof(char**));
 			ptr[0] = buffer;
 			
 			return ptr;

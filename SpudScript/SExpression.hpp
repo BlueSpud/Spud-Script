@@ -25,7 +25,7 @@ class SExpressionNodeLiteral : public SExpressionNode {
 			literal_type = STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())];
 			
 			// Keep the variable
-			value = malloc(size);
+			value = calloc(1,size);
 			STypeRegistry::instance()->performCopy(value, &_value, literal_type);
 		
 		}
@@ -40,7 +40,7 @@ class SExpressionNodeLiteral : public SExpressionNode {
 			literal_type = _literal_type;
 		
 			// Keep the variable
-			value = malloc(size);
+			value = calloc(1,size);
 			STypeRegistry::instance()->performCopy(value, &_value, literal_type);
 		
 		}
@@ -97,6 +97,21 @@ class SExpressionNodeOperator : public SExpressionNode {
 		}
 	
 		std::string op;
+	
+};
+
+class SExpressionNodeFunction : public SExpressionNode {
+	
+	public:
+	
+		SExpressionNodeFunction(SVMFunctionCall* _call) {
+		
+			type = SExpressionNodeTypeFunction;
+			call = _call;
+		
+		}
+	
+	SVMFunctionCall* call;
 	
 };
 

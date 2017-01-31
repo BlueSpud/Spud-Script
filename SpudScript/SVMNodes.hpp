@@ -18,7 +18,8 @@ enum SNodeType {
 	STypeBlock,
 	STypeFunctionDef,
 	STypeIfExpression,
-	STypeLoop
+	STypeLoop,
+	STypeReturn
 	
 };
 
@@ -35,7 +36,8 @@ enum SExpressionNodeType {
 	SExpressionNodeTypeLiteral,
 	SExpressionNodeTypeExpression,
 	SExpressionNodeTypeVariable,
-	SExpressionNodeTypeOperator
+	SExpressionNodeTypeOperator,
+	SExpressionNodeTypeFunction
 	
 };
 
@@ -195,6 +197,14 @@ struct SVMLoopFor : public SVMLoop {
 		delete increment;
 		
 	}
+	
+};
+
+struct SVMReturn : public SVMNode {
+	
+	SVMExpression* expression;
+	
+	virtual ~SVMReturn() { delete expression; }
 	
 };
 

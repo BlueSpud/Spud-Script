@@ -1,9 +1,9 @@
-for (int a = 0; a < 10; a = a + 1) {
+func test() {
 
-	if (a % 2 == 2 * 4 + 2 - 9) {
-
-		prints(a);
-
-	}
+	prints("Calling the function test");
+	return "THIS IS A STRING";
 
 }
+
+string a = test();
+prints(a);

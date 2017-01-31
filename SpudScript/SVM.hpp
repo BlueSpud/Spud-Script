@@ -20,8 +20,8 @@ class SVM {
     public:
     
         void executeCode(std::vector<SVMNode*> nodes);
-    
-        SVariable* resolveVariable(std::string name);
+	
+		#define EXPOSE_FUNC(vm, f, r, s) bool bound_##f = vm.bindFunction(f, #f, #r, #s);
 	
 		template <class... params>
 		bool bindFunction(void(*func)(params...), std::string name, std::string return_type, std::string signature);
@@ -32,13 +32,15 @@ class SVM {
 		template<class T>
 		T* getScriptValue(std::string name);
 	
-		#define EXPOSE_FUNC(vm, f, r, s) bool bound_##f = vm.bindFunction(f, #f, #r, #s);
+		template<class T>
+		void exposeVariable(void* value, std::string name);
 	
     private:
 	
 		void* evaluateNode(SVMNode* node);
 	
         SVariable declareVariable(size_t type);
+		SVariable* resolveVariable(std::string name);
     
         std::map<std::string, SVariable> global_variables;
         std::map<std::string, SVMFunctionDefinition*> script_functions;
@@ -51,6 +53,7 @@ class SVM {
 		void* evaluateDeclaration(SVMDeclaration* declaration);
 		void evaluateAssignment(SVMAssignment* assignment);
 		void evaluateIf(SVMIfStatement* if_statement);
+		void evaluateReturn(SVMReturn* return_node);
 	
         SVMBlock* current_block;
     
@@ -123,6 +126,27 @@ T* SVM::getScriptValue(std::string name) {
 	throw std::runtime_error("Variable " + name + " was not declared in this scope");
 	
 	return nullptr;
+	
+}
+
+template<class T>
+void SVM::exposeVariable(void* value, std::string name) {
+	
+	// Get the type that we exposed
+	size_t hash = STypeRegistry::instance()->hashString(typeid(T).name());
+	if (STypeRegistry::instance()->cpp_class_names.count(hash)) {
+		
+		// Check that it wasnt defined globally already
+		if (!global_variables.count(name)) {
+		
+			// Create a new variable and expose it in the global scope
+			global_variables[name] = SVariable();
+			global_variables[name].type = STypeRegistry::instance()->cpp_class_names[hash];
+			global_variables[name].value = value;
+			
+		} else throw std::runtime_error("Redefintion of " + name);
+		
+	} else throw std::runtime_error("Type was not exposed to script");
 	
 }
 

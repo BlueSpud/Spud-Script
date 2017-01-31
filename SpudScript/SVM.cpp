@@ -77,9 +77,18 @@ void* SVM::evaluateNode(SVMNode* node) {
             script_functions[def->identifier] = def;
             
         } break;
-            
+			
+		case STypeReturn: {
+			
+			// Register the block that we have for the name of the function
+			SVMReturn* return_node = (SVMReturn*)node;
+			evaluateReturn(return_node);
+			
+		} break;
+	
+			
         default:
-            
+			
             break;
             
     }
@@ -188,7 +197,7 @@ SVariable SVM::evaluateExpression(SVMExpression* expression) {
 					// Copy the data
 					literal.type = literal_node->literal_type;
 				
-					literal.value = malloc(literal_node->size);
+					literal.value = calloc(1,literal_node->size);
 					STypeRegistry::instance()->performCopy(literal.value, literal_node->value, literal_node->literal_type);
     
 				} break;
@@ -206,7 +215,7 @@ SVariable SVM::evaluateExpression(SVMExpression* expression) {
 						// Copy the data
 						size_t size = STypeRegistry::instance()->getTypeSize(resolved_var->type);
 						var.type = resolved_var->type;
-						var.value = malloc(size);
+						var.value = calloc(1,size);
 						STypeRegistry::instance()->performCopy(var.value, resolved_var->value, resolved_var->type);
 					
 					} else {
@@ -226,6 +235,34 @@ SVariable SVM::evaluateExpression(SVMExpression* expression) {
 					vars.push_back(evaluateExpression(expression_node->expression));
     
 				} break;
+				
+			case SExpressionNodeTypeFunction: {
+				
+				// Evaluate the function call and get the return value, it may be null
+				SExpressionNodeFunction* func_node = (SExpressionNodeFunction*)expression->nodes[i];
+				
+				SVariable var;
+				
+				// Call the funtion and get the return value
+				try {
+					
+					evaluateFuncitonCall(func_node->call);
+					
+				} catch (SVariable _var) { var = _var; }
+				
+				// Check that this expression was valid calling the function
+				if (var.value != nullptr) {
+					
+					vars.push_back(var);
+					
+				} else if (expression->nodes.size() != 1) {
+					
+					// Something was done with the function, it wont work because there was no return value, not even 0
+					throw std::runtime_error("Function call did not return a value, could not operate on void");
+					
+				} else return SVariable();
+				
+			}
 				
 			default:
 				break;
@@ -385,7 +422,7 @@ void* SVM::evaluateFuncitonCall(SVMFunctionCall* call) {
 				
 			}
 			
-			// Call the function
+			// Call the block, if there is a return node this will throw and something will have to catch an SVariable
 			evaluateNode(block);
 			
 		} else {
@@ -533,6 +570,10 @@ void SVM::evaluateAssignment(SVMAssignment* assignment) {
 		assignment->expression->destination_type = assignment->declaration->type;
 		void* expression_result = evaluateNode(assignment->expression);
 		
+		// Check that we got a value
+		if (!expression_result)
+			throw std::runtime_error("Expression returned null");
+		
 		// COPY the result
 		SVariable* variable = (SVariable*)evaluateNode(assignment->declaration);
 		STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
@@ -546,6 +587,10 @@ void SVM::evaluateAssignment(SVMAssignment* assignment) {
 			
 			assignment->expression->destination_type = variable->type;
 			void* expression_result = evaluateNode(assignment->expression);
+			
+			// Check that we got a value
+			if (!expression_result)
+				throw std::runtime_error("Expression returned null");
 			
 			// COPY the result
 			STypeRegistry::instance()->performCopy(variable->value, expression_result, variable->type);
@@ -575,5 +620,38 @@ void SVM::evaluateIf(SVMIfStatement* if_statement) {
 	
 	// Clean up
 	free(expression_result);
+	
+}
+
+void SVM::evaluateReturn(SVMReturn* return_node) {
+	
+	// First figure out if this was a valid return node
+	SVMBlock* search_block = current_block;
+	
+	// Cannot return in the global scope
+	if (!search_block)
+		throw std::runtime_error("Unexpected return");
+		
+	while (search_block) {
+		
+		if (search_block->func_override)
+			break;
+		else if (search_block->owner && search_block->owner->node_type == STypeBlock)
+			search_block = (SVMBlock*)search_block->owner;
+		else {
+			
+			// Reached the global scope, cant return from that
+			throw std::runtime_error("Unexpected return");
+			
+		}
+		
+	}
+	
+	// We have verified that this is being called inside a function, so we can evaluate the expression and then throw it
+	SVariable result;
+	if (return_node->expression)
+		result = evaluateExpression(return_node->expression);
+	
+	throw result;
 	
 }

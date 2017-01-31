@@ -79,11 +79,11 @@ void STypeRegistry::performCopy(void*& dest, void* from, size_t type) {
 		size_t length = strlen(from_pointer[0]);
 		
 		// Create a new block for the contents and copy it in
-		char* buffer = (char*)malloc(sizeof(char) * (length + 1));
+		char* buffer = (char*)calloc(1,sizeof(char) * (length + 1));
 		memcpy(buffer, from_pointer[0], sizeof(char) * (length + 1));
 		
 		// Make the destinaiton pointer
-		char** ptr = (char**)malloc(sizeof(char**));
+		char** ptr = (char**)calloc(1,sizeof(char**));
 		ptr[0] = buffer;
 		
 		memcpy(dest, ptr, sizeof(char**));

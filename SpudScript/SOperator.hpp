@@ -79,7 +79,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("+")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = (first_c)(a + b);
 		return out;
 		
@@ -87,7 +87,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("-")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = (first_c)(a - b);
 		return out;
 		
@@ -95,7 +95,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("/")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = (first_c)(a / b);
 		return out;
 		
@@ -103,7 +103,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("*")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = (first_c)(a * b);
 		
 		return out;
@@ -112,7 +112,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("==")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a == b;
 		
 		return out;
@@ -121,7 +121,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("!=")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a != b;
 		
 		return out;
@@ -130,7 +130,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("<")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a < b;
 		
 		return out;
@@ -139,7 +139,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare(">")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a > b;
 		
 		return out;
@@ -148,7 +148,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare("<=")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a <= b;
 		
 		return out;
@@ -157,7 +157,7 @@ void* SOperatorRegistry::standardArithmatic(SOPERATOR_ARGS) {
 	
 	if (!o.compare(">=")) {
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a >= b;
 		
 		return out;
@@ -182,7 +182,7 @@ void* SOperatorRegistry::modulusArithmatic(SOPERATOR_ARGS) {
 		first_c a = *(first_c*)first->value;
 		second_c b = *(second_c*)second->value;
 		
-		first_c* out = (first_c*)malloc(sizeof(first_c));
+		first_c* out = (first_c*)calloc(1,sizeof(first_c));
 		*out = a % b;
 		
 		return out;
@@ -196,7 +196,7 @@ void* SOperatorRegistry::modulusArithmatic(SOPERATOR_ARGS) {
 template <class from, class to>
 void* SOperatorRegistry::standardCast(SCAST_ARGS) {
 	
-	to* f = (to*)malloc(sizeof(to));
+	to* f = (to*)calloc(1,sizeof(to));
 	*f = (to)*(from*)var->value;
 	return f;
 	
@@ -209,10 +209,10 @@ void* SOperatorRegistry::toString(SVariable* var) {
 	
 	// Create a new string buffer
 	size_t size = sizeof(char) * (string.length() + 1);
-	char* buffer = (char*)malloc(size);
+	char* buffer = (char*)calloc(1,size);
 	sprintf(buffer, "%s", string.c_str());
 	
-	char** ptr = (char**)malloc(sizeof(char**));
+	char** ptr = (char**)calloc(1,sizeof(char**));
 	ptr[0] = buffer;
 	
 	return ptr;

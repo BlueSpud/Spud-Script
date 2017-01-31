@@ -38,7 +38,7 @@ class SAST {
 		SASTIfStatement* parseIfStatement(PARSE_ARGS, SBlock*& current_block, SASTIfStatement*& current_if);
 		SASTLoop* parseWhileLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& current_loop);
 		SASTLoop* parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& current_loop);
-
+		SASTReturn* parseReturn(PARSE_ARGS);
 	
 };
 

@@ -37,7 +37,14 @@ class SClassFactory : public SClassFactoryBase {
 		SClassFactory(size_t _size) { size = _size; }
         ~SClassFactory();
     
-		virtual void* createObject() { return malloc(size); }
+		virtual void* createObject() {
+			
+			// Create space for the object and then allocate the object inside of the block
+			void* memory = calloc(1,size);
+			new (memory) T();
+			
+			return memory;
+		}
 
 };
 
@@ -46,10 +53,10 @@ class SStringFactory : public SClassFactoryBase {
 	virtual void* createObject() {
 		
 		// First we allocate space for a string and a pointer
-		char* buffer = (char*)malloc(sizeof(char) * 2);
-		sprintf(buffer, "");
+		char* buffer = (char*)calloc(1,sizeof(char) * 2);
+		//sprintf(buffer, "");
 		
-		char** ptr = (char**)malloc(sizeof(char**));
+		char** ptr = (char**)calloc(1,sizeof(char**));
 		ptr[0] = buffer;
 		
 		return ptr;
@@ -67,8 +74,8 @@ struct SVariableLocation {
 
 struct SVariable {
     
-    void* value;
-    size_t type;
+    void* value = nullptr;
+    size_t type = 0;
     
 };
 
