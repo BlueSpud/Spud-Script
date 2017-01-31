@@ -1,19 +1,12 @@
-func test(int a) {
+func test() {
 
-	int b = 0;
-
-	if (a < 5) {
-
-		b = b + 1;
-
-		prints(a);
-		a = a + 1;
-		test(a);
-
-	}
-
-	prints(b);
+	prints("Calling the function test");
+	return 10;
 
 }
 
-test(1);
+int a = test();
+prints(a);
+
+a = cppReturn();
+prints(a);

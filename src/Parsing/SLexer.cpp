@@ -93,30 +93,15 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
         }
         
         // Check for operators
-		bool operator_success = false;
-        for (int o = 0; o < operators.size(); o++) {
-            
-            if (i + operators[o].length() - 1 < source.length() && !source.substr(i, operators[o].length()).compare(operators[o])) {
-				
-                SToken token;
-                token.type = STokenTypeOperator;
-                token.string = source.substr(i, operators[o].length());
-                
-                tokens.push_back(token);
-				
-				// Save that we succeded and we have to incremenet i by any additional length
-				operator_success = true;
-				i = i + (int)operators[o].length() - 1;
-				break;
-				
-				
-            }
-            
-        }
-		
-		if (operator_success)
+		SToken operator_token = getTokenFromArray(operators, i, source, STokenTypeOperator);
+		if (operator_token.string.length()) {
+			
+			tokens.push_back(operator_token);
+			i = i + (int)operator_token.string.length() - 1;
 			continue;
-        
+			
+		}
+		
         // Check for types
         SToken type_token = getTokenFromArray(STypeRegistry::instance()->registered_types, i, source, STokenTypeType);
         if (type_token.string.length()) {
@@ -177,7 +162,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
 		}
 		
         // If all else failed, we can assume that this was an identifier
-        if ((char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') || (char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z')) {
+        if ((char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') || (char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z') || !char_at.compare("_")) {
 			
             // Start parsing the identifier
             int start = i;
@@ -186,8 +171,12 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
 				
                 char_at = source.substr(i, 1);
                 
-                // If it not a letter, we're done
-                if (!(char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') && !(char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z') && char_at.c_str()[0] != '.')
+                // These are what is valid as the second char for a identifier, numbers are allowed
+                if (!(char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') &&
+					!(char_at.c_str()[0] >= 'A' && char_at.c_str()[0] <= 'Z') &&
+					!(char_at.c_str()[0] >= '0' && char_at.c_str()[0] <= '9') &&
+					char_at.c_str()[0] != '.' &&
+					char_at.compare("_"))
                     break;
              
                 i++;

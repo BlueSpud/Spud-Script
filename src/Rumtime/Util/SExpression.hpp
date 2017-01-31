@@ -9,24 +9,7 @@
 #ifndef SExpression_hpp
 #define SExpression_hpp
 
-#include "SASTNodes.h"
-
-enum SExpressionNodeType {
-	
-	SExpressionNodeTypeLiteral,
-	SExpressionNodeTypeExpression,
-	SExpressionNodeTypeVariable,
-	SExpressionNodeTypeOperator
-	
-};
-
-class SExpressionNode {
-	
-	public:
-	
-		SExpressionNodeType type;
-	
-};
+#include "SASTNodes.hpp"
 
 class SExpressionNodeLiteral : public SExpressionNode {
 	
@@ -39,16 +22,16 @@ class SExpressionNodeLiteral : public SExpressionNode {
 			size = sizeof(T);
 			
 			// Get the script type based on the C++ class
-			literal_type = STypeRegistry::instance()->cpp_class_names[typeid(T).name()];
+			literal_type = STypeRegistry::instance()->cpp_class_names[STypeRegistry::hashString(typeid(T).name())];
 			
 			// Keep the variable
-			value = malloc(size);
+			value = calloc(1,size);
 			STypeRegistry::instance()->performCopy(value, &_value, literal_type);
 		
 		}
 	
 		template <class T>
-		SExpressionNodeLiteral(T _value, const std::string& _literal_type) {
+		SExpressionNodeLiteral(T _value, size_t _literal_type) {
 		
 			type = SExpressionNodeTypeLiteral;
 			size = sizeof(T);
@@ -57,14 +40,16 @@ class SExpressionNodeLiteral : public SExpressionNode {
 			literal_type = _literal_type;
 		
 			// Keep the variable
-			value = malloc(size);
+			value = calloc(1,size);
 			STypeRegistry::instance()->performCopy(value, &_value, literal_type);
 		
 		}
 	
+		virtual ~SExpressionNodeLiteral() { free(value); }
+	
 		size_t size;
 	
-		std::string literal_type;
+		size_t literal_type;
 		void* value;
 };
 
@@ -72,14 +57,16 @@ class SExpressionNodeExpression : public SExpressionNode {
 	
 	public:
 	
-		SExpressionNodeExpression(SASTExpression* _expression) {
+		SExpressionNodeExpression(SVMExpression* _expression) {
 	
 			type = SExpressionNodeTypeExpression;
 			expression = _expression;
 			
 		}
 	
-		SASTExpression* expression;
+		virtual ~SExpressionNodeExpression() { delete expression; }
+	
+		SVMExpression* expression;
 	
 };
 
@@ -113,11 +100,18 @@ class SExpressionNodeOperator : public SExpressionNode {
 	
 };
 
-// Actual definition for expression
-struct SASTExpression : public SASTNode {
+class SExpressionNodeFunction : public SExpressionNode {
 	
-	std::vector<SExpressionNode*> nodes;
-	std::string destination_type = "int";
+	public:
+	
+		SExpressionNodeFunction(SVMFunctionCall* _call) {
+		
+			type = SExpressionNodeTypeFunction;
+			call = _call;
+		
+		}
+	
+	SVMFunctionCall* call;
 	
 };
 

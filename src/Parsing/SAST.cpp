@@ -42,12 +42,6 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
 		if (if_statement)
 			node_place->push_back(if_statement);
 		
-		// Parse a function call
-		SASTFunctionCall* func_call = parseFunctionCall(tokens, i);
-		if (func_call)
-			node_place->push_back(func_call);
-		
-		
         // Parse an expression
 		SASTExpression* expression_node = parseExpression(tokens, i);
 		if (expression_node)
@@ -75,6 +69,10 @@ std::vector<SASTNode*> SAST::parseTokens(std::vector<SToken>& tokens) {
         if (func_def)
             nodes.push_back(func_def);
 		
+		// Parse a return
+		SASTReturn* return_node = parseReturn(tokens, i);
+		if (return_node)
+			node_place->push_back(return_node);
 		
 		// Parse an assignement
 		if (!parseAssignment(tokens, i, node_place))
@@ -118,12 +116,12 @@ bool SAST::parseStartBlock(PARSE_ARGS, SBlock*& current_block) {
 		if (!current_block) {
 		 
 			current_block = new SBlock();
-			current_block->node_type = SASTTypeBlock;
+			current_block->node_type = STypeBlock;
 		 
 		} else {
 			 
 			SBlock* new_block  = new SBlock();
-			new_block->node_type = SASTTypeBlock;
+			new_block->node_type = STypeBlock;
 			new_block->owner = current_block;
 			 
 			// This is a block within a block, add the last block, make this one owned
@@ -159,7 +157,7 @@ bool SAST::parseEndBlock(PARSE_ARGS, std::vector<SASTNode*>& nodes, SBlock*& cur
 		} else {
 			
 			// Check if we need to restore the owning block
-			if (current_block->owner->node_type == SASTTypeBlock)
+			if (current_block->owner->node_type == STypeBlock)
 				current_block = (SBlock*)current_block->owner;
 			else {
 				
@@ -256,7 +254,7 @@ bool SAST::endLoop(SBlock*& current_block, SASTLoop*& current_loop) {
 SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 	
 	SASTExpression* expression_node = new SASTExpression();
-	expression_node->node_type = SASTTypeExpression;
+	expression_node->node_type = STypeExpression;
 	bool last_operator = true;
 	bool ended = false;
 	
@@ -280,10 +278,11 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 			if (!tokens[i].string.compare("||") || !tokens[i].string.compare("&&")) {
 				
 				SASTExpression* new_expression = new SASTExpression();
-				new_expression->node_type = SASTTypeExpression;
+				new_expression->node_type = STypeExpression;
 
 				// Create an expression node to store the expression that was already parsed
-				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(expression_node);
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression((SVMExpression*)expression_node->compile());
+				delete expression_node;
 				new_expression->nodes.push_back(sub_expression_node);
 
 				// If this is an or operator, we use addition, but if its an and we use multiplication
@@ -294,6 +293,27 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 				// Keep parsing for this one
 				expression_node = new_expression;
 				
+			} else if (!tokens[i].string.compare("==") || !tokens[i].string.compare("!=") || !tokens[i].string.compare("<") || !tokens[i].string.compare(">") || !tokens[i].string.compare(">=") || !tokens[i].string.compare("<=")) {
+			
+				// Comparisson operators need to have an expresison before and an expresison after
+				SASTExpression* new_expression = new SASTExpression();
+				new_expression->node_type = STypeExpression;
+				
+				// Create an expression node to store the expression that was already parsed
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression((SVMExpression*)expression_node->compile());
+				delete expression_node;
+				new_expression->nodes.push_back(sub_expression_node);
+				new_expression->nodes.push_back(new SExpressionNodeOperator(tokens[i].string));
+				
+				// Parse a new expressiona after
+				i = i + 1;
+				new_expression->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)parseExpression(tokens, i)->compile()));
+				
+				// Expression must be complete or there was an issue
+				expression_node = new_expression;
+				return expression_node;
+				
+			
 			} else {
 			
 				// Parse an normal operator
@@ -336,14 +356,15 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					// In order to respect the type of the variable, we create a sub equations
 					// Make sure to set the expression type to not cast
 					SASTExpression* negate_expression = new SASTExpression();
-					negate_expression->destination_type = "";
-					negate_expression->node_type = SASTTypeExpression;
+					negate_expression->destination_type = 0;
+					negate_expression->node_type = STypeExpression;
 
 					negate_expression->nodes.push_back(new SExpressionNodeVariable(tokens[i].string));
 					negate_expression->nodes.push_back(new SExpressionNodeOperator("*"));
 					negate_expression->nodes.push_back(new SExpressionNodeLiteral(-1));
 					
-					expression_node->nodes.push_back(new SExpressionNodeExpression(negate_expression));
+					expression_node->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)negate_expression->compile()));
+					delete negate_expression;
 					
 				} else break;
 				
@@ -362,25 +383,27 @@ SASTExpression* SAST::parseExpression(PARSE_ARGS) {
 					
 					// There was a node after, so we can put that into an expression
 					SASTExpression* bool_expression = new SASTExpression();
-					bool_expression->node_type = SASTTypeExpression;
-					bool_expression->destination_type = "bool";
+					bool_expression->node_type = STypeExpression;
+					bool_expression->destination_type = STypeRegistry::hashString("bool");
 					bool_expression->nodes.push_back(new_node);
 					
 					// Now we create a larger expression to have the 1 - bool
 					SASTExpression* one_minus = new SASTExpression();
-					one_minus->node_type = SASTTypeExpression;
-					one_minus->destination_type = "bool";
+					one_minus->node_type = STypeExpression;
+					one_minus->destination_type = STypeRegistry::hashString("bool");
 					
 					// Push back 1 - bool_expression
 					one_minus->nodes.push_back(new SExpressionNodeLiteral(1));
 					one_minus->nodes.push_back(new SExpressionNodeOperator("-"));
-					one_minus->nodes.push_back(new SExpressionNodeExpression(bool_expression));
+					one_minus->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)bool_expression->compile()));
+					delete  bool_expression;
 					
 					// We make destination type int just in case we want to do arithmatic with it
-					one_minus->destination_type = "int";
+					one_minus->destination_type = STypeRegistry::hashString("int");
 					
 					// Add a node for the big expression
-					expression_node->nodes.push_back(new SExpressionNodeExpression(one_minus));
+					expression_node->nodes.push_back(new SExpressionNodeExpression((SVMExpression*)one_minus->compile()));
+					delete one_minus;
 					
 					// Increment and saved literal
 					last_operator = false;
@@ -433,6 +456,18 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 			
 		case STokenTypeIdentifier: {
 			
+			// Try parsing a function call
+			SASTFunctionCall* func_call = parseFunctionCall(tokens, i);
+			if (func_call) {
+				
+				// Add a funtion call node
+				SExpressionNodeFunction* func_node = new SExpressionNodeFunction((SVMFunctionCall*)func_call->compile());
+				delete func_call;
+				return func_node;
+				
+			}
+			
+			// This was an ordinary variable
 			// We dont resolve the variable now so we just save the name
 			SExpressionNodeVariable* var_node = new SExpressionNodeVariable(tokens[i].string);
 			return var_node;
@@ -442,7 +477,7 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 		case STokenTypeString: {
 			
 			// String literal, needs to be told it is a string
-			SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), "string");
+			SExpressionNodeLiteral* literal = new SExpressionNodeLiteral(tokens[i].string.c_str(), STypeRegistry::hashString("string"));
 			return literal;
 			
 		} break;
@@ -457,7 +492,8 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 			if (tokens[i].type == STokenTypeCloseParen && sub_expression) {
 				
 				// Success!
-				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression(sub_expression);
+				SExpressionNodeExpression* sub_expression_node = new SExpressionNodeExpression((SVMExpression*)sub_expression->compile());
+				delete sub_expression;
 				return sub_expression_node;
 				
 			} else {
@@ -478,7 +514,7 @@ SExpressionNode* SAST::parseExpressionNode(PARSE_ARGS) {
 SASTDeclaration* SAST::parseDeclaration(PARSE_ARGS) {
 	
 	SASTDeclaration* decl_node = new SASTDeclaration();
-	decl_node->node_type = SASTTypeDeclaration;
+	decl_node->node_type = STypeDeclaration;
 	if (tokens[i].type == STokenTypeType) {
 		
 		i++;
@@ -511,7 +547,7 @@ SASTFunctionCall* SAST::parseFunctionCall(PARSE_ARGS) {
 	
 	// Parse a function call
 	SASTFunctionCall* call_node = new SASTFunctionCall();
-	call_node->node_type = SASTTypeFunctionCall;
+	call_node->node_type = STypeFunctionCall;
 	if (tokens[i].type == STokenTypeIdentifier) {
 		
 		call_node->identifier = tokens[i];
@@ -561,7 +597,7 @@ bool SAST::parseAssignment(PARSE_ARGS, std::vector<SASTNode*>* node_place) {
 	
 	// Parse an Assignment
 	SASTAssignment* assign_node = new SASTAssignment();
-	assign_node->node_type = SASTTypeAssignment;
+	assign_node->node_type = STypeAssignment;
 	
 	if (!tokens[i].string.compare("=")) {
 		
@@ -571,7 +607,7 @@ bool SAST::parseAssignment(PARSE_ARGS, std::vector<SASTNode*>* node_place) {
 			
 			// Node is declaration
 			// Previous token is identifier
-			if (node_place->size() != 0 && (*node_place)[node_place->size() - 1]->node_type == SASTTypeDeclaration) {
+			if (node_place->size() != 0 && (*node_place)[node_place->size() - 1]->node_type == STypeDeclaration) {
 				
 				assign_node->declaration = (SASTDeclaration*)(*node_place)[node_place->size() - 1];
 				std::vector<SASTNode*>::iterator deleter = node_place->begin() + node_place->size() - 1;
@@ -615,7 +651,7 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 	
 	// Check for a function definition
 	SASTFunctionDefinition* func_def = new SASTFunctionDefinition();
-	func_def->node_type = SASTTypeFunctionDef;
+	func_def->node_type = STypeFunctionDef;
 	if (!current_block && tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("func")) {
 		
 		i++;
@@ -652,7 +688,7 @@ SASTFunctionDefinition* SAST::parseFunctionDef(PARSE_ARGS, SBlock*& current_bloc
 						
 						// Create a block for the funciton definition
 						func_def->block = current_block = new SBlock();
-						func_def->block->node_type = SASTTypeBlock;
+						func_def->block->node_type = STypeBlock;
 						func_def->block->owner = func_def;
 						
 						return func_def;
@@ -723,15 +759,15 @@ SASTIfStatement* SAST::parseIfStatement(PARSE_ARGS, SBlock*& current_block, SAST
 						
 						// Create a new block and make it the current block
 						SASTIfStatement* if_statement = new SASTIfStatement();
-						if_statement->node_type = SASTTypeIfExpression;
+						if_statement->node_type = STypeIfExpression;
 						
 						if_statement->parent_block = current_block;
 						if_statement->block = current_block = new SBlock();
-						if_statement->block->node_type = SASTTypeBlock;
+						if_statement->block->node_type = STypeBlock;
 						current_block->owner = if_statement;
 						
 						// Will always be a bool for the target type
-						expression->destination_type = "bool";
+						expression->destination_type = STypeRegistry::hashString("bool");
 						if_statement->expression = expression;
 						
 						// If we are inside of another if statement, make sure to remember that
@@ -804,17 +840,17 @@ SASTLoop* SAST::parseWhileLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& cu
 						
 						// Create a new while loop
 						SASTLoop* loop = current_loop = new SASTLoop();
-						loop->node_type = SASTTypeLoop;
-						loop->loop_type = SASTLoopTypeWhile;
+						loop->node_type = STypeLoop;
+						loop->loop_type = SLoopTypeWhile;
 						
 						// Create a new block
 						loop->parent_block = current_block;
 						loop->block = current_block = new SBlock();
-						loop->block->node_type = SASTTypeBlock;
+						loop->block->node_type = STypeBlock;
 						loop->block->owner = loop;
 						
 						// Will always be a bool for the target type
-						expression->destination_type = "bool";
+						expression->destination_type = STypeRegistry::hashString("bool");
 						loop->expression = expression;
 						
 						return loop;
@@ -875,7 +911,7 @@ SASTLoop* SAST::parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& curr
 			
 			parseAssignment(tokens, i, &temp);
 			
-			if (temp.size() && temp.back()->node_type == SASTTypeAssignment) {
+			if (temp.size() && temp.back()->node_type == STypeAssignment) {
 				
 				SASTAssignment* initial_assign = (SASTAssignment*)temp.back();
 			
@@ -907,19 +943,19 @@ SASTLoop* SAST::parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& curr
 								// Create a new while loop
 								SASTLoopFor* loop = new SASTLoopFor();
 								current_loop = loop;
-								loop->node_type = SASTTypeLoop;
-								loop->loop_type = SASTLoopTypeFor;
+								loop->node_type = STypeLoop;
+								loop->loop_type = SLoopTypeFor;
 						
 								// Create a new block
 								loop->parent_block = current_block;
 								loop->block = current_block = new SBlock();
-								loop->block->node_type = SASTTypeBlock;
+								loop->block->node_type = STypeBlock;
 								loop->block->owner = loop;
 						
 								loop->initial_assign = initial_assign;
 								
 								// Will always be a bool for the target type
-								expression->destination_type = "bool";
+								expression->destination_type = STypeRegistry::hashString("bool");
 								loop->expression = expression;
 						
 								loop->increment = increment;
@@ -969,6 +1005,29 @@ SASTLoop* SAST::parseForLoop(PARSE_ARGS, SBlock*& current_block, SASTLoop*& curr
 			throw std::runtime_error("( Expected");
 			
 		}
+		
+	}
+	
+	return nullptr;
+	
+}
+
+SASTReturn* SAST::parseReturn(PARSE_ARGS) {
+	
+	if (tokens[i].type == STokenTypeKeyword && !tokens[i].string.compare("return")) {
+	
+		// Parse an expression, the destination type is no type because we want it to be determined by the contents
+		i++;
+		SASTExpression* expression = parseExpression(tokens, i);
+		expression->destination_type = 0;
+		
+		// The expression can be null, which means that it was just a blank return to leave the function
+		SASTReturn* return_node = new SASTReturn();
+		return_node->node_type = STypeReturn;
+		
+		return_node->expression = expression;
+		
+		return return_node;
 		
 	}
 	

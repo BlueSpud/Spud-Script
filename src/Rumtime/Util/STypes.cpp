@@ -24,9 +24,9 @@ STypeRegistry* STypeRegistry::instance() {
         instance = new STypeRegistry();
 		
 		// We do a special registration of strings, use char*
-		instance->factories["string"] = new SStringFactory();
+		instance->factories[instance->hasher("string")] = new SStringFactory();
 		instance->registered_types.push_back("string");
-		instance->cpp_class_names[typeid(char*).name()] = "string";
+		instance->cpp_class_names[instance->hasher(typeid(char*).name())] = instance->hasher("string");
 		
 	}
 	
@@ -34,13 +34,22 @@ STypeRegistry* STypeRegistry::instance() {
 
 }
 
-size_t STypeRegistry::getTypeSize(const std::string& type) {
+size_t STypeRegistry::getTypeSize(size_t type) {
 	
 	// Check if it is a normal data type
 	if (factories.count(type))
 		return factories[type]->size;
 	else return 4;
 	
+}
+
+size_t STypeRegistry::hashString(const std::string& type) { return instance()->hasher(type); }
+
+bool STypeRegistry::isOfType(size_t check, const std::string type) {
+	
+	// Hash the type
+	size_t hash = hasher(type);
+	return hash == check;
 }
 
 SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
@@ -52,7 +61,7 @@ SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
     
         char* base_pointer = reinterpret_cast<char*>(variable->value);
         member.value = reinterpret_cast<void*>(base_pointer + instance()->variable_lookups[variable->type][name].byte_offset);
-        member.type = instance()->variable_lookups[variable->type][name].type.c_str();
+		member.type = instance()->variable_lookups[variable->type][name].type;
     
     }
     
@@ -60,21 +69,21 @@ SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
 
 }
 
-void STypeRegistry::performCopy(void*& dest, void* from, const std::string& type) {
+void STypeRegistry::performCopy(void*& dest, void* from, size_t type) {
 	
 	// Strings need to be deep copied
-	if (!type.compare("string")) {
+	if (STypeRegistry::instance()->isOfType(type, "string")) {
 		
 		// Figure out how big we need to allocate
 		char** from_pointer = (char**)from;
 		size_t length = strlen(from_pointer[0]);
 		
 		// Create a new block for the contents and copy it in
-		char* buffer = (char*)malloc(sizeof(char) * (length + 1));
+		char* buffer = (char*)calloc(1,sizeof(char) * (length + 1));
 		memcpy(buffer, from_pointer[0], sizeof(char) * (length + 1));
 		
 		// Make the destinaiton pointer
-		char** ptr = (char**)malloc(sizeof(char**));
+		char** ptr = (char**)calloc(1,sizeof(char**));
 		ptr[0] = buffer;
 		
 		memcpy(dest, ptr, sizeof(char**));

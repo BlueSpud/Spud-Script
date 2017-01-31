@@ -38,18 +38,18 @@ SOperatorRegistry* SOperatorRegistry::instance() {
 	
 }
 
-bool SOperatorRegistry::registerOperator(operator_func func, std::string type) {
+bool SOperatorRegistry::registerOperator(operator_func func, const std::string type) {
 	
 	// Save the operator
-	operator_funcs[type] = func;
+	operator_funcs[STypeRegistry::hashString(type)] = func;
 	return true;
 	
 }
 
-bool SOperatorRegistry::registerCast(cast_func func, std::string type) {
+bool SOperatorRegistry::registerCast(cast_func func, const std::string type) {
 	
 	// Save the cast
-	cast_funcs[type] = func;
+	cast_funcs[STypeRegistry::hashString(type)] = func;
 	return true;
 	
 }
@@ -57,7 +57,7 @@ bool SOperatorRegistry::registerCast(cast_func func, std::string type) {
 void* SOperatorRegistry::performCast(SCAST_ARGS) {
 	
 	// Check if we have a cast for this and we're not casting it to the same thing
-	if (var->type.compare(type) && cast_funcs.count(var->type)) {
+	if (var->type != type && cast_funcs.count(var->type)) {
 		
 		// Return the casted value if success
 		void* cast_result = cast_funcs[var->type](var, type);
@@ -67,7 +67,7 @@ void* SOperatorRegistry::performCast(SCAST_ARGS) {
 		
 	}
 	
-	throw std::runtime_error(var->type + " cannot be cast to " + type);
+	throw std::runtime_error("Cannot cast");
 	
 	return nullptr;
 	
@@ -86,7 +86,7 @@ void* SOperatorRegistry::performOperation(SOPERATOR_ARGS) {
 	
 	}
 	
-	throw std::runtime_error("Undefined operation " + first->type + " " + o + " " + second->type);
+	throw std::runtime_error("Undefined operation: " + o);
 	
 	return nullptr;
 	
@@ -95,27 +95,27 @@ void* SOperatorRegistry::performOperation(SOPERATOR_ARGS) {
 void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 	
 	// Int to int
-	if (!second->type.compare("int"))
-		return instance()->standardArithmatic<int, int>(first, second, o);
+	if (STypeRegistry::instance()->isOfType(second->type, "int"))
+		return instance()->modulusArithmatic<int, int>(first, second, o);
 	
 	// Int to float
-	if (!second->type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(second->type, "float"))
 		return instance()->standardArithmatic<int, float>(first, second, o);
 	
 	// Int to double
-	if (!second->type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(second->type, "double"))
 		return instance()->standardArithmatic<int, double>(first, second, o);
 	
 	// Int to long
-	if (!second->type.compare("long"))
-		return instance()->standardArithmatic<int, long>(first, second, o);
+	if (STypeRegistry::instance()->isOfType(second->type, "long"))
+		return instance()->modulusArithmatic<int, long>(first, second, o);
 	
 	// Int to char
-	if (!second->type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(second->type, "char"))
 		return instance()->standardArithmatic<int, char>(first, second, o);
 	
 	// Int to bool
-	if (!second->type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(second->type, "bool"))
 		return instance()->standardArithmatic<int, bool>(first, second, o);
 
 	return nullptr;
@@ -125,27 +125,27 @@ void* SOperatorRegistry::oInt(SOPERATOR_ARGS) {
 void* SOperatorRegistry::oFloat(SOPERATOR_ARGS) {
 	
 	// Float to int
-	if (!second->type.compare("int"))
+	if (STypeRegistry::instance()->isOfType(second->type, "int"))
 		return instance()->standardArithmatic<float, int>(first, second, o);
 	
 	// Float to float
-	if (!second->type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(second->type, "float"))
 		return instance()->standardArithmatic<float, float>(first, second, o);
 	
 	// Float to double
-	if (!second->type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(second->type, "double"))
 		return instance()->standardArithmatic<float, double>(first, second, o);
 	
 	// Float to long
-	if (!second->type.compare("long"))
+	if (STypeRegistry::instance()->isOfType(second->type, "long"))
 		return instance()->standardArithmatic<float, long>(first, second, o);
 	
 	// Float to char
-	if (!second->type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(second->type, "char"))
 		return instance()->standardArithmatic<float, char>(first, second, o);
 	
 	// Float to bool
-	if (!second->type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(second->type, "bool"))
 		return instance()->standardArithmatic<float, bool>(first, second, o);
 	
 	return nullptr;
@@ -155,27 +155,27 @@ void* SOperatorRegistry::oFloat(SOPERATOR_ARGS) {
 void* SOperatorRegistry::oDouble(SOPERATOR_ARGS) {
 	
 	// Double to int
-	if (!second->type.compare("int"))
+	if (STypeRegistry::instance()->isOfType(second->type, "int"))
 		return instance()->standardArithmatic<double, int>(first, second, o);
 	
 	// Double to float
-	if (!second->type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(second->type, "float"))
 		return instance()->standardArithmatic<double, float>(first, second, o);
 	
 	// Double to double
-	if (!second->type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(second->type, "double"))
 		return instance()->standardArithmatic<double, double>(first, second, o);
 	
 	// Double to long
-	if (!second->type.compare("long"))
+	if (STypeRegistry::instance()->isOfType(second->type, "long"))
 		return instance()->standardArithmatic<double, long>(first, second, o);
 	
 	// Double to char
-	if (!second->type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(second->type, "char"))
 		return instance()->standardArithmatic<double, char>(first, second, o);
 	
 	// Double to bool
-	if (!second->type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(second->type, "bool"))
 		return instance()->standardArithmatic<double, bool>(first, second, o);
 	
 	return nullptr;
@@ -185,27 +185,27 @@ void* SOperatorRegistry::oDouble(SOPERATOR_ARGS) {
 void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
 	
 	// Long to int
-	if (!second->type.compare("int"))
-		return instance()->standardArithmatic<long, int>(first, second, o);
+	if (STypeRegistry::instance()->isOfType(second->type, "int"))
+		return instance()->modulusArithmatic<long, int>(first, second, o);
 	
 	// Long to float
-	if (!second->type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(second->type, "float"))
 		return instance()->standardArithmatic<long, float>(first, second, o);
 	
 	// Long to double
-	if (!second->type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(second->type, "double"))
 		return instance()->standardArithmatic<long, double>(first, second, o);
 	
 	// Long to long
-	if (!second->type.compare("long"))
-		return instance()->standardArithmatic<long, long>(first, second, o);
+	if (STypeRegistry::instance()->isOfType(second->type, "long"))
+		return instance()->modulusArithmatic<long, long>(first, second, o);
 	
 	// Long to char
-	if (!second->type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(second->type, "char"))
 		return instance()->standardArithmatic<long, char>(first, second, o);
 	
 	// Long to bool
-	if (!second->type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(second->type, "bool"))
 		return instance()->standardArithmatic<long, bool>(first, second, o);
 	
 	return nullptr;
@@ -215,27 +215,27 @@ void* SOperatorRegistry::oLong(SOPERATOR_ARGS) {
 void* SOperatorRegistry::oBool(SOPERATOR_ARGS) {
 	
 	// Bool to int
-	if (!second->type.compare("int"))
-		return instance()->standardArithmatic<bool, int>(first, second, o);
+	if (STypeRegistry::instance()->isOfType(second->type, "int"))
+		return instance()->modulusArithmatic<bool, int>(first, second, o);
 	
 	// Bool to float
-	if (!second->type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(second->type, "float"))
 		return instance()->standardArithmatic<bool, float>(first, second, o);
 	
 	// Bool to double
-	if (!second->type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(second->type, "double"))
 		return instance()->standardArithmatic<bool, double>(first, second, o);
 	
 	// Bool to long
-	if (!second->type.compare("long"))
-		return instance()->standardArithmatic<bool, long>(first, second, o);
+	if (STypeRegistry::instance()->isOfType(second->type, "long"))
+		return instance()->modulusArithmatic<bool, long>(first, second, o);
 	
 	// Bool to char
-	if (!second->type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(second->type, "char"))
 		return instance()->standardArithmatic<bool, char>(first, second, o);
 	
 	// bool to bool
-	if (!second->type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(second->type, "bool"))
 		return instance()->standardArithmatic<bool, bool>(first, second, o);
 	
 	return nullptr;
@@ -257,10 +257,10 @@ void* SOperatorRegistry::oString(SOPERATOR_ARGS) {
 
 			// Create a new string buffer
 			size_t size = sizeof(char) * (result.length() + 1);
-			char* buffer = (char*)malloc(size);
+			char* buffer = (char*)calloc(1,size);
 			sprintf(buffer, "%s", result.c_str());
 			
-			char** ptr = (char**)malloc(sizeof(char**));
+			char** ptr = (char**)calloc(1,sizeof(char**));
 			ptr[0] = buffer;
 			
 			return ptr;
@@ -278,22 +278,22 @@ void* SOperatorRegistry::oString(SOPERATOR_ARGS) {
 
 void* SOperatorRegistry::cInt(SCAST_ARGS) {
 	
-	if (!type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(type, "float"))
 		return instance()->standardCast<int, float>(var, type);
 	
-	if (!type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(type, "double"))
 		return instance()->standardCast<int, double>(var, type);
 	
-	if (!type.compare("long"))
+	if (STypeRegistry::instance()->isOfType(type, "long"))
 		return instance()->standardCast<int, long>(var, type);
 	
-	if (!type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(type, "char"))
 		return instance()->standardCast<int, char>(var, type);
 	
-	if (!type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(type, "bool"))
 		return instance()->standardCast<int, bool>(var, type);
 	
-	if (!type.compare("string"))
+	if (STypeRegistry::instance()->isOfType(type, "string"))
 		return instance()->toString<int>(var);
 	
 	return nullptr;
@@ -302,22 +302,22 @@ void* SOperatorRegistry::cInt(SCAST_ARGS) {
 
 void* SOperatorRegistry::cFloat(SCAST_ARGS) {
 	
-	if (!type.compare("int"))
+	if (STypeRegistry::instance()->isOfType(type, "int"))
 		return instance()->standardCast<float, int>(var, type);
 	
-	if (!type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(type, "double"))
 		return instance()->standardCast<float, double>(var, type);
 	
-	if (!type.compare("long"))
+	if (STypeRegistry::instance()->isOfType(type, "long"))
 		return instance()->standardCast<float, long>(var, type);
 	
-	if (!type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(type, "char"))
 		return instance()->standardCast<float, char>(var, type);
 	
-	if (!type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(type, "bool"))
 		return instance()->standardCast<float, bool>(var, type);
 	
-	if (!type.compare("string"))
+	if (STypeRegistry::instance()->isOfType(type, "string"))
 		return instance()->toString<float>(var);
 	
 	return nullptr;
@@ -326,22 +326,22 @@ void* SOperatorRegistry::cFloat(SCAST_ARGS) {
 
 void* SOperatorRegistry::cDouble(SCAST_ARGS) {
 	
-	if (!type.compare("int"))
+	if (STypeRegistry::instance()->isOfType(type, "int"))
 		return instance()->standardCast<double, int>(var, type);
 	
-	if (!type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(type, "float"))
 		return instance()->standardCast<double, float>(var, type);
 	
-	if (!type.compare("long"))
+	if (STypeRegistry::instance()->isOfType(type, "long"))
 		return instance()->standardCast<double, long>(var, type);
 	
-	if (!type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(type, "char"))
 		return instance()->standardCast<double, char>(var, type);
 	
-	if (!type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(type, "bool"))
 		return instance()->standardCast<double, bool>(var, type);
 	
-	if (!type.compare("string"))
+	if (STypeRegistry::instance()->isOfType(type, "string"))
 		return instance()->toString<double>(var);
 	
 	return nullptr;
@@ -350,22 +350,22 @@ void* SOperatorRegistry::cDouble(SCAST_ARGS) {
 
 void* SOperatorRegistry::cLong(SCAST_ARGS) {
 	
-	if (!type.compare("int"))
+	if (STypeRegistry::instance()->isOfType(type, "int"))
 		return instance()->standardCast<long, int>(var, type);
 	
-	if (!type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(type, "float"))
 		return instance()->standardCast<long, float>(var, type);
 	
-	if (!type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(type, "double"))
 		return instance()->standardCast<long, double>(var, type);
 	
-	if (!type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(type, "char"))
 		return instance()->standardCast<long, char>(var, type);
 	
-	if (!type.compare("bool"))
+	if (STypeRegistry::instance()->isOfType(type, "bool"))
 		return instance()->standardCast<long, bool>(var, type);
 	
-	if (!type.compare("string"))
+	if (STypeRegistry::instance()->isOfType(type, "string"))
 		return instance()->toString<long>(var);
 	
 	return nullptr;
@@ -374,22 +374,22 @@ void* SOperatorRegistry::cLong(SCAST_ARGS) {
 
 void* SOperatorRegistry::cBool(SCAST_ARGS) {
 	
-	if (!type.compare("int"))
+	if (STypeRegistry::instance()->isOfType(type, "int"))
 		return instance()->standardCast<bool, int>(var, type);
 	
-	if (!type.compare("float"))
+	if (STypeRegistry::instance()->isOfType(type, "float"))
 		return instance()->standardCast<bool, float>(var, type);
 	
-	if (!type.compare("double"))
+	if (STypeRegistry::instance()->isOfType(type, "double"))
 		return instance()->standardCast<bool, double>(var, type);
 	
-	if (!type.compare("long"))
+	if (STypeRegistry::instance()->isOfType(type, "long"))
 		return instance()->standardCast<bool, long>(var, type);
 	
-	if (!type.compare("char"))
+	if (STypeRegistry::instance()->isOfType(type, "char"))
 		return instance()->standardCast<bool, char>(var, type);
 	
-	if (!type.compare("string"))
+	if (STypeRegistry::instance()->isOfType(type, "string"))
 		return instance()->toString<bool>(var);
 	
 	return nullptr;

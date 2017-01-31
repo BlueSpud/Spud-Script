@@ -26,11 +26,15 @@ class Test {
 
     public:
 
-        int a, b = 24, c = 12, d;
+        int a = 0, b = 24, c = 12, d = 0;
     
         Other o;
+	
+		static int test;
 
 };
+
+int Test::test;
 
 void prints(char* a) {
 	
@@ -46,9 +50,11 @@ void cppFunction(float a, float b, float c) {
     
 }
 
+int cppReturn() { return 25; }
+
 EXPOSE_FUNC(vm, cppFunction, void, float float float)
 EXPOSE_FUNC(vm, prints, void, string)
-
+EXPOSE_FUNC_NO_ARGS(vm, cppReturn, int)
 
 EXPOSE_SCRIPT_TYPE(Other)
 
@@ -60,6 +66,7 @@ int main(int argc, const char * argv[]) {
     SLexer lexer;
     SAST parser;
 	
+	// TODO, fix this!
 	EXPOSE_SCRIPT_MEMBER(Other, a, int);
 	
     EXPOSE_SCRIPT_MEMBER(Test, a, int);
@@ -89,6 +96,7 @@ int main(int argc, const char * argv[]) {
     lexer.operators.push_back("-");
     lexer.operators.push_back("*");
     lexer.operators.push_back("/");
+	lexer.operators.push_back("%");
 	
 	lexer.operators.push_back("<=");
 	lexer.operators.push_back(">=");
@@ -105,10 +113,26 @@ int main(int argc, const char * argv[]) {
     // Go!
     std::vector<SToken> tokens = lexer.lexSource(code);
     std::vector<SASTNode*> nodes = parser.parseTokens(tokens);
-
-    vm.executeCode(nodes);
-
-//	std::cout << "w: " << *vm.getScriptValue<char*>("w") << std::endl;
-//	std::cout << "s: " << *vm.getScriptValue<char*>("s") << std::endl;
+	std::vector<SVMNode*> compiled;
 	
+	for (int i = 0; i < nodes.size(); i++)
+		compiled.push_back(nodes[i]->compile());
+	
+	for (int i = 0; i < nodes.size(); i++)
+		delete nodes[i];
+	
+	Test* some = new Test;
+	vm.exposeVariable<Test>(some, "some");
+
+	try { vm.executeCode(compiled); } catch (std::runtime_error e) {
+		
+		std::cout << "[Spud Script] There was a runtime error executing the script: " << e.what() << std::endl;
+		
+	}
+	
+	for (int i = 0; i < compiled.size(); i++)
+		delete compiled[i];
+
 }
+
+
