@@ -18,18 +18,18 @@ class SFunctionContainer {
 		std::string return_type;
 		std::vector<std::string> signature;
 	
-		virtual void operator()(const std::vector<void*>& variables) = 0;
+		virtual SVariable operator()(const std::vector<void*>& variables) = 0;
 	
 };
 
 
 // Special thanks to n.m. on Stack Overflow for help with this class
-template <class ...params>
+template <class R, class ...params>
 class SFunction : public SFunctionContainer {
 	
 	public:
 	
-		SFunction(void(*_func)(params...), const std::string& _return_type, const std::string& _signature) {
+		SFunction(R(*_func)(params...), const std::string& _return_type, const std::string& _signature) {
 			
 			func = _func;
 			return_type = _return_type;
@@ -42,34 +42,76 @@ class SFunction : public SFunctionContainer {
 			
 		}
 	
-		virtual void operator()(const std::vector<void*>& variables) {
+		virtual SVariable operator()(const std::vector<void*>& variables) {
+		
+			// Call the function
+			checkAndCall(variables);
+			
+			// Void return value
+			return SVariable();
+		
+		}
+	
+		R checkAndCall(const std::vector<void*>& variables) {
 		
 			// Make sure we have correct # of parameters in the vector
 			if (sizeof...(params) != variables.size())
 				throw std::runtime_error("Wrong number of arguments");
-			else call<std::tuple<params...>>(variables, std::make_index_sequence<sizeof...(params)>());
+			return call<std::tuple<params...>>(variables, std::make_index_sequence<sizeof...(params)>());
 		
 		}
 	
 	private:
 	
-		void(*func)(params...);
+		R(*func)(params...);
 	
 		template <class tuple, size_t... index>
-		void call(const std::vector<void*>& variables, std::index_sequence<index...>) {
+		R call(const std::vector<void*>& variables, std::index_sequence<index...>) {
 		
 			// Call the function with the variables
-			func(castCPP<typename std::tuple_element<index, tuple>::type>(variables[index])...);
+			return func(castCPP<typename std::tuple_element<index, tuple>::type>(variables[index])...);
 		
 		};
 	
 };
 
+template <class R, class ...params>
+class SFunctionReturn : public SFunction<R, params...> {
+	
+	public:
+	
+		SFunctionReturn(R(*_func)(params...), const std::string& _return_type, const std::string& _signature) : SFunction<R, params...>(_func, _return_type, _signature) {}
+	
+		virtual SVariable operator()(const std::vector<void*>& variables) {
+	
+			// Get the value of the function
+			R return_value = SFunction<R, params...>::checkAndCall(variables);
+			SVariable var;
+
+			// Copy the memory into a new block
+			var.value = calloc(1, sizeof(R));
+			memcpy(var.value, &return_value, sizeof(R));
+			var.type = STypeRegistry::instance()->cpp_class_names[STypeRegistry::instance()->hashString(typeid(R).name())];
+			
+			return var;
+		
+		}
+	
+};
+
+template <class R, class... params>
+SFunctionContainer* CreateSFunction(R(*func)(params ...), const std::string& _return_type, const std::string& _signature) {
+	
+	// Create a new function with a return type
+	return (SFunctionContainer*)(new SFunctionReturn<R, params...>(func, _return_type, _signature));
+	
+}
+
 template <class... params>
 SFunctionContainer* CreateSFunction(void(*func)(params ...), const std::string& _return_type, const std::string& _signature) {
 	
-	// Create a new function and return it as a container
-	return (SFunctionContainer*)(new SFunction<params...>(func, _return_type, _signature));
+	// Create a new function with a void return type type
+	return (SFunctionContainer*)(new SFunction<void, params...>(func, _return_type, _signature));
 	
 }
 

@@ -50,8 +50,11 @@ void cppFunction(float a, float b, float c) {
     
 }
 
+int cppReturn() { return 25; }
+
 EXPOSE_FUNC(vm, cppFunction, void, float float float)
 EXPOSE_FUNC(vm, prints, void, string)
+EXPOSE_FUNC(vm, cppReturn, int, )
 
 EXPOSE_SCRIPT_TYPE(Other)
 
@@ -121,7 +124,11 @@ int main(int argc, const char * argv[]) {
 	Test* some = new Test;
 	vm.exposeVariable<Test>(some, "some");
 
-    vm.executeCode(compiled);
+	try { vm.executeCode(compiled); } catch (std::runtime_error e) {
+		
+		std::cout << "[Spud Script] There was a runtime error executing the script: " << e.what() << std::endl;
+		
+	}
 	
 	for (int i = 0; i < compiled.size(); i++)
 		delete compiled[i];

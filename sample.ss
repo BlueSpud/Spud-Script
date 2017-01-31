@@ -1,9 +1,12 @@
 func test() {
 
 	prints("Calling the function test");
-	return "THIS IS A STRING";
+	return 10;
 
 }
 
-string a = test();
+int a = test();
+prints(a);
+
+a = cppReturn();
 prints(a);

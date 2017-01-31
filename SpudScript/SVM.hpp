@@ -23,8 +23,11 @@ class SVM {
 	
 		#define EXPOSE_FUNC(vm, f, r, s) bool bound_##f = vm.bindFunction(f, #f, #r, #s);
 	
-		template <class... params>
-		bool bindFunction(void(*func)(params...), std::string name, std::string return_type, std::string signature);
+		template <class R, class... params>
+		bool bindFunction(R(*func)(params...), std::string name, std::string return_type, std::string signature);
+	
+//		template <class... params>
+//		bool bindFunction(void(*func)(params...), std::string name, std::string return_type, std::string signature);
 	
 		template <class... params>
 		void* callFunction(std::string name, params... p);
@@ -59,8 +62,8 @@ class SVM {
     
 };
 
-template <class... params>
-bool SVM::bindFunction(void(*func)(params...), std::string name, std::string return_type, std::string signature) {
+template <class R, class... params>
+bool SVM::bindFunction(R(*func)(params...), std::string name, std::string return_type, std::string signature) {
 	
 	// Get the function container
 	SFunctionContainer* container = CreateSFunction(func, return_type, signature);

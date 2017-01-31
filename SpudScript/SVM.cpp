@@ -445,11 +445,16 @@ void* SVM::evaluateFuncitonCall(SVMFunctionCall* call) {
 			
 		}
 		
-		cpp_functions[call->identifier]->operator()(params);
+		// Get the return value of the function call
+		SVariable var = cpp_functions[call->identifier]->operator()(params);
 		
 		// Make sure that we free what we allocated
 		for (int i = 0; i < call->expressions.size(); i++)
 			free(params[i]);
+		
+		// Call a throw
+		if (var.value != nullptr)
+			throw var;
 		
 	} else {
 		
