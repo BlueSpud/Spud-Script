@@ -11,6 +11,10 @@
 
 #include "SASTNodes.hpp"
 
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
 class SExpressionNodeLiteral : public SExpressionNode {
 	
 	public:
@@ -114,5 +118,9 @@ class SExpressionNodeFunction : public SExpressionNode {
 	SVMFunctionCall* call;
 	
 };
+
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
 
 #endif /* SExpression_hpp */

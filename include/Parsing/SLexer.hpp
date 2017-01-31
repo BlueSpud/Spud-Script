@@ -15,8 +15,12 @@
 
 #include "STypes.hpp"
 
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
 enum STokenType {
-    
+	
     STokenTypeKeyword,
     STokenTypeType,
     STokenTypeIdentifier,
@@ -31,22 +35,6 @@ enum STokenType {
     
 };
 
-static std::string STokenNames[] = {
-    
-    "keyword",
-    "type",
-    "identifier",
-    "number",
-    "operator",
-    "open paren",
-    "close paren",
-    "open brack",
-    "close brack",
-    "semi",
-	"string"
-    
-};
-
 struct SToken {
     
     STokenType type;
@@ -56,19 +44,30 @@ struct SToken {
     
 };
 
+struct SLexerData {
+	
+	SLexerData();
+	
+	std::vector<std::string> keywords;
+	std::vector<std::string >operators;
+	
+};
+
 class SLexer {
     
     public:
-    
-        std::vector<std::string> keywords;
-        std::vector<std::string >operators;
-        std::vector<SToken> lexSource(std::string source);
+	
+        static std::vector<SToken> lexSource(std::string src);
     
     private:
     
-        SToken getTokenFromArray(const std::vector<std::string> array, int position, const std::string& source, STokenType type);
-    
+        static SToken getTokenFromArray(const std::vector<std::string> array, int position, const std::string& src, STokenType type);
+		static SLexerData data;
+	
 };
 
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
 
 #endif /* Slexer_hpp */

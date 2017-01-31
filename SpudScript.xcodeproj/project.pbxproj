@@ -7,50 +7,33 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		029F6DBE1E1C6F460071C2BA /* sample.ss in CopyFiles */ = {isa = PBXBuildFile; fileRef = 029F6DBD1E1C6F3C0071C2BA /* sample.ss */; };
-		02DA3D841E4140160055D205 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3D721E413FFB0055D205 /* main.cpp */; };
-		02DA3D851E41401F0055D205 /* SAST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3D741E413FFB0055D205 /* SAST.cpp */; };
-		02DA3D861E4140210055D205 /* SLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3D771E413FFB0055D205 /* SLexer.cpp */; };
-		02DA3D871E4140240055D205 /* SVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3D7A1E413FFB0055D205 /* SVM.cpp */; };
-		02DA3D8C1E41406C0055D205 /* SOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3D801E413FFB0055D205 /* SOperator.cpp */; };
-		02DA3D8D1E4140700055D205 /* STypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3D821E413FFB0055D205 /* STypes.cpp */; };
+		02DA3E1E1E4153540055D205 /* SAST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E171E4153400055D205 /* SAST.cpp */; };
+		02DA3E1F1E4153550055D205 /* SLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E181E4153400055D205 /* SLexer.cpp */; };
+		02DA3E201E41535A0055D205 /* SScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E1A1E4153400055D205 /* SScript.cpp */; };
+		02DA3E211E41535B0055D205 /* SOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E1C1E4153400055D205 /* SOperator.cpp */; };
+		02DA3E221E41535C0055D205 /* STypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E1D1E4153400055D205 /* STypes.cpp */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		02D5AFF41E14B05E001E2A2A /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				029F6DBE1E1C6F460071C2BA /* sample.ss in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		029F6DBD1E1C6F3C0071C2BA /* sample.ss */ = {isa = PBXFileReference; lastKnownFileType = text; path = sample.ss; sourceTree = "<group>"; };
-		02D5AFF61E14B05E001E2A2A /* SpudScript */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SpudScript; sourceTree = BUILT_PRODUCTS_DIR; };
-		02DA3D721E413FFB0055D205 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		02DA3D741E413FFB0055D205 /* SAST.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SAST.cpp; sourceTree = "<group>"; };
-		02DA3D751E413FFB0055D205 /* SAST.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SAST.hpp; sourceTree = "<group>"; };
-		02DA3D761E413FFB0055D205 /* SASTNodes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SASTNodes.hpp; sourceTree = "<group>"; };
-		02DA3D771E413FFB0055D205 /* SLexer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SLexer.cpp; sourceTree = "<group>"; };
-		02DA3D781E413FFB0055D205 /* SLexer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SLexer.hpp; sourceTree = "<group>"; };
-		02DA3D7A1E413FFB0055D205 /* SVM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SVM.cpp; sourceTree = "<group>"; };
-		02DA3D7B1E413FFB0055D205 /* SVM.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SVM.hpp; sourceTree = "<group>"; };
-		02DA3D7C1E413FFB0055D205 /* SVMNodes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SVMNodes.hpp; sourceTree = "<group>"; };
-		02DA3D7E1E413FFB0055D205 /* SExpression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SExpression.hpp; sourceTree = "<group>"; };
-		02DA3D7F1E413FFB0055D205 /* SFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SFunctional.hpp; sourceTree = "<group>"; };
-		02DA3D801E413FFB0055D205 /* SOperator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SOperator.cpp; sourceTree = "<group>"; };
-		02DA3D811E413FFB0055D205 /* SOperator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SOperator.hpp; sourceTree = "<group>"; };
-		02DA3D821E413FFB0055D205 /* STypes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = STypes.cpp; sourceTree = "<group>"; };
-		02DA3D831E413FFB0055D205 /* STypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STypes.hpp; sourceTree = "<group>"; };
+		02DA3DFA1E4153030055D205 /* libSpudScript.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSpudScript.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		02DA3E0A1E4153400055D205 /* SAST.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SAST.hpp; sourceTree = "<group>"; };
+		02DA3E0B1E4153400055D205 /* SASTNodes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SASTNodes.hpp; sourceTree = "<group>"; };
+		02DA3E0C1E4153400055D205 /* SLexer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SLexer.hpp; sourceTree = "<group>"; };
+		02DA3E0E1E4153400055D205 /* SScript.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SScript.hpp; sourceTree = "<group>"; };
+		02DA3E0F1E4153400055D205 /* SVMNodes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SVMNodes.hpp; sourceTree = "<group>"; };
+		02DA3E111E4153400055D205 /* SExpression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SExpression.hpp; sourceTree = "<group>"; };
+		02DA3E121E4153400055D205 /* SFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SFunctional.hpp; sourceTree = "<group>"; };
+		02DA3E131E4153400055D205 /* SOperator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SOperator.hpp; sourceTree = "<group>"; };
+		02DA3E141E4153400055D205 /* STypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STypes.hpp; sourceTree = "<group>"; };
+		02DA3E171E4153400055D205 /* SAST.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SAST.cpp; sourceTree = "<group>"; };
+		02DA3E181E4153400055D205 /* SLexer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SLexer.cpp; sourceTree = "<group>"; };
+		02DA3E1A1E4153400055D205 /* SScript.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SScript.cpp; sourceTree = "<group>"; };
+		02DA3E1C1E4153400055D205 /* SOperator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SOperator.cpp; sourceTree = "<group>"; };
+		02DA3E1D1E4153400055D205 /* STypes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = STypes.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		02D5AFF31E14B05E001E2A2A /* Frameworks */ = {
+		02DA3DF71E4153030055D205 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -60,79 +43,119 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		02D5AFED1E14B05E001E2A2A = {
+		02DA3DF11E4153030055D205 = {
 			isa = PBXGroup;
 			children = (
-				029F6DBD1E1C6F3C0071C2BA /* sample.ss */,
-				02DA3D711E413FFB0055D205 /* src */,
-				02D5AFF71E14B05E001E2A2A /* Products */,
+				02DA3E081E4153400055D205 /* include */,
+				02DA3E151E4153400055D205 /* src */,
+				02DA3DFB1E4153030055D205 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		02D5AFF71E14B05E001E2A2A /* Products */ = {
+		02DA3DFB1E4153030055D205 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				02D5AFF61E14B05E001E2A2A /* SpudScript */,
+				02DA3DFA1E4153030055D205 /* libSpudScript.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		02DA3D711E413FFB0055D205 /* src */ = {
+		02DA3E081E4153400055D205 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3D721E413FFB0055D205 /* main.cpp */,
-				02DA3D731E413FFB0055D205 /* Parsing */,
-				02DA3D791E413FFB0055D205 /* Rumtime */,
+				02DA3E091E4153400055D205 /* Parsing */,
+				02DA3E0D1E4153400055D205 /* Rumtime */,
+				02DA3E101E4153400055D205 /* Util */,
 			);
-			path = src;
+			path = include;
 			sourceTree = "<group>";
 		};
-		02DA3D731E413FFB0055D205 /* Parsing */ = {
+		02DA3E091E4153400055D205 /* Parsing */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3D751E413FFB0055D205 /* SAST.hpp */,
-				02DA3D741E413FFB0055D205 /* SAST.cpp */,
-				02DA3D761E413FFB0055D205 /* SASTNodes.hpp */,
-				02DA3D771E413FFB0055D205 /* SLexer.cpp */,
-				02DA3D781E413FFB0055D205 /* SLexer.hpp */,
+				02DA3E0A1E4153400055D205 /* SAST.hpp */,
+				02DA3E0B1E4153400055D205 /* SASTNodes.hpp */,
+				02DA3E0C1E4153400055D205 /* SLexer.hpp */,
 			);
 			path = Parsing;
 			sourceTree = "<group>";
 		};
-		02DA3D791E413FFB0055D205 /* Rumtime */ = {
+		02DA3E0D1E4153400055D205 /* Rumtime */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3D7A1E413FFB0055D205 /* SVM.cpp */,
-				02DA3D7B1E413FFB0055D205 /* SVM.hpp */,
-				02DA3D7C1E413FFB0055D205 /* SVMNodes.hpp */,
-				02DA3D7D1E413FFB0055D205 /* Util */,
+				02DA3E0E1E4153400055D205 /* SScript.hpp */,
+				02DA3E0F1E4153400055D205 /* SVMNodes.hpp */,
 			);
 			path = Rumtime;
 			sourceTree = "<group>";
 		};
-		02DA3D7D1E413FFB0055D205 /* Util */ = {
+		02DA3E101E4153400055D205 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3D7E1E413FFB0055D205 /* SExpression.hpp */,
-				02DA3D7F1E413FFB0055D205 /* SFunctional.hpp */,
-				02DA3D801E413FFB0055D205 /* SOperator.cpp */,
-				02DA3D811E413FFB0055D205 /* SOperator.hpp */,
-				02DA3D821E413FFB0055D205 /* STypes.cpp */,
-				02DA3D831E413FFB0055D205 /* STypes.hpp */,
+				02DA3E111E4153400055D205 /* SExpression.hpp */,
+				02DA3E121E4153400055D205 /* SFunctional.hpp */,
+				02DA3E131E4153400055D205 /* SOperator.hpp */,
+				02DA3E141E4153400055D205 /* STypes.hpp */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
+		02DA3E151E4153400055D205 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				02DA3E161E4153400055D205 /* Parsing */,
+				02DA3E191E4153400055D205 /* Rumtime */,
+				02DA3E1B1E4153400055D205 /* Util */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		02DA3E161E4153400055D205 /* Parsing */ = {
+			isa = PBXGroup;
+			children = (
+				02DA3E181E4153400055D205 /* SLexer.cpp */,
+				02DA3E171E4153400055D205 /* SAST.cpp */,
+			);
+			path = Parsing;
+			sourceTree = "<group>";
+		};
+		02DA3E191E4153400055D205 /* Rumtime */ = {
+			isa = PBXGroup;
+			children = (
+				02DA3E1A1E4153400055D205 /* SScript.cpp */,
+			);
+			path = Rumtime;
+			sourceTree = "<group>";
+		};
+		02DA3E1B1E4153400055D205 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				02DA3E1C1E4153400055D205 /* SOperator.cpp */,
+				02DA3E1D1E4153400055D205 /* STypes.cpp */,
 			);
 			path = Util;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		02DA3DF81E4153030055D205 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		02D5AFF51E14B05E001E2A2A /* SpudScript */ = {
+		02DA3DF91E4153030055D205 /* SpudScript */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 02D5AFFD1E14B05E001E2A2A /* Build configuration list for PBXNativeTarget "SpudScript" */;
+			buildConfigurationList = 02DA3E051E4153030055D205 /* Build configuration list for PBXNativeTarget "SpudScript" */;
 			buildPhases = (
-				02D5AFF21E14B05E001E2A2A /* Sources */,
-				02D5AFF31E14B05E001E2A2A /* Frameworks */,
-				02D5AFF41E14B05E001E2A2A /* CopyFiles */,
+				02DA3DF61E4153030055D205 /* Sources */,
+				02DA3DF71E4153030055D205 /* Frameworks */,
+				02DA3DF81E4153030055D205 /* Headers */,
 			);
 			buildRules = (
 			);
@@ -140,65 +163,64 @@
 			);
 			name = SpudScript;
 			productName = SpudScript;
-			productReference = 02D5AFF61E14B05E001E2A2A /* SpudScript */;
-			productType = "com.apple.product-type.tool";
+			productReference = 02DA3DFA1E4153030055D205 /* libSpudScript.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		02D5AFEE1E14B05E001E2A2A /* Project object */ = {
+		02DA3DF21E4153030055D205 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Logan Pazol";
 				TargetAttributes = {
-					02D5AFF51E14B05E001E2A2A = {
+					02DA3DF91E4153030055D205 = {
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = 259SD8597R;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 02D5AFF11E14B05E001E2A2A /* Build configuration list for PBXProject "SpudScript" */;
+			buildConfigurationList = 02DA3DF51E4153030055D205 /* Build configuration list for PBXProject "SpudScript" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 02D5AFED1E14B05E001E2A2A;
-			productRefGroup = 02D5AFF71E14B05E001E2A2A /* Products */;
+			mainGroup = 02DA3DF11E4153030055D205;
+			productRefGroup = 02DA3DFB1E4153030055D205 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				02D5AFF51E14B05E001E2A2A /* SpudScript */,
+				02DA3DF91E4153030055D205 /* SpudScript */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		02D5AFF21E14B05E001E2A2A /* Sources */ = {
+		02DA3DF61E4153030055D205 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02DA3D841E4140160055D205 /* main.cpp in Sources */,
-				02DA3D851E41401F0055D205 /* SAST.cpp in Sources */,
-				02DA3D861E4140210055D205 /* SLexer.cpp in Sources */,
-				02DA3D871E4140240055D205 /* SVM.cpp in Sources */,
-				02DA3D8C1E41406C0055D205 /* SOperator.cpp in Sources */,
-				02DA3D8D1E4140700055D205 /* STypes.cpp in Sources */,
+				02DA3E1F1E4153550055D205 /* SLexer.cpp in Sources */,
+				02DA3E221E41535C0055D205 /* STypes.cpp in Sources */,
+				02DA3E1E1E4153540055D205 /* SAST.cpp in Sources */,
+				02DA3E211E41535B0055D205 /* SOperator.cpp in Sources */,
+				02DA3E201E41535A0055D205 /* SScript.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		02D5AFFB1E14B05E001E2A2A /* Debug */ = {
+		02DA3E031E4153030055D205 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -240,12 +262,12 @@
 			};
 			name = Debug;
 		};
-		02D5AFFC1E14B05E001E2A2A /* Release */ = {
+		02DA3E041E4153030055D205 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -280,18 +302,28 @@
 			};
 			name = Release;
 		};
-		02D5AFFE1E14B05E001E2A2A /* Debug */ = {
+		02DA3E061E4153030055D205 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/bin/macOS/";
 				DEVELOPMENT_TEAM = 259SD8597R;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		02D5AFFF1E14B05E001E2A2A /* Release */ = {
+		02DA3E071E4153030055D205 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/bin/macOS/";
 				DEVELOPMENT_TEAM = 259SD8597R;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -299,25 +331,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		02D5AFF11E14B05E001E2A2A /* Build configuration list for PBXProject "SpudScript" */ = {
+		02DA3DF51E4153030055D205 /* Build configuration list for PBXProject "SpudScript" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				02D5AFFB1E14B05E001E2A2A /* Debug */,
-				02D5AFFC1E14B05E001E2A2A /* Release */,
+				02DA3E031E4153030055D205 /* Debug */,
+				02DA3E041E4153030055D205 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		02D5AFFD1E14B05E001E2A2A /* Build configuration list for PBXNativeTarget "SpudScript" */ = {
+		02DA3E051E4153030055D205 /* Build configuration list for PBXNativeTarget "SpudScript" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				02D5AFFE1E14B05E001E2A2A /* Debug */,
-				02D5AFFF1E14B05E001E2A2A /* Release */,
+				02DA3E061E4153030055D205 /* Debug */,
+				02DA3E071E4153030055D205 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 02D5AFEE1E14B05E001E2A2A /* Project object */;
+	rootObject = 02DA3DF21E4153030055D205 /* Project object */;
 }

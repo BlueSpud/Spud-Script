@@ -9,6 +9,10 @@
 #ifndef SVMNodes_h
 #define SVMNodes_h
 
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
 enum SNodeType {
 	
 	STypeExpression,
@@ -207,5 +211,9 @@ struct SVMReturn : public SVMNode {
 	virtual ~SVMReturn() { delete expression; }
 	
 };
+
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
 
 #endif /* SVMNodes_h */

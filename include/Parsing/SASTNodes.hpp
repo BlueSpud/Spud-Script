@@ -14,6 +14,10 @@
 
 #include "SVMNodes.hpp"
 
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
 struct SASTNode {
 	
 	SNodeType node_type;
@@ -319,5 +323,9 @@ struct SASTReturn : public SASTNode {
 	virtual ~SASTReturn() { delete expression; }
 
 };
+
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
 
 #endif /* SASTNodes_h */

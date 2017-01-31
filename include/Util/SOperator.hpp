@@ -9,14 +9,25 @@
 #ifndef SOperator_hpp
 #define SOperator_hpp
 
-#include "STypes.hpp"
-
 #define SOPERATOR_ARGS SVariable* first, SVariable* second, const std::string& o
 #define SOPERATOR(n) static void* n(SOPERATOR_ARGS);
-typedef void*(*operator_func)(SVariable*, SVariable*, const std::string&);
 
 #define SCAST_ARGS SVariable* var, const size_t type
 #define SCAST(n) static void* n(SCAST_ARGS);
+
+#define REGISTER_OPERATOR(f, t) bool operator_registered_##t = SOperatorRegistry::instance()->registerOperator(f, #t);
+#define REGISTER_CAST(f, t) bool cast_registered_##t = SOperatorRegistry::instance()->registerCast(f, #t);
+
+#include "STypes.hpp"
+
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
+
+typedef void*(*operator_func)(SVariable*, SVariable*, const std::string&);
+
+
 typedef void*(*cast_func)(SVariable*, const size_t);
 
 class SOperatorRegistry {
@@ -24,11 +35,9 @@ class SOperatorRegistry {
 	public:
 	
 		static SOperatorRegistry* instance();
-	
-		#define REGISTER_OPERATOR(f, t) bool operator_registered_##t = SOperatorRegistry::instance()->registerOperator(f, #t);
+		
 		bool registerOperator(operator_func func, const std::string type);
 	
-		#define REGISTER_CAST(f, t) bool cast_registered_##t = SOperatorRegistry::instance()->registerCast(f, #t);
 		bool registerCast(cast_func func, const std::string type);
 	
 		void* performOperation(SOPERATOR_ARGS);
@@ -218,5 +227,9 @@ void* SOperatorRegistry::toString(SVariable* var) {
 	return ptr;
 
 }
+
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
 
 #endif /* SOperator_hpp */

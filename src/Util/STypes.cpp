@@ -52,6 +52,18 @@ bool STypeRegistry::isOfType(size_t check, const std::string type) {
 	return hash == check;
 }
 
+bool STypeRegistry::registerCPPMember(std::string class_name, std::string name, size_t offset, size_t type) {
+	
+	// Hash the name of the class
+	size_t class_hash = hasher(class_name);
+	
+	variable_lookups[class_hash][name].byte_offset = offset;
+	variable_lookups[class_hash][name].type = type;
+
+	return true;
+	
+}
+
 SVariable STypeRegistry::getMemeber(SVariable* variable, std::string name) {
 
     SVariable member;

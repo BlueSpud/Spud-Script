@@ -8,16 +8,48 @@
 
 #include "SLexer.hpp"
 
-std::string SToken::getString() const { return "SToken: " + STokenNames[type] + " " + string; }
+SLexerData SLexer::data;
 
-std::vector<SToken> SLexer::lexSource(std::string source) {
+SLexerData::SLexerData() {
+	
+	// Add in keywords
+	keywords.push_back("if");
+	keywords.push_back("return");
+	keywords.push_back("else");
+	keywords.push_back("func");
+	keywords.push_back("while");
+	keywords.push_back("for");
+	
+	// Add in operators, order does matter for some of these
+	operators.push_back("==");
+	operators.push_back("!=");
+	operators.push_back("!");
+	operators.push_back("=");
+	
+	operators.push_back("&&");
+	operators.push_back("||");
+	
+	operators.push_back("+");
+	operators.push_back("-");
+	operators.push_back("*");
+	operators.push_back("/");
+	operators.push_back("%");
+	
+	operators.push_back("<=");
+	operators.push_back(">=");
+	operators.push_back("<");
+	operators.push_back(">");
+
+}
+
+std::vector<SToken> SLexer::lexSource(std::string src) {
     
     std::vector<SToken> tokens;
     
     // Go char by char and read the string
-    for (int i = 0; i < source.length(); i++) {
+    for (int i = 0; i < src.length(); i++) {
         
-        std::string char_at = source.substr(i, 1);
+        std::string char_at = src.substr(i, 1);
         
         // Check for brackets
         if (!char_at.compare("(")) {
@@ -76,12 +108,12 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
         }
         
         // Check for comments
-        if (i + 1 < source.length() && !source.substr(i, 2).compare("//")) {
+        if (i + 1 < src.length() && !src.substr(i, 2).compare("//")) {
             
             // Run until we get a new line or we hit end of file
-            while (i < source.length()) {
+            while (i < src.length()) {
                 
-                char_at = source.substr(i, 1);
+                char_at = src.substr(i, 1);
                 
                 if (!char_at.compare("\n"))
                     break;
@@ -93,7 +125,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
         }
         
         // Check for operators
-		SToken operator_token = getTokenFromArray(operators, i, source, STokenTypeOperator);
+		SToken operator_token = getTokenFromArray(data.operators, i, src, STokenTypeOperator);
 		if (operator_token.string.length()) {
 			
 			tokens.push_back(operator_token);
@@ -103,7 +135,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
 		}
 		
         // Check for types
-        SToken type_token = getTokenFromArray(STypeRegistry::instance()->registered_types, i, source, STokenTypeType);
+        SToken type_token = getTokenFromArray(STypeRegistry::instance()->registered_types, i, src, STokenTypeType);
         if (type_token.string.length()) {
             
             tokens.push_back(type_token);
@@ -113,7 +145,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
         }
         
         // Check for keywords
-        SToken keyword_token = getTokenFromArray(keywords, i, source, STokenTypeKeyword);
+        SToken keyword_token = getTokenFromArray(data.keywords, i, src, STokenTypeKeyword);
         if (keyword_token.string.length()) {
             
             tokens.push_back(keyword_token);
@@ -129,9 +161,9 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
 			int start = i;
 			
 			// Start parsing the number
-			while (i < source.length()) {
+			while (i < src.length()) {
 				
-				char_at = source.substr(i, 1);
+				char_at = src.substr(i, 1);
 				
 				if (!char_at.compare(".")) {
 					
@@ -153,7 +185,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
 			// Get the token for the number
 			SToken token;
 			token.type = STokenTypeNumber;
-			token.string = source.substr(start, i - start);
+			token.string = src.substr(start, i - start);
 			
 			tokens.push_back(token);
 			i--;
@@ -167,9 +199,9 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
             // Start parsing the identifier
             int start = i;
 			
-            while (i < source.length()) {
+            while (i < src.length()) {
 				
-                char_at = source.substr(i, 1);
+                char_at = src.substr(i, 1);
                 
                 // These are what is valid as the second char for a identifier, numbers are allowed
                 if (!(char_at.c_str()[0] >= 'a' && char_at.c_str()[0] <= 'z') &&
@@ -186,7 +218,7 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
             // Get the token for the identifier
             SToken token;
             token.type = STokenTypeIdentifier;
-            token.string = source.substr(start, i - start);
+            token.string = src.substr(start, i - start);
             
             tokens.push_back(token);
             i--;
@@ -202,15 +234,15 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
 			
 			SToken token;
 			token.type = STokenTypeString;
-			char_at = source.substr(i, 1);
+			char_at = src.substr(i, 1);
 			
 			while (char_at.compare("\"")) {
 				
 				token.string = token.string + char_at;
 				i++;
 				
-				if (i < source.length())
-					char_at = source.substr(i, 1);
+				if (i < src.length())
+					char_at = src.substr(i, 1);
 				else throw std::runtime_error("\" expected");
 				
 			}
@@ -226,15 +258,15 @@ std::vector<SToken> SLexer::lexSource(std::string source) {
     
 }
 
-SToken SLexer::getTokenFromArray(const std::vector<std::string> array, int position, const std::string& source, STokenType type) {
+SToken SLexer::getTokenFromArray(const std::vector<std::string> array, int position, const std::string& src, STokenType type) {
     
     // See if this is the start of a keyword
     for (int k = 0; k < array.size(); k++) {
         
         // Check if there is enough room for the keyword
-        if (source.length() - position >= array[k].length()) {
+        if (src.length() - position >= array[k].length()) {
             
-            if (!source.substr(position, array[k].length()).compare(array[k])) {
+            if (!src.substr(position, array[k].length()).compare(array[k])) {
                 
                 // Keyword matched
                 SToken token;

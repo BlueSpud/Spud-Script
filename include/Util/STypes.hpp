@@ -13,6 +13,10 @@
 #include <vector>
 #include <map>
 
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
 class STypeRegistry;
 
 class SClassFactoryBase {
@@ -105,6 +109,8 @@ class STypeRegistry {
 		template <class T>
 		bool registerCPPClass(const char* name);
 	
+		bool registerCPPMember(std::string class_name, std::string name, size_t offset, size_t type);
+	
 		void performCopy(void*& dest, void* from, size_t type);
 	
 		std::hash<std::string> hasher;
@@ -117,9 +123,6 @@ class STypeRegistry {
     
 };
 
-#define EXPOSE_SCRIPT_TYPE(c) bool class_reg_##c = STypeRegistry::instance()->registerCPPClass<c>(#c);
-#define EXPOSE_SCRIPT_MEMBER(c, n, t) STypeRegistry::instance()->variable_lookups[STypeRegistry::instance()->hasher(#c)][#n].byte_offset = offsetof(c, n); STypeRegistry::instance()->variable_lookups[STypeRegistry::instance()->hasher(#c)][#n].type = STypeRegistry::instance()->hasher(#t);
-
 template <class T>
 bool STypeRegistry::registerCPPClass(const char* name) {
 	
@@ -131,5 +134,12 @@ bool STypeRegistry::registerCPPClass(const char* name) {
 	return true;
 	
 }
+
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
+
+#define EXPOSE_SCRIPT_TYPE(c) bool class_reg_##c = STypeRegistry::instance()->registerCPPClass<c>(#c);
+#define EXPOSE_SCRIPT_MEMBER(c, n, t) bool is_registered_##c##n = STypeRegistry::instance()->registerCPPMember(#c, #n, offsetof(c, n), STypeRegistry::instance()->hasher(#t));
 
 #endif /* STypes_hpp */

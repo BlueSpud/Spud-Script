@@ -6,16 +6,53 @@
 //  Copyright © 2016 Logan Pazol. All rights reserved.
 //
 
-#include "SVM.hpp"
+#include "SScript.hpp"
 
-void SVM::executeCode(std::vector<SVMNode*> nodes) {
+void SScript::loadScript(std::string src) {
 
-    for (int i = 0; i < nodes.size(); i++)
-        evaluateNode(nodes[i]);
+	// First we lex the source
+	std::vector<SToken> tokens = SLexer::lexSource(src);
+	
+	// After the source is lexed we build the abstract syntax tree (AST)
+	std::vector<SASTNode*> ast;
+	try { ast = SAST::parseTokens(tokens); }
+	catch (std::runtime_error e) {
+		
+		// There was an eror in the parsing
+		std::cout << "[Spud Script] There was an error parsing a script: " << e.what() << std::endl;
+		
+		// We have to delete what we have
+		for (int i = 0; i < ast.size(); i++)
+			delete ast[i];
+		
+		// Return, script could not be completed
+		return;
+		
+	}
+	
+	// Now we compile the nodes, this shaves off some information we dont need but the parser needed
+	for (int i = 0; i < ast.size(); i++)
+		nodes.push_back(ast[i]->compile());
+	
+	// Delete the AST that was dynamically allocated
+	for (int i = 0; i < ast.size(); i++)
+		delete ast[i];
+	
+}
+
+void SScript::execute() {
+
+	// Exeptions can be thrown, so we handle that here
+	try {
+	
+		for (int i = 0; i < nodes.size(); i++)
+			evaluateNode(nodes[i]);
+		
+	} catch (std::runtime_error e) { std::cout << "[Spud Script] A runtime error was encountered: " << e.what() << std::endl; }
 
 }
 
-void* SVM::evaluateNode(SVMNode* node) {
+void* SScript::evaluateNode(SVMNode* node) {
 
     switch (node->node_type) {
             
@@ -97,7 +134,7 @@ void* SVM::evaluateNode(SVMNode* node) {
     
 }
 
-SVariable SVM::declareVariable(size_t type) {
+SVariable SScript::declareVariable(size_t type) {
 
     SVariable to_declare;
 	
@@ -112,7 +149,7 @@ SVariable SVM::declareVariable(size_t type) {
 
 }
 
-SVariable* SVM::resolveVariable(std::string name) {
+SVariable* SScript::resolveVariable(std::string name) {
     
     // Go through the scopes and try to find the variable
     SVMBlock* search_block = current_block;
@@ -179,7 +216,7 @@ SVariable* SVM::resolveVariable(std::string name) {
     
 }
 
-SVariable SVM::evaluateExpression(SVMExpression* expression) {
+SVariable SScript::evaluateExpression(SVMExpression* expression) {
 	
 	std::vector<SVariable> vars;
 	
@@ -371,7 +408,7 @@ SVariable SVM::evaluateExpression(SVMExpression* expression) {
 	
 }
 
-void SVM::evaluateBlock(SVMBlock* block) {
+void SScript::evaluateBlock(SVMBlock* block) {
 	
 	SVMBlock* last_block = current_block;
 	current_block = block;
@@ -396,7 +433,7 @@ void SVM::evaluateBlock(SVMBlock* block) {
 	
 }
 
-void* SVM::evaluateFuncitonCall(SVMFunctionCall* call) {
+void* SScript::evaluateFuncitonCall(SVMFunctionCall* call) {
 	
 	// Check if there is a script function
 	if (script_functions.count(call->identifier)) {
@@ -467,7 +504,7 @@ void* SVM::evaluateFuncitonCall(SVMFunctionCall* call) {
 	return nullptr;
 }
 
-void SVM::evaluateLoop(SVMLoop* loop) {
+void SScript::evaluateLoop(SVMLoop* loop) {
 	
 	if (loop->loop_type == SLoopTypeWhile) {
 		
@@ -528,7 +565,7 @@ void SVM::evaluateLoop(SVMLoop* loop) {
 	
 }
 
-void* SVM::evaluateDeclaration(SVMDeclaration* declaration) {
+void* SScript::evaluateDeclaration(SVMDeclaration* declaration) {
 	
 	if (!current_block) {
 		
@@ -566,7 +603,7 @@ void* SVM::evaluateDeclaration(SVMDeclaration* declaration) {
 	
 }
 
-void SVM::evaluateAssignment(SVMAssignment* assignment) {
+void SScript::evaluateAssignment(SVMAssignment* assignment) {
 	
 	// If we need to declare, declare
 	if (assignment->declaration) {
@@ -612,7 +649,7 @@ void SVM::evaluateAssignment(SVMAssignment* assignment) {
 	
 }
 
-void SVM::evaluateIf(SVMIfStatement* if_statement) {
+void SScript::evaluateIf(SVMIfStatement* if_statement) {
 	
 	// Evaluate the expression, always returns a bool
 	bool* expression_result = (bool*)evaluateNode(if_statement->expression);
@@ -628,7 +665,7 @@ void SVM::evaluateIf(SVMIfStatement* if_statement) {
 	
 }
 
-void SVM::evaluateReturn(SVMReturn* return_node) {
+void SScript::evaluateReturn(SVMReturn* return_node) {
 	
 	// First figure out if this was a valid return node
 	SVMBlock* search_block = current_block;

@@ -10,3 +10,7 @@ prints(a);
 
 a = cppReturn();
 prints(a);
+
+Test t;
+
+prints(t.o.a);

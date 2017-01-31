@@ -11,6 +11,10 @@
 
 #include "STypes.hpp"
 
+#ifdef GCC
+	#pragma GCC visibility push(hidden)
+#endif
+
 class SFunctionContainer {
 	
 	public:
@@ -154,5 +158,9 @@ std::vector<SVariable> parametersToVector(params&... p) {
 	return args;
 	
 }
+
+#ifdef GCC
+	#pragma GCC visibility pop
+#endif
 
 #endif /* SFunctional_h */

@@ -1,13 +1,13 @@
 //
-//  SVM.hpp
+//  SScript.hpp
 //  SpudScript
 //
 //  Created by Logan Pazol on 12/31/16.
 //  Copyright © 2016 Logan Pazol. All rights reserved.
 //
 
-#ifndef SVM_hpp
-#define SVM_hpp
+#ifndef SScript_hpp
+#define SScript_hpp
 
 #include <map>
 #include <sstream>
@@ -15,14 +15,16 @@
 #include "SFunctional.hpp"
 #include "SOperator.hpp"
 
-class SVM {
+class SScript {
     
     public:
-    
-        void executeCode(std::vector<SVMNode*> nodes);
 	
-		#define EXPOSE_FUNC(vm, f, r, s) bool bound_##f = vm.bindFunction(f, #f, #r, #s);
-		#define EXPOSE_FUNC_NO_ARGS(vm, f, r) bool bound_##f = vm.bindFunction(f, #f, #r, "");
+		void loadScript(std::string src);
+	
+        void execute();
+	
+		#define EXPOSE_FUNC(sc, f, r, s) bool bound_##sc##f = sc.bindFunction(f, #f, #r, #s);
+		#define EXPOSE_FUNC_NO_ARGS(sc, f, r) bool bound_##sc##f = sc.bindFunction(f, #f, #r, "");
 	
 		template <class R, class... params>
 		bool bindFunction(R(*func)(params...), std::string name, std::string return_type, std::string signature);
@@ -37,6 +39,8 @@ class SVM {
 		void exposeVariable(void* value, std::string name);
 	
     private:
+	
+		std::vector<SVMNode*> nodes;
 	
 		void* evaluateNode(SVMNode* node);
 	
@@ -61,7 +65,7 @@ class SVM {
 };
 
 template <class R, class... params>
-bool SVM::bindFunction(R(*func)(params...), std::string name, std::string return_type, std::string signature) {
+bool SScript::bindFunction(R(*func)(params...), std::string name, std::string return_type, std::string signature) {
 	
 	// Get the function container
 	SFunctionContainer* container = CreateSFunction(func, return_type, signature);
@@ -72,7 +76,7 @@ bool SVM::bindFunction(R(*func)(params...), std::string name, std::string return
 }
 
 template <class... params>
-void* SVM::callFunction(std::string name, params... p){
+void* SScript::callFunction(std::string name, params... p){
 	
 	// Check if we have a function with the name
 	if (script_functions.count(name)) {
@@ -109,7 +113,7 @@ void* SVM::callFunction(std::string name, params... p){
 }
 
 template<class T>
-T* SVM::getScriptValue(std::string name) {
+T* SScript::getScriptValue(std::string name) {
 	
 	SVariable* var = resolveVariable(name);
 	
@@ -131,7 +135,7 @@ T* SVM::getScriptValue(std::string name) {
 }
 
 template<class T>
-void SVM::exposeVariable(void* value, std::string name) {
+void SScript::exposeVariable(void* value, std::string name) {
 	
 	// Get the type that we exposed
 	size_t hash = STypeRegistry::instance()->hashString(typeid(T).name());
@@ -152,4 +156,4 @@ void SVM::exposeVariable(void* value, std::string name) {
 }
 
 
-#endif /* SVM_hpp */
+#endif /* SScript_hpp */
