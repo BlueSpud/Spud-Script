@@ -54,7 +54,7 @@ int cppReturn() { return 25; }
 
 EXPOSE_FUNC(vm, cppFunction, void, float float float)
 EXPOSE_FUNC(vm, prints, void, string)
-EXPOSE_FUNC(vm, cppReturn, int, )
+EXPOSE_FUNC_NO_ARGS(vm, cppReturn, int)
 
 EXPOSE_SCRIPT_TYPE(Other)
 

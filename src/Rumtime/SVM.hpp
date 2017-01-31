@@ -22,12 +22,10 @@ class SVM {
         void executeCode(std::vector<SVMNode*> nodes);
 	
 		#define EXPOSE_FUNC(vm, f, r, s) bool bound_##f = vm.bindFunction(f, #f, #r, #s);
+		#define EXPOSE_FUNC_NO_ARGS(vm, f, r) bool bound_##f = vm.bindFunction(f, #f, #r, "");
 	
 		template <class R, class... params>
 		bool bindFunction(R(*func)(params...), std::string name, std::string return_type, std::string signature);
-	
-//		template <class... params>
-//		bool bindFunction(void(*func)(params...), std::string name, std::string return_type, std::string signature);
 	
 		template <class... params>
 		void* callFunction(std::string name, params... p);
