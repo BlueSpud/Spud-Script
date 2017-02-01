@@ -53,7 +53,7 @@ class SScript {
 	
 		SVariable evaluateExpression(SVMExpression* expression);
 		void evaluateBlock(SVMBlock* block);
-		void* evaluateFuncitonCall(SVMFunctionCall* call);
+		void* evaluateFunctionCall(SVMFunctionCall* call);
 		void evaluateLoop(SVMLoop* loop);
 		void* evaluateDeclaration(SVMDeclaration* declaration);
 		void evaluateAssignment(SVMAssignment* assignment);

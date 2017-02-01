@@ -12,24 +12,33 @@
 		02DA3E201E41535A0055D205 /* SScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E1A1E4153400055D205 /* SScript.cpp */; };
 		02DA3E211E41535B0055D205 /* SOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E1C1E4153400055D205 /* SOperator.cpp */; };
 		02DA3E221E41535C0055D205 /* STypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02DA3E1D1E4153400055D205 /* STypes.cpp */; };
+		02DA3E601E4157540055D205 /* SAST.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E5D1E4157540055D205 /* SAST.hpp */; };
+		02DA3E611E4157540055D205 /* SASTNodes.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E5E1E4157540055D205 /* SASTNodes.hpp */; };
+		02DA3E621E4157540055D205 /* SLexer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E5F1E4157540055D205 /* SLexer.hpp */; };
+		02DA3E651E4157760055D205 /* SScript.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E631E4157760055D205 /* SScript.hpp */; };
+		02DA3E661E4157760055D205 /* SVMNodes.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E641E4157760055D205 /* SVMNodes.hpp */; };
+		02DA3E6B1E4157850055D205 /* SExpression.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E671E4157850055D205 /* SExpression.hpp */; };
+		02DA3E6C1E4157850055D205 /* SFunctional.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E681E4157850055D205 /* SFunctional.hpp */; };
+		02DA3E6D1E4157850055D205 /* SOperator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E691E4157850055D205 /* SOperator.hpp */; };
+		02DA3E6E1E4157850055D205 /* STypes.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 02DA3E6A1E4157850055D205 /* STypes.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		02DA3DFA1E4153030055D205 /* libSpudScript.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSpudScript.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		02DA3E0A1E4153400055D205 /* SAST.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SAST.hpp; sourceTree = "<group>"; };
-		02DA3E0B1E4153400055D205 /* SASTNodes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SASTNodes.hpp; sourceTree = "<group>"; };
-		02DA3E0C1E4153400055D205 /* SLexer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SLexer.hpp; sourceTree = "<group>"; };
-		02DA3E0E1E4153400055D205 /* SScript.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SScript.hpp; sourceTree = "<group>"; };
-		02DA3E0F1E4153400055D205 /* SVMNodes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SVMNodes.hpp; sourceTree = "<group>"; };
-		02DA3E111E4153400055D205 /* SExpression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SExpression.hpp; sourceTree = "<group>"; };
-		02DA3E121E4153400055D205 /* SFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SFunctional.hpp; sourceTree = "<group>"; };
-		02DA3E131E4153400055D205 /* SOperator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SOperator.hpp; sourceTree = "<group>"; };
-		02DA3E141E4153400055D205 /* STypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = STypes.hpp; sourceTree = "<group>"; };
 		02DA3E171E4153400055D205 /* SAST.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SAST.cpp; sourceTree = "<group>"; };
 		02DA3E181E4153400055D205 /* SLexer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SLexer.cpp; sourceTree = "<group>"; };
 		02DA3E1A1E4153400055D205 /* SScript.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SScript.cpp; sourceTree = "<group>"; };
 		02DA3E1C1E4153400055D205 /* SOperator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SOperator.cpp; sourceTree = "<group>"; };
 		02DA3E1D1E4153400055D205 /* STypes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = STypes.cpp; sourceTree = "<group>"; };
+		02DA3E5D1E4157540055D205 /* SAST.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SAST.hpp; path = include/SAST.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E5E1E4157540055D205 /* SASTNodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SASTNodes.hpp; path = include/SASTNodes.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E5F1E4157540055D205 /* SLexer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SLexer.hpp; path = include/SLexer.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E631E4157760055D205 /* SScript.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SScript.hpp; path = include/SScript.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E641E4157760055D205 /* SVMNodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SVMNodes.hpp; path = include/SVMNodes.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E671E4157850055D205 /* SExpression.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SExpression.hpp; path = include/SExpression.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E681E4157850055D205 /* SFunctional.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SFunctional.hpp; path = include/SFunctional.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E691E4157850055D205 /* SOperator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SOperator.hpp; path = include/SOperator.hpp; sourceTree = SOURCE_ROOT; };
+		02DA3E6A1E4157850055D205 /* STypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = STypes.hpp; path = include/STypes.hpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,9 +82,9 @@
 		02DA3E091E4153400055D205 /* Parsing */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3E0A1E4153400055D205 /* SAST.hpp */,
-				02DA3E0B1E4153400055D205 /* SASTNodes.hpp */,
-				02DA3E0C1E4153400055D205 /* SLexer.hpp */,
+				02DA3E5D1E4157540055D205 /* SAST.hpp */,
+				02DA3E5E1E4157540055D205 /* SASTNodes.hpp */,
+				02DA3E5F1E4157540055D205 /* SLexer.hpp */,
 			);
 			path = Parsing;
 			sourceTree = "<group>";
@@ -83,8 +92,8 @@
 		02DA3E0D1E4153400055D205 /* Rumtime */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3E0E1E4153400055D205 /* SScript.hpp */,
-				02DA3E0F1E4153400055D205 /* SVMNodes.hpp */,
+				02DA3E631E4157760055D205 /* SScript.hpp */,
+				02DA3E641E4157760055D205 /* SVMNodes.hpp */,
 			);
 			path = Rumtime;
 			sourceTree = "<group>";
@@ -92,10 +101,10 @@
 		02DA3E101E4153400055D205 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				02DA3E111E4153400055D205 /* SExpression.hpp */,
-				02DA3E121E4153400055D205 /* SFunctional.hpp */,
-				02DA3E131E4153400055D205 /* SOperator.hpp */,
-				02DA3E141E4153400055D205 /* STypes.hpp */,
+				02DA3E671E4157850055D205 /* SExpression.hpp */,
+				02DA3E681E4157850055D205 /* SFunctional.hpp */,
+				02DA3E691E4157850055D205 /* SOperator.hpp */,
+				02DA3E6A1E4157850055D205 /* STypes.hpp */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -143,6 +152,15 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02DA3E6C1E4157850055D205 /* SFunctional.hpp in Headers */,
+				02DA3E601E4157540055D205 /* SAST.hpp in Headers */,
+				02DA3E6D1E4157850055D205 /* SOperator.hpp in Headers */,
+				02DA3E6E1E4157850055D205 /* STypes.hpp in Headers */,
+				02DA3E651E4157760055D205 /* SScript.hpp in Headers */,
+				02DA3E661E4157760055D205 /* SVMNodes.hpp in Headers */,
+				02DA3E621E4157540055D205 /* SLexer.hpp in Headers */,
+				02DA3E6B1E4157850055D205 /* SExpression.hpp in Headers */,
+				02DA3E611E4157540055D205 /* SASTNodes.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

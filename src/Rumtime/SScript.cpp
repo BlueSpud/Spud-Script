@@ -96,7 +96,7 @@ void* SScript::evaluateNode(SVMNode* node) {
         case STypeFunctionCall: {
             
             SVMFunctionCall* call = (SVMFunctionCall*)node;
-			evaluateFuncitonCall(call);
+			evaluateFunctionCall(call);
 			
         } break;
             
@@ -283,7 +283,7 @@ SVariable SScript::evaluateExpression(SVMExpression* expression) {
 				// Call the funtion and get the return value
 				try {
 					
-					evaluateFuncitonCall(func_node->call);
+					evaluateFunctionCall(func_node->call);
 					
 				} catch (SVariable _var) { var = _var; }
 				
@@ -433,7 +433,7 @@ void SScript::evaluateBlock(SVMBlock* block) {
 	
 }
 
-void* SScript::evaluateFuncitonCall(SVMFunctionCall* call) {
+void* SScript::evaluateFunctionCall(SVMFunctionCall* call) {
 	
 	// Check if there is a script function
 	if (script_functions.count(call->identifier)) {
