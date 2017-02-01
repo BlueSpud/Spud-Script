@@ -1,4 +1,4 @@
 osx_image: xcode8
 
-language: c++
+language: objective-c
 script: xcodebuild -project SpudScript.xcodeproj -scheme SpudScript build
