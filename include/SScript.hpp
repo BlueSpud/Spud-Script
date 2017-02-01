@@ -145,7 +145,6 @@ void SScript::exposeVariable(void* value, std::string name) {
 		if (!global_variables.count(name)) {
 		
 			// Create a new variable and expose it in the global scope
-			global_variables[name] = SVariable();
 			global_variables[name].type = STypeRegistry::instance()->cpp_class_names[hash];
 			global_variables[name].value = value;
 			
