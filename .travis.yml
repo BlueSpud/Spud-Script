@@ -1,0 +1,3 @@
+language: c++
+xcode_project: SpudScript.xcodeproj
+xcode_scheme: SpudScript
