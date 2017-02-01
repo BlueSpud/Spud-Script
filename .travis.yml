@@ -1,3 +1,2 @@
 language: c++
-xcode_project: SpudScript.xcodeproj
-xcode_scheme: SpudScript
+script: xctool -workspace SpudScript.xcodeproj -scheme SpudScript build
