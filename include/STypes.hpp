@@ -85,7 +85,14 @@ struct SVariable {
 
 // Function to cast a type to c++
 template <class T>
-T castCPP(void* value) { return (*(T*)value); }
+T castCPP(void* value) {
+    
+    if (!value) {
+        throw std::runtime_error("Attempted to use the value of a function call that did not return a value");
+    } else {
+        return (*(T*)value);
+    }
+}
 
 struct SVariableMember {
     

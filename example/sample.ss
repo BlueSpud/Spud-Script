@@ -46,3 +46,7 @@ func scriptFunction(int c) {
 
 // Assign a to a function call to scriptFunction()
 a = scriptFunction(4);
+
+// Errors out
+// func undefined() {}
+// prints(undefined());
